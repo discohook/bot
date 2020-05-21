@@ -5,7 +5,10 @@ from os import environ
 import discord
 from discord.ext import commands
 
-extensions = ("ext.markdown",)
+extensions = (
+    "ext.markdown",
+    "ext.messages",
+)
 
 
 def _prefix(bot, msg):
