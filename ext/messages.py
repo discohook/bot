@@ -5,13 +5,15 @@ import json
 import discord
 from discord.ext import commands
 
+from .utils import converter
+
 
 class Messages(commands.Cog):
     """Message helpers"""
 
     @commands.command()
     async def link(
-        self, ctx: commands.Context, msg: commands.MessageConverter,
+        self, ctx: commands.Context, msg: converter.MessageConverter,
     ):
         """Sends a link to recreate a given message in Discohook"""
 
