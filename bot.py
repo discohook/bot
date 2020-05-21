@@ -13,7 +13,7 @@ extensions = (
 
 def _prefix(bot, msg):
     prefixes = (f"<@!{bot.user.id}> ", f"<@{bot.user.id}> ")
-    prefixes = (*prefixes, "d.")
+    prefixes = (*prefixes, "d.", "d!")
 
     return prefixes
 
