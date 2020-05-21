@@ -38,6 +38,10 @@ class Markdown(commands.Cog):
     ):
         """Gives formatting to use a given server emoji"""
 
+        if emoji.guild != ctx.guild:
+            await ctx.send("Emoji not available in this server")
+            return
+
         await ctx.send(f"`{emoji}`")
 
 
