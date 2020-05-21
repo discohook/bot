@@ -33,7 +33,9 @@ class Bot(commands.AutoShardedBot):
         print(f"Ready as {self.user} ({self.user.id})")
 
     async def on_command_error(self, ctx, error):
-        if isinstance(error, commands.UserInputError):
+        if isinstance(error, commands.UserInputError) or isinstance(
+            error, commands.CheckFailure
+        ):
             await ctx.send(error)
 
         elif isinstance(error, commands.CommandNotFound):
