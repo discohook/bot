@@ -22,6 +22,9 @@ class Messages(commands.Cog):
         if len(msg.content) > 0:
             msg_data["content"] = msg.content
 
+        msg_data["username"] = msg.author.display_name
+        msg_data["avatar_url"] = str(msg.author.avatar_url_as(format="webp"))
+
         embeds = [embed.to_dict() for embed in msg.embeds if embed.type == "rich"]
 
         for embed in embeds:
