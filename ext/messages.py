@@ -34,10 +34,14 @@ class Messages(commands.Cog):
             msg_data["embeds"] = embeds
 
         msg_json = json.dumps({"message": msg_data}, separators=(",", ":"))
-        msg_b64 = base64.urlsafe_b64encode(msg_json.encode("utf-8")).decode("utf-8")
+        msg_b64 = (
+            base64.urlsafe_b64encode(msg_json.encode("utf-8"))
+            .decode("utf-8")
+            .replace("=", "")
+        )
         url = f"https://discohook.org/?message={msg_b64}"
 
-        if len(url) > 2048:
+        if len(url) > 512:
             await ctx.send(
                 embed=discord.Embed(title="URL too long for embed"),
                 file=discord.File(io.StringIO(url), filename="url.txt"),
