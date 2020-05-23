@@ -30,7 +30,9 @@ class Bot(commands.AutoShardedBot):
     def __init__(self):
         super().__init__(
             command_prefix=_prefix,
-            description="Helper bot for Discohook (<https://discohook.org/>)",
+            description="Helper bot for Discohook (<https://discohook.org/>)"
+            "\nNeed help? Ask in the [support server](https://discohook.org/discord)."
+            "\nInvite me at <https://discohook.org/bot>.",
             activity=discord.Game(name="at discohook.org | d.help"),
         )
 
