@@ -5,7 +5,7 @@ from discord.ext import commands
 
 
 class GuildMemberConverter(commands.IDConverter):
-    """Converts to a :class:`~discord.Member`.
+    """Converts to a :class:`discord.Member`.
     All lookups are via the local guild.
     The lookup strategy is as follows (in order):
     1. Lookup by ID.
