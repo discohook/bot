@@ -5,9 +5,12 @@ from os import environ
 import discord
 from discord.ext import commands
 
+from ext import meta
+
 extensions = (
     "ext.markdown",
     "ext.messages",
+    "ext.meta",
 )
 
 error_types = (
