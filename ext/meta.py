@@ -128,6 +128,7 @@ class Meta(commands.Cog):
         )
 
     @prefix.command(name="set")
+    @commands.has_guild_permissions(manage_guild=True)
     async def prefix_set(self, ctx: commands.Context, prefix: str):
         """Sets the server prefix"""
 
