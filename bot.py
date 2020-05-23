@@ -5,7 +5,7 @@ from os import environ
 import discord
 from discord.ext import commands
 
-from ext import meta
+from ext.utils import config
 
 extensions = (
     "ext.markdown",
@@ -20,10 +20,14 @@ error_types = (
 
 
 def _prefix(bot, msg):
-    prefixes = (f"<@!{bot.user.id}> ", f"<@{bot.user.id}> ")
-    prefixes = (*prefixes, "d.", "d!")
+    prefix = bot.prefixes.get(msg.guild.id if msg.guild else 0, "d.")
 
-    return prefixes
+    return (
+        f"<@!{bot.user.id}> ",
+        f"<@{bot.user.id}> ",
+        prefix,
+        f"{prefix} ",
+    )
 
 
 class Bot(commands.AutoShardedBot):
@@ -35,6 +39,8 @@ class Bot(commands.AutoShardedBot):
             "\nInvite me at <https://discohook.org/bot>.",
             activity=discord.Game(name="at discohook.org | d.help"),
         )
+
+        self.prefixes = config.Config("prefixes.json")
 
         for extension in extensions:
             self.load_extension(extension)

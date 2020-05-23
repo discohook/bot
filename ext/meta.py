@@ -114,7 +114,31 @@ class HelpCommand(commands.HelpCommand):
 
 
 class Meta(commands.Cog):
-    pass
+    @commands.group(invoke_without_command=True)
+    @commands.guild_only()
+    async def prefix(self, ctx: commands.Context):
+        """Manages the server prefix"""
+
+        prefix = ctx.bot.prefixes.get(ctx.guild.id, "d.")
+        await ctx.send(
+            embed=discord.Embed(
+                title="Prefix",
+                description=f'The prefix for Discobot in this server is "{prefix}"',
+            )
+        )
+
+    @prefix.command(name="set")
+    async def prefix_set(self, ctx: commands.Context, prefix: str):
+        """Sets the server prefix"""
+
+        ctx.bot.prefixes.put(ctx.guild.id, prefix)
+
+        await ctx.send(
+            embed=discord.Embed(
+                title="Prefix set",
+                description=f'The prefix for this server is now "{prefix}"',
+            )
+        )
 
 
 def setup(bot: commands.Bot):
