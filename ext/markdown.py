@@ -1,3 +1,4 @@
+import discord
 from discord.ext import commands
 
 from .utils import converter
@@ -6,14 +7,17 @@ from .utils import converter
 class Markdown(commands.Cog):
     """Markdown syntax helpers"""
 
-    @commands.command()
+    @commands.command(aliases=["member"])
     @commands.guild_only()
     async def user(
         self, ctx: commands.Context, member: converter.GuildMemberConverter,
     ):
         """Gives formatting to mention a given member"""
 
-        await ctx.send(f"`{member.mention}`")
+        embed = discord.Embed(title="Syntax", description=f"`{member.mention}`")
+        embed.add_field(name="Output", value=member.mention)
+
+        await ctx.send(embed=embed)
 
     @commands.command()
     @commands.guild_only()
@@ -22,7 +26,10 @@ class Markdown(commands.Cog):
     ):
         """Gives formatting to mention a given role"""
 
-        await ctx.send(f"`{role.mention}`")
+        embed = discord.Embed(title="Syntax", description=f"`{role.mention}`")
+        embed.add_field(name="Output", value=role.mention)
+
+        await ctx.send(embed=embed)
 
     @commands.command()
     @commands.guild_only()
@@ -31,7 +38,10 @@ class Markdown(commands.Cog):
     ):
         """Gives formatting to link to a given channel"""
 
-        await ctx.send(f"`{channel.mention}`")
+        embed = discord.Embed(title="Syntax", description=f"`{channel.mention}`")
+        embed.add_field(name="Output", value=channel.mention)
+
+        await ctx.send(embed=embed)
 
     @commands.command(aliases=["emote"])
     @commands.guild_only()
@@ -40,7 +50,10 @@ class Markdown(commands.Cog):
     ):
         """Gives formatting to use a given server emoji"""
 
-        await ctx.send(f"`{emoji}`")
+        embed = discord.Embed(title="Syntax", description=f"`{emoji}`")
+        embed.add_field(name="Output", value=str(emoji))
+
+        await ctx.send(embed=embed)
 
 
 def setup(bot):
