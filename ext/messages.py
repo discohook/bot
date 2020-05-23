@@ -13,7 +13,7 @@ class Messages(commands.Cog):
 
     @commands.command()
     async def link(
-        self, ctx: commands.Context, msg: converter.MessageConverter,
+        self, ctx: commands.Context, msg: converter.GuildMessageConverter,
     ):
         """Sends a link to recreate a given message in Discohook"""
 

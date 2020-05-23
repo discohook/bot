@@ -1,5 +1,7 @@
 from discord.ext import commands
 
+from .utils import converter
+
 
 class Markdown(commands.Cog):
     """Markdown syntax helpers"""
@@ -7,7 +9,7 @@ class Markdown(commands.Cog):
     @commands.command()
     @commands.guild_only()
     async def user(
-        self, ctx: commands.Context, member: commands.MemberConverter,
+        self, ctx: commands.Context, member: converter.GuildMemberConverter,
     ):
         """Gives formatting to mention a given member"""
 
@@ -16,7 +18,7 @@ class Markdown(commands.Cog):
     @commands.command()
     @commands.guild_only()
     async def role(
-        self, ctx: commands.Context, role: commands.RoleConverter,
+        self, ctx: commands.Context, role: converter.GuildRoleConverter,
     ):
         """Gives formatting to mention a given role"""
 
@@ -25,7 +27,7 @@ class Markdown(commands.Cog):
     @commands.command()
     @commands.guild_only()
     async def channel(
-        self, ctx: commands.Context, channel: commands.TextChannelConverter,
+        self, ctx: commands.Context, channel: converter.GuildTextChannelConverter,
     ):
         """Gives formatting to link to a given channel"""
 
@@ -34,13 +36,9 @@ class Markdown(commands.Cog):
     @commands.command(aliases=["emote"])
     @commands.guild_only()
     async def emoji(
-        self, ctx: commands.Context, emoji: commands.EmojiConverter,
+        self, ctx: commands.Context, emoji: converter.GuildEmojiConverter,
     ):
         """Gives formatting to use a given server emoji"""
-
-        if emoji.guild != ctx.guild:
-            await ctx.send("Emoji not available in this server")
-            return
 
         await ctx.send(f"`{emoji}`")
 
