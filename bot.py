@@ -10,6 +10,11 @@ extensions = (
     "ext.messages",
 )
 
+error_types = (
+    (commands.UserInputError, "Bad input"),
+    (commands.CheckFailure, "Check failed"),
+)
+
 
 def _prefix(bot, msg):
     prefixes = (f"<@!{bot.user.id}> ", f"<@{bot.user.id}> ")
@@ -33,22 +38,23 @@ class Bot(commands.AutoShardedBot):
         print(f"Ready as {self.user} ({self.user.id})")
 
     async def on_command_error(self, ctx, error):
-        if isinstance(error, commands.UserInputError) or isinstance(
-            error, commands.CheckFailure
-        ):
-            await ctx.send(error)
+        if isinstance(error, commands.CommandNotFound):
+            return
 
-        elif isinstance(error, commands.CommandNotFound):
-            pass
+        for (error_type, error_msg) in error_types:
+            if isinstance(error, error_type):
+                await ctx.send(
+                    embed=discord.Embed(title=error_msg, description=str(error))
+                )
+                return
 
-        else:
-            err = error
-            if isinstance(error, commands.CommandInvokeError):
-                err = error.original
+        err = error
+        if isinstance(error, commands.CommandInvokeError):
+            err = error.original
 
-            if not isinstance(err, discord.HTTPException):
-                traceback.print_tb(err.__traceback__)
-                print(f"{err.__class__.__name__}: {err}", file=sys.stderr)
+        if not isinstance(err, discord.HTTPException):
+            traceback.print_tb(err.__traceback__)
+            print(f"{err.__class__.__name__}: {err}", file=sys.stderr)
 
 
 def main():
