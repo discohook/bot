@@ -25,8 +25,8 @@ def _prefix(bot, msg):
     return (
         f"<@!{bot.user.id}> ",
         f"<@{bot.user.id}> ",
-        prefix,
         f"{prefix} ",
+        prefix,
     )
 
 
