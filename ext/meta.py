@@ -120,10 +120,15 @@ class Meta(commands.Cog):
         """Manages the server prefix"""
 
         prefix = ctx.bot.prefixes.get(ctx.guild.id, "d.")
+        set_usage = (
+            f"{ctx.prefix}{self.prefix_set.qualified_name} {self.prefix_set.signature}"
+        )
+
         await ctx.send(
             embed=discord.Embed(
                 title="Prefix",
-                description=f'The prefix for Discobot in this server is "{prefix}"',
+                description=f'The prefix for Discobot in this server is "{prefix}"'
+                f'\nUse "{set_usage}" to change the prefix',
             )
         )
 
