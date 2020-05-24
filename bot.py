@@ -1,3 +1,4 @@
+import re
 import sys
 import traceback
 from os import environ
@@ -47,6 +48,24 @@ class Bot(commands.AutoShardedBot):
 
     async def on_ready(self):
         print(f"Ready as {self.user} ({self.user.id})")
+
+    async def on_message(self, message):
+        if message.author.bot:
+            return
+
+        if re.fullmatch(rf"<@!?{self.user.id}>", message.content):
+            description = 'The prefix for Discobot is "d."'
+
+            if message.guild:
+                prefix = self.prefixes.get(message.guild.id, "d.")
+                description = f'The prefix for Discobot in this server is "{prefix}"'
+
+            await message.channel.send(
+                embed=discord.Embed(title="Prefix", description=description)
+            )
+            return
+
+        await self.process_commands(message)
 
     async def on_command_error(self, ctx, error):
         if isinstance(error, commands.CommandNotFound):
