@@ -40,6 +40,8 @@ class Webhooks(commands.Cog):
         return embed
 
     @commands.group(invoke_without_command=True)
+    @commands.has_guild_permissions(manage_webhooks=True)
+    @commands.bot_has_guild_permissions(manage_webhooks=True)
     async def webhook(self, ctx: commands.Context):
         """Group of commands to manage webhooks in this server"""
         await ctx.send_help("webhook")
