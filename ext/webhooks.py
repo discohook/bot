@@ -1,3 +1,4 @@
+import asyncio
 import datetime
 
 import discord
@@ -174,14 +175,40 @@ class Webhooks(commands.Cog):
         """Deletes a webhook, this cannot be undone
         Messages sent by this webhook will not be deleted"""
 
-        await webhook.delete()
-
-        await ctx.send(
+        message = await ctx.send(
             embed=discord.Embed(
-                title="Webhook deleted",
-                description="Messages sent by this webhook have not been deleted",
+                title="Confirmation",
+                description=f'Are you sure you want to delete "{webhook.name}"? This action cannot be reverted.',
             )
         )
+
+        await message.add_reaction("\N{WASTEBASKET}")
+
+        try:
+            reaction, user = await ctx.bot.wait_for(
+                "reaction_add",
+                timeout=30.0,
+                check=lambda reaction, user: str(reaction) == "\N{WASTEBASKET}"
+                and user == ctx.author,
+            )
+        except asyncio.TimeoutError:
+            await message.edit(
+                embed=discord.Embed(
+                    title="Confirmation cancelled",
+                    description="30 second timeout reached",
+                )
+            )
+        else:
+            await webhook.delete()
+
+            await message.edit(
+                embed=discord.Embed(
+                    title="Webhook deleted",
+                    description="Messages sent by this webhook have not been deleted",
+                )
+            )
+        finally:
+            await message.remove_reaction("\N{WASTEBASKET}", ctx.guild.me)
 
 
 def setup(bot):
