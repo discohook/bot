@@ -145,8 +145,8 @@ class Webhooks(commands.Cog):
         new_name: str = None,
     ):
         """Edits an existing webhook
-        Put the existing webhook name inside quotes
-        To edit the avatar, attach a file with the message
+        The existing webhook name must be put in quotes, but not the new name (if any)
+        To edit the avatar, attach a image file with the message
         """
 
         avatar_file = (
@@ -154,6 +154,9 @@ class Webhooks(commands.Cog):
             if len(ctx.message.attachments) > 0
             else None
         )
+
+        if avatar_file is None and new_name is None:
+            raise commands.UserInputError("No new name or avatar was given")
 
         await webhook.edit(name=new_name, avatar=avatar_file)
 
