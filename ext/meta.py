@@ -24,7 +24,7 @@ class HelpCommand(commands.HelpCommand):
 
         signature = f"{self.context.prefix}{alias}" if not short else alias
         if command.signature:
-            signature += f" {command.signature}"
+            signature += f" {command.signature}".replace("_", " ")
 
         return signature
 
