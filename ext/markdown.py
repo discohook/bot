@@ -7,10 +7,10 @@ from .utils import converter
 class Markdown(commands.Cog):
     """Markdown syntax helpers"""
 
-    @commands.command(aliases=["member"])
+    @commands.command(aliases=["member"], rest_is_raw=True)
     @commands.guild_only()
     async def user(
-        self, ctx: commands.Context, member: converter.GuildMemberConverter,
+        self, ctx: commands.Context, *, member: converter.GuildMemberConverter,
     ):
         """Gives formatting to mention a given member"""
 
@@ -19,10 +19,10 @@ class Markdown(commands.Cog):
 
         await ctx.send(embed=embed)
 
-    @commands.command()
+    @commands.command(rest_is_raw=True)
     @commands.guild_only()
     async def role(
-        self, ctx: commands.Context, role: converter.GuildRoleConverter,
+        self, ctx: commands.Context, *, role: converter.GuildRoleConverter,
     ):
         """Gives formatting to mention a given role"""
 
@@ -31,10 +31,10 @@ class Markdown(commands.Cog):
 
         await ctx.send(embed=embed)
 
-    @commands.command()
+    @commands.command(rest_is_raw=True)
     @commands.guild_only()
     async def channel(
-        self, ctx: commands.Context, channel: converter.GuildTextChannelConverter,
+        self, ctx: commands.Context, *, channel: converter.GuildTextChannelConverter,
     ):
         """Gives formatting to link to a given channel"""
 
@@ -43,10 +43,10 @@ class Markdown(commands.Cog):
 
         await ctx.send(embed=embed)
 
-    @commands.command(aliases=["emote"])
+    @commands.command(aliases=["emote"], rest_is_raw=True)
     @commands.guild_only()
     async def emoji(
-        self, ctx: commands.Context, emoji: converter.GuildEmojiConverter,
+        self, ctx: commands.Context, *, emoji: converter.GuildEmojiConverter,
     ):
         """Gives formatting to use a given server emoji"""
 

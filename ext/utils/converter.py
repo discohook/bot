@@ -19,6 +19,8 @@ class GuildMemberConverter(commands.IDConverter):
         if not ctx.guild:
             raise commands.NoPrivateMessage()
 
+        argument = argument.strip()
+
         match = self._get_id_match(argument) or re.match(r"<@!?([0-9]+)>$", argument)
         result = None
 
@@ -50,6 +52,8 @@ class GuildRoleConverter(commands.IDConverter):
         if not ctx.guild:
             raise commands.NoPrivateMessage()
 
+        argument = argument.strip()
+
         match = self._get_id_match(argument) or re.match(r"<@&([0-9]+)>$", argument)
 
         if match:
@@ -75,6 +79,8 @@ class GuildTextChannelConverter(commands.IDConverter):
     async def convert(self, ctx, argument):
         if not ctx.guild:
             raise commands.NoPrivateMessage()
+
+        argument = argument.strip()
 
         match = self._get_id_match(argument) or re.match(r"<#([0-9]+)>$", argument)
         result = None
@@ -104,6 +110,8 @@ class GuildEmojiConverter(commands.IDConverter):
         if not ctx.guild:
             raise commands.NoPrivateMessage()
 
+        argument = argument.strip()
+
         match = self._get_id_match(argument) or re.match(
             r"<a?:[a-zA-Z0-9\_]+:([0-9]+)>$", argument
         )
@@ -129,9 +137,11 @@ class GuildMessageConverter(commands.Converter):
     3. Lookup by message URL
     """
 
-    async def convert(self, ctx: commands.Context, argument: str):
+    async def convert(self, ctx: commands.Context, argument):
         if not ctx.guild:
             raise commands.NoPrivateMessage()
+
+        argument = argument.strip()
 
         id_regex = re.compile(
             r"^(?:(?P<channel_id>[0-9]{15,21})-)?(?P<message_id>[0-9]{15,21})$"
@@ -193,7 +203,9 @@ class WebhookConverter(commands.IDConverter):
         if not ctx.guild:
             raise commands.NoPrivateMessage()
 
-        match = self._get_id_match(argument.strip())
+        argument = argument.strip()
+
+        match = self._get_id_match(argument)
 
         webhooks = [
             webhook
@@ -206,12 +218,12 @@ class WebhookConverter(commands.IDConverter):
             result = discord.utils.get(webhooks, id=int(match.group(1)))
         if result is None:
             result = discord.utils.get(
-                webhooks, channel_id=ctx.channel.id, name=argument.strip()
+                webhooks, channel_id=ctx.channel.id, name=argument
             )
         if result is None:
-            result = discord.utils.get(webhooks, name=argument.strip())
+            result = discord.utils.get(webhooks, name=argument)
 
         if result is None:
-            raise commands.BadArgument(f'Webhook "{argument.strip()}" not found')
+            raise commands.BadArgument(f'Webhook "{argument}" not found')
 
         return result
