@@ -59,7 +59,7 @@ class HelpCommand(commands.HelpCommand):
 
             for command in commands:
                 description.append(
-                    f"`{self.get_command_signature(command, short=True)}`: {command.short_doc}"
+                    f"`{self.get_command_signature(command, short=True)}`: {command.help}"
                 )
 
             self.embed.add_field(
@@ -87,21 +87,16 @@ class HelpCommand(commands.HelpCommand):
 
     async def send_group_help(self, group: commands.Group):
         self.embed.title = f"Help: {group.qualified_name}"
-
-        description = f"Syntax: `{self.get_command_signature(group)}`"
-        if group.description:
-            description += "\n" + group.description
-        if group.help:
-            description += "\n" + group.help
-
-        self.embed.description = description
+        self.embed.description = (
+            f"Syntax: `{self.get_command_signature(group)}`\n{group.help}"
+        )
 
         commands = await self.filter_commands(group.commands, sort=True)
 
         for command in commands:
             self.embed.add_field(
                 name=f"`{self.get_command_signature(command, short=True)}`",
-                value=command.short_doc,
+                value=command.help,
                 inline=False,
             )
 
@@ -110,13 +105,9 @@ class HelpCommand(commands.HelpCommand):
     async def send_command_help(self, command: commands.Command):
         self.embed.title = f"Help: {command.qualified_name}"
 
-        description = f"Syntax: `{self.get_command_signature(command)}`"
-        if command.description:
-            description += "\n" + command.description
-        if command.help:
-            description += "\n" + command.help
-
-        self.embed.description = description
+        self.embed.description = (
+            f"Syntax: `{self.get_command_signature(command)}`\n{command.help}"
+        )
 
         await self.get_destination().send(embed=self.embed)
 
