@@ -179,3 +179,39 @@ class GuildMessageConverter(commands.Converter):
             raise commands.BadArgument(f'Message "{argument}" not found')
         except discord.Forbidden:
             raise commands.BadArgument(f'Message "{argument}" not found')
+
+
+class WebhookConverter(commands.IDConverter):
+    """Converts to a :class:`discord.Webhook`.
+    The lookup strategy is as follows (in order):
+    1. Lookup by webhook ID
+    2. Lookup by name in current channel
+    3. Lookup by name in current guild
+    """
+
+    async def convert(self, ctx: commands.Context, argument: str):
+        if not ctx.guild:
+            raise commands.NoPrivateMessage()
+
+        match = self._get_id_match(argument.strip())
+
+        webhooks = [
+            webhook
+            for webhook in await ctx.guild.webhooks()
+            if webhook.type == discord.WebhookType.incoming
+        ]
+
+        result = None
+        if match:
+            result = discord.utils.get(webhooks, id=int(match.group(1)))
+        if result is None:
+            result = discord.utils.get(
+                webhooks, channel_id=ctx.channel.id, name=argument.strip()
+            )
+        if result is None:
+            result = discord.utils.get(webhooks, name=argument.strip())
+
+        if result is None:
+            raise commands.BadArgument(f'Webhook "{argument.strip()}" not found')
+
+        return result

@@ -12,6 +12,7 @@ extensions = (
     "ext.markdown",
     "ext.messages",
     "ext.meta",
+    "ext.webhooks",
 )
 
 error_types = (
