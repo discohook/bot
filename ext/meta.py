@@ -43,14 +43,13 @@ class HelpCommand(commands.HelpCommand):
         if self.context.bot.description:
             self.embed.description = self.context.bot.description
 
-        def get_category(command):
-            return command.cog.qualified_name if command.cog is not None else "Meta"
-
         grouped = itertools.groupby(
             await self.filter_commands(
-                self.context.bot.commands, sort=True, key=get_category,
+                self.context.bot.commands,
+                sort=True,
+                key=lambda command: command.cog.qualified_name,
             ),
-            key=get_category,
+            key=lambda command: command.cog.qualified_name,
         )
 
         for category, commands in grouped:
