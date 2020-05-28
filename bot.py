@@ -75,7 +75,8 @@ class Bot(commands.AutoShardedBot):
         for (error_type, error_msg) in error_types:
             if isinstance(error, error_type):
                 await ctx.send(
-                    embed=discord.Embed(title=error_msg, description=str(error))
+                    embed=discord.Embed(title=error_msg, description=str(error)),
+                    delete_after=10,
                 )
                 return
 
