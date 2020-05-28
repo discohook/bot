@@ -112,6 +112,8 @@ class HelpCommand(commands.HelpCommand):
 
 
 class Meta(commands.Cog):
+    """Commands related to the bot itself"""
+
     @commands.group(invoke_without_command=True)
     @commands.guild_only()
     async def prefix(self, ctx: commands.Context):
