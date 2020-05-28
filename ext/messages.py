@@ -13,33 +13,33 @@ class Messages(commands.Cog):
 
     @commands.command()
     async def link(
-        self, ctx: commands.Context, msg: converter.GuildMessageConverter,
+        self, ctx: commands.Context, message: converter.GuildMessageConverter,
     ):
-        """Sends a link to recreate a given message in Discohook"""
+        """Sends a link to recreate a given message in Discohook by message link"""
 
-        msg_data = {}
+        message_data = {}
 
-        if len(msg.content) > 0:
-            msg_data["content"] = msg.content
+        if len(message.content) > 0:
+            message_data["content"] = message.content
 
-        msg_data["username"] = msg.author.display_name
-        msg_data["avatar_url"] = str(msg.author.avatar_url_as(format="webp"))
+        message_data["username"] = message.author.display_name
+        message_data["avatar_url"] = str(message.author.avatar_url_as(format="webp"))
 
-        embeds = [embed.to_dict() for embed in msg.embeds if embed.type == "rich"]
+        embeds = [embed.to_dict() for embed in message.embeds if embed.type == "rich"]
 
         for embed in embeds:
             embed.pop("type")
 
         if len(embeds) > 0:
-            msg_data["embeds"] = embeds
+            message_data["embeds"] = embeds
 
-        msg_json = json.dumps({"message": msg_data}, separators=(",", ":"))
-        msg_b64 = (
-            base64.urlsafe_b64encode(msg_json.encode("utf-8"))
+        message_json = json.dumps({"message": message_data}, separators=(",", ":"))
+        message_b64 = (
+            base64.urlsafe_b64encode(message_json.encode("utf-8"))
             .decode("utf-8")
             .replace("=", "")
         )
-        url = f"https://discohook.org/?message={msg_b64}"
+        url = f"https://discohook.org/?message={message_b64}"
 
         if len(url) > 512:
             await ctx.send(
