@@ -138,13 +138,7 @@ class Meta(commands.Cog):
         """Sets the server prefix"""
 
         if len(prefix) > 20:
-            await ctx.send(
-                embed=discord.Embed(
-                    title="Prefix",
-                    description="The prefix can't be longer than 20 characters",
-                )
-            )
-            return
+            raise commands.BadArgument("The prefix can't be longer than 20 characters")
 
         ctx.bot.prefixes.put(ctx.guild.id, prefix)
 
