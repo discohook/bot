@@ -5,6 +5,7 @@ services:
     restart: always
     environment:
       DISCORD_TOKEN:
+      SHORTER_URL:
       CONFIG_PATH: /config
     volumes:
       - "config:/config"

@@ -1,7 +1,9 @@
 import base64
 import io
 import json
+from os import environ
 
+import aiohttp
 import discord
 from discord.ext import commands
 
@@ -11,7 +13,22 @@ from .utils import converter
 class Messages(commands.Cog):
     """Message helpers"""
 
+    def __init__(self, bot):
+        self.bot = bot
+
+    async def _get_short_url(self, url):
+        post_url = f"{environ.get('SHORTER_URL')}/create"
+        post_json = {"url": url}
+
+        async with self.bot.session.post(post_url, json=post_json) as resp:
+            if resp.status != 200:
+                return
+
+            data = await resp.json()
+            return data["url"]
+
     @commands.command()
+    @commands.cooldown(5, 60, type=commands.BucketType.user)
     async def link(
         self, ctx: commands.Context, message: converter.GuildMessageConverter,
     ):
@@ -41,13 +58,19 @@ class Messages(commands.Cog):
         )
         url = f"https://discohook.org/?message={message_b64}"
 
-        if len(url) > 512:
+        short_url = await self._get_short_url(url)
+
+        if short_url is None:
             await ctx.send(
-                embed=discord.Embed(title="URL too long for embed"),
-                file=discord.File(io.StringIO(url), filename="url.txt"),
+                embed=discord.Embed(
+                    title="Error", description="Failed to get short URL",
+                )
             )
-        else:
-            await ctx.send(embed=discord.Embed(title="Message", url=url))
+            return
+
+        embed = discord.Embed(title="Message", description=short_url)
+        embed.set_footer(text="Link will stay valid for 6 hours")
+        await ctx.send(embed=embed)
 
 
 def setup(bot):

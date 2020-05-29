@@ -1,8 +1,10 @@
+import asyncio
 import re
 import sys
 import traceback
 from os import environ
 
+import aiohttp
 import discord
 from discord.ext import commands
 
@@ -15,10 +17,11 @@ extensions = (
     "ext.webhooks",
 )
 
-error_types = (
+error_types = [
+    (commands.CommandOnCooldown, "Cooldown"),
     (commands.UserInputError, "Bad input"),
     (commands.CheckFailure, "Check failed"),
-)
+]
 
 
 def _prefix(bot, msg):
@@ -33,7 +36,7 @@ def _prefix(bot, msg):
 
 
 class Bot(commands.AutoShardedBot):
-    def __init__(self):
+    def __init__(self,):
         super().__init__(
             command_prefix=_prefix,
             description="Helper bot for Discohook (<https://discohook.org/>)"
@@ -44,11 +47,17 @@ class Bot(commands.AutoShardedBot):
 
         self.prefixes = config.Config("prefixes.json")
 
+    async def on_ready(self):
+        self.session = aiohttp.ClientSession()
+
         for extension in extensions:
             self.load_extension(extension)
 
-    async def on_ready(self):
         print(f"Ready as {self.user} ({self.user.id})")
+
+    async def close(self):
+        await self.session.close()
+        await super().close()
 
     async def on_message(self, message):
         if message.author.bot:
