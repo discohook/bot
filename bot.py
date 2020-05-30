@@ -10,7 +10,10 @@ from discord.ext import commands
 
 from ext.utils import config
 
+environ.setdefault("JISHAKU_HIDE", "true")
+
 extensions = (
+    "jishaku",
     "ext.markdown",
     "ext.messages",
     "ext.meta",
