@@ -73,7 +73,7 @@ class Messages(commands.Cog):
             return
 
         embed = discord.Embed(title="Message", description=short_url,)
-        embed.set_footer(text="Expires at")
+        embed.set_footer(text="Expires")
         embed.timestamp = timestamp
         await ctx.send(embed=embed)
 
