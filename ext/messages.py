@@ -1,6 +1,7 @@
 import base64
 import io
 import json
+from datetime import datetime
 from os import environ
 
 import aiohttp
@@ -25,7 +26,10 @@ class Messages(commands.Cog):
                 return
 
             data = await resp.json()
-            return data["url"]
+            url = data["url"]
+            expires = datetime.strptime(data["expires"], "%Y-%m-%dT%H:%M:%S%z")
+
+            return url, expires
 
     @commands.command()
     @commands.cooldown(5, 60, type=commands.BucketType.user)
@@ -58,7 +62,7 @@ class Messages(commands.Cog):
         )
         url = f"https://discohook.org/?message={message_b64}"
 
-        short_url = await self._get_short_url(url)
+        short_url, timestamp = await self._get_short_url(url)
 
         if short_url is None:
             await ctx.send(
@@ -68,8 +72,9 @@ class Messages(commands.Cog):
             )
             return
 
-        embed = discord.Embed(title="Message", description=short_url)
-        embed.set_footer(text="Link will stay valid for 6 hours")
+        embed = discord.Embed(title="Message", description=short_url,)
+        embed.set_footer(text="Expires at")
+        embed.timestamp = timestamp
         await ctx.send(embed=embed)
 
 
