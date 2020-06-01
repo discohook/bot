@@ -149,6 +149,22 @@ class Meta(commands.Cog):
             )
         )
 
+    @commands.command()
+    async def invite(self, ctx: commands.Context):
+        """Gives the invite to the bot and support server"""
+
+        embed = discord.Embed(
+            title="Invite",
+            description="To invite me, go to <https://discohook.org/bot>.",
+        )
+        embed.add_field(
+            name="Support server",
+            value="The invite link to Discohook's support server is at <https://discohook.org/discord>.",
+            inline=False,
+        )
+
+        await ctx.send(embed=embed)
+
 
 def setup(bot: commands.Bot):
     meta = Meta(bot)
