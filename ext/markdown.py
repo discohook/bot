@@ -8,6 +8,7 @@ class Markdown(commands.Cog):
     """Markdown syntax helpers"""
 
     @commands.command(aliases=["member"], rest_is_raw=True)
+    @commands.cooldown(1, 3, commands.BucketType.member)
     @commands.guild_only()
     async def user(
         self, ctx: commands.Context, *, member: converter.GuildMemberConverter,
@@ -20,6 +21,7 @@ class Markdown(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.command(rest_is_raw=True)
+    @commands.cooldown(1, 3, commands.BucketType.member)
     @commands.guild_only()
     async def role(
         self, ctx: commands.Context, *, role: converter.GuildRoleConverter,
@@ -32,6 +34,7 @@ class Markdown(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.command(rest_is_raw=True)
+    @commands.cooldown(1, 3, commands.BucketType.member)
     @commands.guild_only()
     async def channel(
         self, ctx: commands.Context, *, channel: converter.GuildTextChannelConverter,
@@ -44,6 +47,7 @@ class Markdown(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.command(aliases=["emote"], rest_is_raw=True)
+    @commands.cooldown(1, 3, commands.BucketType.member)
     @commands.guild_only()
     async def emoji(
         self, ctx: commands.Context, *, emoji: converter.GuildEmojiConverter,

@@ -115,6 +115,7 @@ class Meta(commands.Cog):
     """Commands related to the bot itself"""
 
     @commands.group(invoke_without_command=True)
+    @commands.cooldown(3, 8, commands.BucketType.channel)
     @commands.guild_only()
     async def prefix(self, ctx: commands.Context):
         """Manages the server prefix"""
@@ -133,6 +134,7 @@ class Meta(commands.Cog):
         )
 
     @prefix.command(name="set")
+    @commands.cooldown(3, 30, commands.BucketType.guild)
     @commands.has_guild_permissions(manage_guild=True)
     async def prefix_set(self, ctx: commands.Context, prefix: str):
         """Sets the server prefix"""
@@ -150,6 +152,7 @@ class Meta(commands.Cog):
         )
 
     @commands.command()
+    @commands.cooldown(3, 8, commands.BucketType.channel)
     async def invite(self, ctx: commands.Context):
         """Gives the invite to the bot and support server"""
 

@@ -32,7 +32,7 @@ class Messages(commands.Cog):
             return url, expires
 
     @commands.command()
-    @commands.cooldown(5, 60, type=commands.BucketType.user)
+    @commands.cooldown(3, 30, type=commands.BucketType.user)
     async def link(
         self, ctx: commands.Context, message: converter.GuildMessageConverter,
     ):

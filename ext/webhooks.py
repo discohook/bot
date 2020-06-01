@@ -41,6 +41,7 @@ class Webhooks(commands.Cog):
         return embed
 
     @commands.group(invoke_without_command=True)
+    @commands.cooldown(1, 3, commands.BucketType.member)
     @commands.has_guild_permissions(manage_webhooks=True)
     @commands.bot_has_guild_permissions(manage_webhooks=True)
     async def webhook(self, ctx: commands.Context):
@@ -48,6 +49,7 @@ class Webhooks(commands.Cog):
         await ctx.send_help("webhook")
 
     @webhook.command(name="list")
+    @commands.cooldown(1, 3, commands.BucketType.member)
     @commands.has_guild_permissions(manage_webhooks=True)
     @commands.bot_has_guild_permissions(manage_webhooks=True)
     async def webhook_list(
@@ -79,6 +81,7 @@ class Webhooks(commands.Cog):
         await ctx.send(embed=embed)
 
     @webhook.command(name="get", aliases=["show"], rest_is_raw=True)
+    @commands.cooldown(3, 8, commands.BucketType.member)
     @commands.has_guild_permissions(manage_webhooks=True)
     @commands.bot_has_guild_permissions(manage_webhooks=True)
     async def webhook_get(
@@ -89,6 +92,7 @@ class Webhooks(commands.Cog):
         await ctx.send(embed=self._get_webhook_embed(ctx, webhook))
 
     @webhook.command(name="url", rest_is_raw=True)
+    @commands.cooldown(3, 8, commands.BucketType.member)
     @commands.has_guild_permissions(manage_webhooks=True)
     @commands.bot_has_guild_permissions(manage_webhooks=True)
     async def webhook_url(
@@ -112,6 +116,7 @@ class Webhooks(commands.Cog):
             )
 
     @webhook.command(name="new", aliases=["create"], rest_is_raw=True)
+    @commands.cooldown(3, 30, commands.BucketType.member)
     @commands.has_guild_permissions(manage_webhooks=True)
     @commands.bot_has_guild_permissions(manage_webhooks=True)
     async def webhook_new(
@@ -136,6 +141,7 @@ class Webhooks(commands.Cog):
         )
 
     @webhook.command(name="edit", aliases=["rename", "avatar"], rest_is_raw=True)
+    @commands.cooldown(3, 30, commands.BucketType.member)
     @commands.has_guild_permissions(manage_webhooks=True)
     @commands.bot_has_guild_permissions(manage_webhooks=True)
     async def webhook_edit(
@@ -167,6 +173,7 @@ class Webhooks(commands.Cog):
         )
 
     @webhook.command(name="delete", aliases=["remove"], rest_is_raw=True)
+    @commands.cooldown(3, 30, commands.BucketType.member)
     @commands.has_guild_permissions(manage_webhooks=True)
     @commands.bot_has_guild_permissions(manage_webhooks=True)
     async def webhook_delete(
