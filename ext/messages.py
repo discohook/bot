@@ -27,7 +27,7 @@ class Messages(commands.Cog):
 
             data = await resp.json()
             url = data["url"]
-            expires = datetime.strptime(data["expires"], "%Y-%m-%dT%H:%M:%S%z")
+            expires = datetime.strptime(data["expires"], "%Y-%m-%dT%H:%M:%S.%f%z")
 
             return url, expires
 
