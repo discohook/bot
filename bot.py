@@ -44,7 +44,7 @@ class Bot(commands.AutoShardedBot):
             command_prefix=_prefix,
             description="Helper bot for Discohook (<https://discohook.org/>)"
             "\nNeed help? Ask in the [support server](https://discohook.org/discord)."
-            "\nInvite me at <https://discohook.org/bot>.",
+            "\nWant me in your server? [Invite me](https://discohook.org/bot).",
             activity=discord.Game(name="at discohook.org | d.help"),
         )
 
