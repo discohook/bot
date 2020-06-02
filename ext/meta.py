@@ -136,7 +136,7 @@ class Meta(commands.Cog):
     @prefix.command(name="set")
     @commands.cooldown(3, 30, commands.BucketType.guild)
     @commands.has_guild_permissions(manage_guild=True)
-    async def prefix_set(self, ctx: commands.Context, prefix: str):
+    async def prefix_set(self, ctx: commands.Context, *, prefix: str):
         """Sets the server prefix"""
 
         if len(prefix) > 20:
