@@ -80,7 +80,7 @@ class Webhooks(commands.Cog):
 
         await ctx.send(embed=embed)
 
-    @webhook.command(name="get", aliases=["show"], rest_is_raw=True)
+    @webhook.command(name="get", aliases=["show"])
     @commands.cooldown(3, 8, commands.BucketType.member)
     @commands.has_guild_permissions(manage_webhooks=True)
     @commands.bot_has_guild_permissions(manage_webhooks=True)
@@ -91,7 +91,7 @@ class Webhooks(commands.Cog):
 
         await ctx.send(embed=self._get_webhook_embed(ctx, webhook))
 
-    @webhook.command(name="url", rest_is_raw=True)
+    @webhook.command(name="url")
     @commands.cooldown(3, 8, commands.BucketType.member)
     @commands.has_guild_permissions(manage_webhooks=True)
     @commands.bot_has_guild_permissions(manage_webhooks=True)
@@ -115,7 +115,7 @@ class Webhooks(commands.Cog):
                 )
             )
 
-    @webhook.command(name="new", aliases=["create"], rest_is_raw=True)
+    @webhook.command(name="new", aliases=["create"])
     @commands.cooldown(3, 30, commands.BucketType.member)
     @commands.has_guild_permissions(manage_webhooks=True)
     @commands.bot_has_guild_permissions(manage_webhooks=True)
@@ -140,7 +140,7 @@ class Webhooks(commands.Cog):
             embed=self._get_webhook_embed(ctx, webhook, message="New webhook created")
         )
 
-    @webhook.command(name="edit", aliases=["rename", "avatar"], rest_is_raw=True)
+    @webhook.command(name="edit", aliases=["rename", "avatar"])
     @commands.cooldown(3, 30, commands.BucketType.member)
     @commands.has_guild_permissions(manage_webhooks=True)
     @commands.bot_has_guild_permissions(manage_webhooks=True)
@@ -172,7 +172,7 @@ class Webhooks(commands.Cog):
             embed=self._get_webhook_embed(ctx, webhook, message="Webhook edited")
         )
 
-    @webhook.command(name="delete", aliases=["remove"], rest_is_raw=True)
+    @webhook.command(name="delete", aliases=["remove"])
     @commands.cooldown(3, 30, commands.BucketType.member)
     @commands.has_guild_permissions(manage_webhooks=True)
     @commands.bot_has_guild_permissions(manage_webhooks=True)

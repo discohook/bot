@@ -7,7 +7,7 @@ from .utils import converter
 class Markdown(commands.Cog):
     """Markdown syntax helpers"""
 
-    @commands.command(aliases=["member"], rest_is_raw=True)
+    @commands.command(aliases=["member"])
     @commands.cooldown(1, 3, commands.BucketType.member)
     @commands.guild_only()
     async def user(
@@ -20,7 +20,7 @@ class Markdown(commands.Cog):
 
         await ctx.send(embed=embed)
 
-    @commands.command(rest_is_raw=True)
+    @commands.command()
     @commands.cooldown(1, 3, commands.BucketType.member)
     @commands.guild_only()
     async def role(
@@ -33,7 +33,7 @@ class Markdown(commands.Cog):
 
         await ctx.send(embed=embed)
 
-    @commands.command(rest_is_raw=True)
+    @commands.command()
     @commands.cooldown(1, 3, commands.BucketType.member)
     @commands.guild_only()
     async def channel(
@@ -46,7 +46,7 @@ class Markdown(commands.Cog):
 
         await ctx.send(embed=embed)
 
-    @commands.command(aliases=["emote"], rest_is_raw=True)
+    @commands.command(aliases=["emote"])
     @commands.cooldown(1, 3, commands.BucketType.member)
     @commands.guild_only()
     async def emoji(
