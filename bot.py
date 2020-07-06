@@ -5,10 +5,9 @@ import traceback
 from os import environ
 
 import aiohttp
+import asyncpg
 import discord
 from discord.ext import commands
-
-from ext.utils import config
 
 environ.setdefault("JISHAKU_HIDE", "true")
 
@@ -27,8 +26,14 @@ error_types = [
 ]
 
 
-def _prefix(bot, msg):
-    prefix = bot.prefixes.get(msg.guild.id if msg.guild else 0, "d.")
+async def _prefix(bot, msg):
+    prefix = await bot.db.fetchval(
+        """
+        SELECT prefix FROM guild_config
+        WHERE guild_id = $1
+        """,
+        msg.guild.id,
+    )
 
     return (
         f"<@!{bot.user.id}> ",
@@ -48,9 +53,8 @@ class Bot(commands.AutoShardedBot):
             activity=discord.Game(name="at discohook.org | d.help"),
         )
 
-        self.prefixes = config.Config("prefixes.json")
-
     async def on_ready(self):
+        self.db = await asyncpg.create_pool(dsn=environ.get("DATABASE_DSN"))
         self.session = aiohttp.ClientSession()
 
         for extension in extensions:
@@ -66,11 +70,30 @@ class Bot(commands.AutoShardedBot):
         if message.author.bot:
             return
 
+        if message.guild:
+            async with self.db.acquire() as conn:
+                try:
+                    await self.db.execute(
+                        """
+                        INSERT INTO guild_config (guild_id)
+                        VALUES ($1)
+                        """,
+                        message.guild.id,
+                    )
+                except asyncpg.UniqueViolationError:
+                    pass
+
         if re.fullmatch(rf"<@!?{self.user.id}>", message.content):
             description = 'The prefix for Discobot is "d."'
 
             if message.guild:
-                prefix = self.prefixes.get(message.guild.id, "d.")
+                prefix = await self.db.fetchval(
+                    """
+                    SELECT prefix FROM guild_config
+                    WHERE guild_id = $1
+                    """,
+                    message.guild.id,
+                )
                 description = f'The prefix for Discobot in this server is "{prefix}"'
 
             await message.channel.send(

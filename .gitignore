@@ -1,4 +1,3 @@
 __pycache__
 venv
-config
 docker-compose.override.yml

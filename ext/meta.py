@@ -114,13 +114,23 @@ class HelpCommand(commands.HelpCommand):
 class Meta(commands.Cog):
     """Commands related to the bot itself"""
 
+    def __init__(self, bot):
+        self.bot = bot
+
     @commands.group(invoke_without_command=True)
     @commands.cooldown(3, 8, commands.BucketType.channel)
     @commands.guild_only()
     async def prefix(self, ctx: commands.Context):
         """Manages the server prefix"""
 
-        prefix = ctx.bot.prefixes.get(ctx.guild.id, "d.")
+        prefix = await self.bot.db.fetchval(
+            """
+            SELECT prefix FROM guild_config
+            WHERE guild_id = $1
+            """,
+            ctx.guild.id,
+        )
+
         set_usage = (
             f"{ctx.prefix}{self.prefix_set.qualified_name} {self.prefix_set.signature}"
         )
@@ -142,7 +152,15 @@ class Meta(commands.Cog):
         if len(prefix) > 20:
             raise commands.BadArgument("The prefix can't be longer than 20 characters")
 
-        ctx.bot.prefixes.put(ctx.guild.id, prefix)
+        await self.bot.db.execute(
+            """
+            UPDATE guild_config
+            SET prefix = $2
+            WHERE guild_id = $1
+            """,
+            ctx.guild.id,
+            prefix,
+        )
 
         await ctx.send(
             embed=discord.Embed(
