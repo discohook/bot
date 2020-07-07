@@ -64,6 +64,7 @@ class Bot(commands.AutoShardedBot):
 
     async def close(self):
         await self.session.close()
+        await self.db.close()
         await super().close()
 
     async def on_message(self, message):
