@@ -6,8 +6,16 @@ services:
     environment:
       DISCORD_TOKEN:
       SHORTER_URL:
-      CONFIG_PATH: /config
+      DATABASE_DSN: postgres://discobot:dn7j7uRQYs4Lg6PERegZ2Pvm@db:5432/discobot
+    depends_on:
+      - db
+  db:
+    image: postgres:12
+    restart: always
+    environment:
+      POSTGRES_USER: discobot
+      POSTGRES_PASSWORD: dn7j7uRQYs4Lg6PERegZ2Pvm
     volumes:
-      - "config:/config"
+      - data:/var/lib/postgresql/data
 volumes:
-  config:
+  data:
