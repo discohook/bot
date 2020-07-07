@@ -123,6 +123,15 @@ class Bot(commands.AutoShardedBot):
             traceback.print_tb(err.__traceback__)
             print(f"{err.__class__.__name__}: {err}", file=sys.stderr)
 
+    async def on_guild_remove(self, guild):
+        await self.db.execute(
+            """
+            DELETE FROM guild_config
+            WHERE guild_id = $1
+            """,
+            guild.id,
+        )
+
 
 def main():
     bot = Bot()
