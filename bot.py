@@ -72,8 +72,16 @@ class Bot(commands.AutoShardedBot):
             return
 
         if message.guild:
-            async with self.db.acquire() as conn:
-                try:
+            try:
+                has_config = await self.db.fetchval(
+                    """
+                    SELECT true FROM guild_config
+                    WHERE guild_id = $1
+                    """,
+                    message.guild.id,
+                )
+
+                if not has_config:
                     await self.db.execute(
                         """
                         INSERT INTO guild_config (guild_id)
@@ -81,8 +89,8 @@ class Bot(commands.AutoShardedBot):
                         """,
                         message.guild.id,
                     )
-                except asyncpg.UniqueViolationError:
-                    pass
+            except asyncpg.UniqueViolationError:
+                pass
 
         if re.fullmatch(rf"<@!?{self.user.id}>", message.content):
             description = 'The prefix for Discobot is "d."'
