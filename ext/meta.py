@@ -169,22 +169,38 @@ class Meta(commands.Cog):
             )
         )
 
-    @commands.command()
+    @commands.command(aliases=["invite"])
     @commands.cooldown(3, 8, commands.BucketType.channel)
-    async def invite(self, ctx: commands.Context):
-        """Gives the invite to the bot and support server"""
+    async def about(self, ctx: commands.Context):
+        """Gives information about this bot"""
 
         embed = discord.Embed(
-            title="Invite",
-            description="To invite me, go to <https://discohook.org/bot>.",
+            title="About",
+            description="This is a helper bot for [Discohook](https://discohook.org/)."
+            "\nIf you need help using me, you can ask in the [support server](https://discohook.org/discord)."
+            "\nWant me in your own server? [Invite me](https://discohook.org/bot)!",
         )
+
         embed.add_field(
-            name="Support server",
-            value="The invite link to Discohook's support server is at <https://discohook.org/discord>.",
-            inline=False,
+            name="Security",
+            value="Want your data deleted? Use the `deletemydata` command to get more info."
+            "\nHave a security issue? Join the support server and DM vivi#1111.",
         )
 
         await ctx.send(embed=embed)
+
+    @commands.command()
+    @commands.cooldown(3, 8, commands.BucketType.channel)
+    async def deletemydata(self, ctx: commands.Context):
+        """Gives information on how to delete your data"""
+
+        await ctx.send(
+            embed=discord.Embed(
+                title="Delete my data",
+                description="As of now, this bot stores zero data specific to users."
+                "\nIf you are a server owner you can delete data specific to this guild by kicking or banning me.",
+            )
+        )
 
 
 def setup(bot: commands.Bot):
