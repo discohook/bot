@@ -129,7 +129,7 @@ class GuildEmojiConverter(commands.IDConverter):
         return result
 
 
-class GuildPartialEmojiConverter(Converter):
+class GuildPartialEmojiConverter(commands.Converter):
     """Converts to a :class:`discord.PartialEmoji`.
     This is done by extracting the animated flag, name and ID from the emoji.
     If it's not an emoji string, it does a lookup by name.
