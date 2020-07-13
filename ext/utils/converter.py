@@ -129,6 +129,39 @@ class GuildEmojiConverter(commands.IDConverter):
         return result
 
 
+class GuildPartialEmojiConverter(Converter):
+    """Converts to a :class:`discord.PartialEmoji`.
+    This is done by extracting the animated flag, name and ID from the emoji.
+    If it's not an emoji string, it does a lookup by name.
+    """
+
+    async def convert(self, ctx, argument):
+        match = re.match(r"<(a?):([a-zA-Z0-9\_]+):([0-9]+)>$", argument)
+
+        if match:
+            emoji_animated = bool(match.group(1))
+            emoji_name = match.group(2)
+            emoji_id = int(match.group(3))
+
+            return discord.PartialEmoji.with_state(
+                ctx.bot._connection,
+                id=emoji_id,
+                name=emoji_name,
+                animated=emoji_animated,
+            )
+
+        emoji = discord.utils.get(ctx.guild.emojis, name=argument)
+        if emoji:
+            return discord.PartialEmoji.with_state(
+                ctx.bot._connection,
+                id=emoji.id,
+                name=emoji.name,
+                animated=emoji.animated,
+            )
+
+        raise commands.BadArgument(f'Emoji "{argument}" not found')
+
+
 class GuildMessageConverter(commands.Converter):
     """Converts to a :class:`discord.Message`.
     The lookup strategy is as follows (in order):

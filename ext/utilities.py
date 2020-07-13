@@ -81,7 +81,7 @@ class Utilities(commands.Cog):
     @commands.cooldown(1, 3, commands.BucketType.member)
     @commands.guild_only()
     async def big(
-        self, ctx: commands.Context, *, emoji: commands.PartialEmojiConverter,
+        self, ctx: commands.Context, *, emoji: converter.GuildPartialEmojiConverter,
     ):
         """Gives the URL to a custom emoji"""
 
