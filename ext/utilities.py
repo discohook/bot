@@ -11,7 +11,7 @@ from discord.ext import commands
 from .utils import converter
 
 
-class Messages(commands.Cog):
+class Utilities(commands.Cog):
     """Message helpers"""
 
     def __init__(self, bot):
@@ -77,6 +77,21 @@ class Messages(commands.Cog):
         embed.timestamp = timestamp
         await ctx.send(embed=embed)
 
+    @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.member)
+    @commands.guild_only()
+    async def big(
+        self, ctx: commands.Context, *, emoji: commands.PartialEmojiConverter,
+    ):
+        """Gives the URL to a custom emoji"""
+
+        embed = discord.Embed(
+            title=f"Emoji URL for :{emoji.name}:", description=str(emoji.url)
+        )
+        embed.set_image(url=str(emoji.url))
+
+        await ctx.send(embed=embed)
+
 
 def setup(bot):
-    bot.add_cog(Messages(bot))
+    bot.add_cog(Utilities(bot))

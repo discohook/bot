@@ -14,8 +14,8 @@ environ.setdefault("JISHAKU_HIDE", "true")
 extensions = (
     "jishaku",
     "ext.markdown",
-    "ext.messages",
     "ext.meta",
+    "ext.utilities",
     "ext.webhooks",
 )
 
