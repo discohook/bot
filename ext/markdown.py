@@ -17,6 +17,7 @@ class Markdown(commands.Cog):
 
         embed = discord.Embed(title="Syntax", description=f"`{member.mention}`")
         embed.add_field(name="Output", value=member.mention)
+        embed.set_footer(text=f"ID: {member.id}")
 
         await ctx.send(embed=embed)
 
@@ -30,6 +31,7 @@ class Markdown(commands.Cog):
 
         embed = discord.Embed(title="Syntax", description=f"`{role.mention}`")
         embed.add_field(name="Output", value=role.mention)
+        embed.set_footer(text=f"ID: {role.id}")
 
         await ctx.send(embed=embed)
 
@@ -43,6 +45,7 @@ class Markdown(commands.Cog):
 
         embed = discord.Embed(title="Syntax", description=f"`{channel.mention}`")
         embed.add_field(name="Output", value=channel.mention)
+        embed.set_footer(text=f"ID: {channel.id}")
 
         await ctx.send(embed=embed)
 
@@ -56,6 +59,7 @@ class Markdown(commands.Cog):
 
         embed = discord.Embed(title="Syntax", description=f"`{emoji}`")
         embed.add_field(name="Output", value=str(emoji))
+        embed.set_footer(text=f"ID: {emoji.id}")
 
         await ctx.send(embed=embed)
 

@@ -89,6 +89,7 @@ class Utilities(commands.Cog):
             title=f"Emoji URL for :{emoji.name}:", description=str(emoji.url)
         )
         embed.set_image(url=str(emoji.url))
+        embed.set_footer(text=f"ID: {emoji.id}")
 
         await ctx.send(embed=embed)
 
