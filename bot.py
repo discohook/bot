@@ -26,46 +26,47 @@ error_types = [
 ]
 
 
-async def _prefix(bot, msg):
-    prefix = await bot.db.fetchval(
-        """
-        SELECT prefix FROM guild_config
-        WHERE guild_id = $1
-        """,
-        msg.guild.id,
-    )
-
-    return (
-        f"<@!{bot.user.id}> ",
-        f"<@{bot.user.id}> ",
-        f"{prefix} ",
-        prefix,
-    )
-
-
 class Bot(commands.AutoShardedBot):
-    def __init__(self,):
+    def __init__(self):
         super().__init__(
-            command_prefix=_prefix,
+            command_prefix=self._prefix,
             description="Helper bot for Discohook (<https://discohook.org/>)"
             "\nNeed help? Ask in the [support server](https://discohook.org/discord)."
             "\nWant me in your server? [Invite me](https://discohook.org/bot).",
             activity=discord.Game(name="at discohook.org | d.help"),
         )
 
-    async def on_ready(self):
-        self.db = await asyncpg.create_pool(dsn=environ.get("DATABASE_DSN"))
-        self.session = aiohttp.ClientSession()
-
         for extension in extensions:
             self.load_extension(extension)
 
-        print(f"Ready as {self.user} ({self.user.id})")
+    async def _prefix(self, bot, msg):
+        prefix = await self.db.fetchval(
+            """
+            SELECT prefix FROM guild_config
+            WHERE guild_id = $1
+            """,
+            msg.guild.id,
+        )
+
+        return (
+            f"<@!{bot.user.id}> ",
+            f"<@{bot.user.id}> ",
+            f"{prefix} ",
+            prefix,
+        )
+
+    async def start(self, *args, **kwargs):
+        self.session = aiohttp.ClientSession()
+        self.db = await asyncpg.create_pool(dsn=environ.get("DATABASE_DSN"))
+        await super().start(*args, **kwargs)
 
     async def close(self):
         await self.session.close()
         await self.db.close()
         await super().close()
+
+    async def on_ready(self):
+        print(f"Ready as {self.user} ({self.user.id})")
 
     async def on_message(self, message):
         if message.author.bot:
