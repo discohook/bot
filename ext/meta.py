@@ -169,25 +169,28 @@ class Meta(commands.Cog):
             )
         )
 
-    @commands.command(aliases=["invite"])
+    @commands.command()
     @commands.cooldown(3, 8, commands.BucketType.channel)
     async def about(self, ctx: commands.Context):
         """Gives information about this bot"""
 
-        embed = discord.Embed(
-            title="About",
-            description="This is a helper bot for [Discohook](https://discohook.org/)."
-            "\nIf you need help using me, you can ask in the [support server](https://discohook.org/discord)."
-            "\nWant me in your own server? [Invite me](https://discohook.org/bot)!",
-        )
-
+        embed = discord.Embed(title="About", description=self.bot.description)
         embed.add_field(
-            name="Security",
+            name="Privacy and Security",
             value="Want your data deleted? Use the `deletemydata` command to get more info."
             "\nHave a security issue? Join the support server and DM vivi#1111.",
         )
 
         await ctx.send(embed=embed)
+
+    @commands.command()
+    @commands.cooldown(3, 8, commands.BucketType.channel)
+    async def invite(self, ctx: commands.Context):
+        """Gives information about this bot"""
+
+        await ctx.send(
+            embed=discord.Embed(title="Invite", description=self.bot.description)
+        )
 
     @commands.command()
     @commands.cooldown(3, 8, commands.BucketType.channel)
