@@ -79,7 +79,6 @@ class Utilities(commands.Cog):
 
     @commands.command()
     @commands.cooldown(1, 3, commands.BucketType.member)
-    @commands.guild_only()
     async def big(
         self, ctx: commands.Context, *, emoji: converter.GuildPartialEmojiConverter,
     ):
