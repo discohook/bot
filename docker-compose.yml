@@ -17,5 +17,6 @@ services:
       POSTGRES_PASSWORD: dn7j7uRQYs4Lg6PERegZ2Pvm
     volumes:
       - data:/var/lib/postgresql/data
+    shm_size: 256M
 volumes:
   data:
