@@ -3,6 +3,6 @@ aiohttp==3.6.2
 asyncpg==0.21.0
 black==19.10b0
 discord.py==1.4.1
-jishaku==1.19.0.194
+jishaku==1.19.1.200
 pg8000==1.16.5
 psutil==5.7.2
