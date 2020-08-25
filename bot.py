@@ -34,6 +34,11 @@ class Bot(commands.AutoShardedBot):
             "\nNeed help? Ask in the [support server](https://discohook.org/discord)."
             "\nWant me in your server? [Invite me](https://discohook.org/bot).",
             activity=discord.Game(name="at discohook.org | d.help"),
+            allowed_mentions=discord.AllowedMentions(
+                everyone=False, users=False, roles=False
+            ),
+            max_messages=None,
+            guild_subscriptions=False,
         )
 
         for extension in extensions:
