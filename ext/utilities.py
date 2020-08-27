@@ -8,7 +8,7 @@ import aiohttp
 import discord
 from discord.ext import commands
 
-from .utils import converter
+from .utils import checks, converter
 
 
 class Utilities(commands.Cog):
@@ -33,6 +33,7 @@ class Utilities(commands.Cog):
 
     @commands.command()
     @commands.cooldown(3, 30, type=commands.BucketType.user)
+    @checks.private_command()
     async def link(
         self, ctx: commands.Context, message: converter.GuildMessageConverter,
     ):
