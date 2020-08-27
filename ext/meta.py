@@ -211,10 +211,10 @@ class Meta(commands.Cog):
                 await commands.has_guild_permissions(manage_guild=True).predicate(ctx)
 
                 parsed_value = self._resolve_value(configurable.type, new_value)
-                await self._config_set(ctx.guild, configurable, new_value)
+                await self._config_set(ctx.guild, configurable, parsed_value)
 
             value = (
-                new_value
+                parsed_value
                 if new_value is not None
                 else await self._config_get(ctx.guild, configurable)
             )
@@ -227,7 +227,7 @@ class Meta(commands.Cog):
                 f"Option {configurable.name} has been set to {value}."
                 if new_value is not None
                 else f"Option {configurable.name} is currently set to {value}."
-                "\nUse `{command} {configurable.name} <new value>` to set it."
+                f"\nUse `{command} {configurable.name} <new value>` to set it."
             )
 
             await ctx.send(
