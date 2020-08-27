@@ -1,9 +1,12 @@
 import asyncio
+import collections
 import itertools
 import re
+import typing
 
 import discord
 from discord.ext import commands
+from discord.utils import get
 
 
 class HelpCommand(commands.HelpCommand):
@@ -111,63 +114,143 @@ class HelpCommand(commands.HelpCommand):
         await self.get_destination().send(embed=self.embed)
 
 
+Configurable = collections.namedtuple(
+    "Configurable", ["name", "description", "column", "type"]
+)
+
+configurables = [
+    Configurable(
+        name="prefix",
+        description="Prefix specific to server, mention prefix will always work.",
+        column="prefix",
+        type=str,
+    ),
+    Configurable(
+        name="private",
+        description="Make certain sensitive commands private to server moderators.",
+        column="commands_private",
+        type=bool,
+    ),
+]
+
+type_names = {str: "text", bool: "boolean", int: "number"}
+
+
 class Meta(commands.Cog):
     """Commands related to the bot itself"""
 
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.group(invoke_without_command=True)
-    @commands.cooldown(3, 8, commands.BucketType.channel)
-    @commands.guild_only()
-    async def prefix(self, ctx: commands.Context):
-        """Manages the server prefix"""
+    def _resolve_value(self, expected_type, raw_value):
+        type_name = type_names[expected_type]
+        escaped_value = "``" + raw_value.replace("`", "\u200b`\u200b") + "``"
 
-        prefix = await self.bot.db.fetchval(
+        if expected_type is bool:
+            lowered = raw_value.lower()
+            if lowered in ("yes", "y", "true", "t", "1", "enable", "on"):
+                return True
+            elif lowered in ("no", "n", "false", "f", "0", "disable", "off"):
+                return False
+            else:
+                raise commands.BadArgument(
+                    f"Value {escaped_value} is not a {type_name}"
+                )
+        else:
+            try:
+                return expected_type(raw_value)
+            except:
+                raise commands.BadArgument(
+                    f"Value {escaped_value} is not a {type_name}"
+                )
+
+    async def _config_get(self, guild, configurable):
+        return await self.bot.db.fetchval(
             """
-            SELECT prefix FROM guild_config
+            SELECT {} FROM guild_config
             WHERE guild_id = $1
-            """,
-            ctx.guild.id,
+            """.format(
+                configurable.column
+            ),
+            guild.id,
         )
 
-        set_usage = (
-            f"{ctx.prefix}{self.prefix_set.qualified_name} {self.prefix_set.signature}"
-        )
-
-        await ctx.send(
-            embed=discord.Embed(
-                title="Prefix",
-                description=f'The prefix for Discobot in this server is "{prefix}"'
-                f'\nUse "{set_usage}" to change the prefix',
-            )
-        )
-
-    @prefix.command(name="set")
-    @commands.cooldown(3, 30, commands.BucketType.guild)
-    @commands.has_guild_permissions(manage_guild=True)
-    async def prefix_set(self, ctx: commands.Context, *, prefix: str):
-        """Sets the server prefix"""
-
-        if len(prefix) > 20:
-            raise commands.BadArgument("The prefix can't be longer than 20 characters")
-
+    async def _config_set(self, guild, configurable, new_value):
         await self.bot.db.execute(
             """
             UPDATE guild_config
-            SET prefix = $2
+            SET {} = $2
             WHERE guild_id = $1
-            """,
-            ctx.guild.id,
-            prefix,
+            """.format(
+                configurable.column
+            ),
+            guild.id,
+            new_value,
         )
 
-        await ctx.send(
-            embed=discord.Embed(
-                title="Prefix set",
-                description=f'The prefix for this server is now "{prefix}"',
+    @commands.group(invoke_without_command=True)
+    @commands.cooldown(3, 8, commands.BucketType.channel)
+    @commands.guild_only()
+    async def config(
+        self,
+        ctx: commands.Context,
+        option: typing.Optional[str],
+        *,
+        new_value: typing.Optional[str],
+    ):
+        """Manages server configuration for bot"""
+
+        command = f"{ctx.prefix}{self.config.qualified_name}"
+
+        if option:
+            configurable = get(configurables, name=option.lower())
+            if configurable is None:
+                raise commands.UserInputError(f'Option "{option}" not found')
+
+            if new_value:
+                await commands.has_guild_permissions(manage_guild=True).predicate(ctx)
+
+                parsed_value = self._resolve_value(configurable.type, new_value)
+                await self._config_set(ctx.guild, configurable, new_value)
+
+            value = (
+                new_value
+                if new_value is not None
+                else await self._config_get(ctx.guild, configurable)
             )
+            value = (
+                ("yes" if value else "no") if isinstance(value, bool) else str(value)
+            )
+            value = "``" + value.replace("`", "\u200b`\u200b") + "``"
+
+            message = (
+                f"Option {configurable.name} has been set to {value}."
+                if new_value is not None
+                else f"Option {configurable.name} is currently set to {value}."
+                "\nUse `{command} {configurable.name} <new value>` to set it."
+            )
+
+            await ctx.send(
+                embed=discord.Embed(title="Configuration", description=message)
+            )
+            return
+
+        embed = discord.Embed(
+            title="Configuration",
+            description="Command to manage the bot's configuration for a server."
+            f"\nTo get the value of an option use `{command} <option>`."
+            f"\nTo set the value of an option use `{command} <option> <new value>`."
+            "\nList of options can be found below:",
         )
+
+        for configurable in configurables:
+            embed.add_field(
+                name=configurable.name.capitalize(),
+                value=configurable.description,
+                inline=False,
+            )
+
+        await ctx.send(embed=embed)
 
     @commands.command()
     @commands.cooldown(3, 8, commands.BucketType.channel)
