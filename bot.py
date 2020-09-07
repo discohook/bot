@@ -9,6 +9,8 @@ import asyncpg
 import discord
 from discord.ext import commands
 
+from ext.utils import wrap_in_code
+
 environ.setdefault("JISHAKU_HIDE", "true")
 
 extensions = (
@@ -109,7 +111,9 @@ class Bot(commands.AutoShardedBot):
                     """,
                     message.guild.id,
                 )
-                description = f'The prefix for Discobot in this server is "{prefix}"'
+                description = (
+                    f"The prefix for Discobot in this server is {wrap_in_code(prefix)}"
+                )
 
             await message.channel.send(
                 embed=discord.Embed(title="Prefix", description=description)

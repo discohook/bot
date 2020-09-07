@@ -5,7 +5,7 @@ import discord
 from discord.ext import commands
 from jishaku import metacog
 
-from .utils import converter
+from .utils import converter, wrap_in_code
 
 
 @commands.group(invoke_without_command=True)
@@ -39,11 +39,11 @@ class Webhooks(commands.Cog, metaclass=metacog.GroupCogMeta, command_parent=webh
             value=f"{webhook.created_at.ctime()} UTC".replace("  ", " "),
         )
 
+        url_signature = wrap_in_code(
+            f"{ctx.prefix}{self.url.qualified_name} {self.url.signature}"
+        )
         url_message = (
-            webhook.url
-            if show_url
-            else f"Use `{ctx.prefix}{self.url.qualified_name} {self.url.signature}`"
-            " to obtain the URL"
+            webhook.url if show_url else f"Use {url_signature} to obtain the URL"
         )
         embed.add_field(name="Webhook URL", value=url_message, inline=False)
 
@@ -58,10 +58,12 @@ class Webhooks(commands.Cog, metaclass=metacog.GroupCogMeta, command_parent=webh
     ):
         """Lists webhooks for the server or a given channel"""
 
+        get_signature = wrap_in_code(
+            f"{ctx.prefix}{self.get.qualified_name} {self.get.signature}"
+        )
         embed = discord.Embed(
             title="Webhooks",
-            description=f"Use `{ctx.prefix}{self.get.qualified_name} {self.get.signature}`"
-            " to get more info on a webhook",
+            description=f"Use {get_signature} to get more info on a webhook",
         )
 
         webhooks = await channel.webhooks() if channel else await ctx.guild.webhooks()
@@ -76,7 +78,7 @@ class Webhooks(commands.Cog, metaclass=metacog.GroupCogMeta, command_parent=webh
 
         if len(webhooks) > 25:
             embed.set_footer(
-                text=f"Too many webhooks - {len(webhooks) - 25} results omitted"
+                text=f"Too many webhooks - {len(webhooks) - 25} results omitted."
             )
 
         await ctx.send(embed=embed)
@@ -186,7 +188,7 @@ class Webhooks(commands.Cog, metaclass=metacog.GroupCogMeta, command_parent=webh
         message = await ctx.send(
             embed=discord.Embed(
                 title="Confirmation",
-                description=f'Are you sure you want to delete "{webhook.name}"? This action cannot be reverted.',
+                description=f"Are you sure you want to delete {wrap_in_code(webhook.name)}? This action cannot be reverted.",
             )
         )
 

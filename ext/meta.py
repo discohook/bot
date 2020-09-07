@@ -8,6 +8,8 @@ import discord
 from discord.ext import commands
 from discord.utils import get
 
+from .utils import wrap_in_code
+
 
 class HelpCommand(commands.HelpCommand):
     async def prepare_help_command(self, ctx, command=None):
@@ -15,7 +17,7 @@ class HelpCommand(commands.HelpCommand):
         command = f"{prefix}{self.invoked_with}"
 
         self.embed = discord.Embed(title="Help")
-        self.embed.set_footer(text=f'Use "{command} [command]" for more info')
+        self.embed.set_footer(text=f'Use "help" or "help <command>" for more info')
 
     def get_command_signature(self, command, *, short=False):
         parent = command.full_parent_name
@@ -29,13 +31,13 @@ class HelpCommand(commands.HelpCommand):
         if command.signature:
             signature += f" {command.signature}".replace("_", " ")
 
-        return signature
+        return wrap_in_code(signature)
 
     def command_not_found(self, string):
-        return f'Command "{string}" does not exist'
+        return f"Command {wrap_in_code(string)} does not exist"
 
     def subcommand_not_found(self, command, string):
-        return f'Command "{command.qualified_name}" has no subcommand named "{string}"'
+        return f"Command {wrap_in_code(command.qualified_name)} has no subcommand named {wrap_in_code(string)}"
 
     async def send_error_message(self, error):
         await self.get_destination().send(
@@ -61,7 +63,7 @@ class HelpCommand(commands.HelpCommand):
 
             for command in commands:
                 description.append(
-                    f"`{self.get_command_signature(command, short=True)}`: {command.help}"
+                    f"{self.get_command_signature(command, short=True)}: {command.help}"
                 )
 
             self.embed.add_field(
@@ -80,7 +82,7 @@ class HelpCommand(commands.HelpCommand):
 
         for command in commands:
             self.embed.add_field(
-                name=f"`{self.get_command_signature(command, short=True)}`",
+                name=f"{self.get_command_signature(command, short=True)}",
                 value=command.short_doc,
                 inline=False,
             )
@@ -90,14 +92,14 @@ class HelpCommand(commands.HelpCommand):
     async def send_group_help(self, group: commands.Group):
         self.embed.title = f"Help: {group.qualified_name}"
         self.embed.description = (
-            f"Syntax: `{self.get_command_signature(group)}`\n{group.help}"
+            f"Syntax: {self.get_command_signature(group)}\n{group.help}"
         )
 
         commands = await self.filter_commands(group.commands, sort=True)
 
         for command in commands:
             self.embed.add_field(
-                name=f"`{self.get_command_signature(command, short=True)}`",
+                name=f"{self.get_command_signature(command, short=True)}",
                 value=command.help,
                 inline=False,
             )
@@ -108,7 +110,7 @@ class HelpCommand(commands.HelpCommand):
         self.embed.title = f"Help: {command.qualified_name}"
 
         self.embed.description = (
-            f"Syntax: `{self.get_command_signature(command)}`\n{command.help}"
+            f"Syntax: {self.get_command_signature(command)}\n{command.help}"
         )
 
         await self.get_destination().send(embed=self.embed)
@@ -144,7 +146,7 @@ class Meta(commands.Cog):
 
     def _resolve_value(self, expected_type, raw_value):
         type_name = type_names[expected_type]
-        escaped_value = "``" + raw_value.replace("`", "\u200b`\u200b") + "``"
+        escaped_value = wrap_in_code(raw_value)
 
         if expected_type is bool:
             lowered = raw_value.lower()
@@ -205,7 +207,9 @@ class Meta(commands.Cog):
         if option:
             configurable = get(configurables, name=option.lower())
             if configurable is None:
-                raise commands.UserInputError(f'Option "{option}" not found')
+                raise commands.UserInputError(
+                    f"Option {wrap_in_code(option)} not found"
+                )
 
             if new_value:
                 await commands.has_guild_permissions(manage_guild=True).predicate(ctx)
@@ -221,13 +225,16 @@ class Meta(commands.Cog):
             value = (
                 ("yes" if value else "no") if isinstance(value, bool) else str(value)
             )
-            value = "``" + value.replace("`", "\u200b`\u200b") + "``"
+            value = wrap_in_code(value)
 
+            set_configurable_signature = wrap_in_code(
+                f"{command} {configurable.name} <new value>"
+            )
             message = (
                 f"Option {configurable.name} has been set to {value}."
                 if new_value is not None
                 else f"Option {configurable.name} is currently set to {value}."
-                f"\nUse `{command} {configurable.name} <new value>` to set it."
+                f"\nUse {set_configurable_signature} to set it."
             )
 
             await ctx.send(
@@ -235,11 +242,13 @@ class Meta(commands.Cog):
             )
             return
 
+        get_signature = wrap_in_code(f"{command} <option>")
+        set_signature = wrap_in_code(f"{command} <option> <new value>")
         embed = discord.Embed(
             title="Configuration",
             description="Command to manage the bot's configuration for a server."
-            f"\nTo get the value of an option use `{command} <option>`."
-            f"\nTo set the value of an option use `{command} <option> <new value>`."
+            f"\nTo get the value of an option use {get_signature}."
+            f"\nTo set the value of an option use {set_signature}."
             "\nList of options can be found below:",
         )
 
@@ -257,10 +266,14 @@ class Meta(commands.Cog):
     async def about(self, ctx: commands.Context):
         """Gives information about this bot"""
 
+        delete_data_signature = wrap_in_code(
+            f"{ctx.prefix}{self.deletemydata.qualified_name} {self.deletemydata.signature}"
+        )
+
         embed = discord.Embed(title="About", description=self.bot.description)
         embed.add_field(
             name="Privacy and Security",
-            value="Want your data deleted? Use the `deletemydata` command to get more info."
+            value=f"Want your data deleted? Use the {delete_data_signature} command to get more info."
             "\nHave a security issue? Join the support server and DM vivi#1111.",
         )
 
@@ -284,7 +297,7 @@ class Meta(commands.Cog):
             embed=discord.Embed(
                 title="Delete my data",
                 description="As of now, this bot stores zero data specific to users."
-                "\nIf you are a server owner you can delete data specific to this guild by kicking or banning me.",
+                "\nIf you are a server owner you can delete data specific to this server by kicking or banning me.",
             )
         )
 

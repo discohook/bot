@@ -3,6 +3,8 @@ import re
 import discord
 from discord.ext import commands
 
+from . import wrap_in_code
+
 
 class GuildMemberConverter(commands.IDConverter):
     """Converts to a :class:`discord.Member`.
@@ -34,7 +36,7 @@ class GuildMemberConverter(commands.IDConverter):
             )
 
         if result is None:
-            raise commands.BadArgument(f'Member "{argument}" not found')
+            raise commands.BadArgument(f"Member {wrap_in_code(argument)} not found")
 
         return result
 
@@ -62,7 +64,7 @@ class GuildRoleConverter(commands.IDConverter):
             result = discord.utils.get(ctx.guild._roles.values(), name=argument)
 
         if result is None:
-            raise commands.BadArgument(f'Role "{argument}" not found')
+            raise commands.BadArgument(f"Role {wrap_in_code(argument)} not found")
 
         return result
 
@@ -92,7 +94,7 @@ class GuildTextChannelConverter(commands.IDConverter):
             result = ctx.guild.get_channel(channel_id)
 
         if not isinstance(result, discord.TextChannel):
-            raise commands.BadArgument(f'Channel "{argument}" not found')
+            raise commands.BadArgument(f"Channel {wrap_in_code(argument)} not found")
 
         return result
 
@@ -124,7 +126,7 @@ class GuildEmojiConverter(commands.IDConverter):
             result = discord.utils.get(ctx.guild.emojis, id=emoji_id)
 
         if result is None:
-            raise commands.BadArgument(f'Emoji "{argument}" not found')
+            raise commands.BadArgument(f"Emoji {wrap_in_code(argument)} not found")
 
         return result
 
@@ -159,7 +161,7 @@ class GuildPartialEmojiConverter(commands.Converter):
                 animated=emoji.animated,
             )
 
-        raise commands.BadArgument(f'Emoji "{argument}" not found')
+        raise commands.BadArgument(f"Emoji {wrap_in_code(argument)} not found")
 
 
 class GuildMessageConverter(commands.Converter):
@@ -188,7 +190,7 @@ class GuildMessageConverter(commands.Converter):
 
         match = id_regex.match(argument) or link_regex.match(argument)
         if not match:
-            raise commands.BadArgument(f'Message "{argument}" not found')
+            raise commands.BadArgument(f"Message {wrap_in_code(argument)} not found")
 
         message_id = int(match.group("message_id"))
         channel_id = match.group("channel_id")
@@ -202,11 +204,13 @@ class GuildMessageConverter(commands.Converter):
             ):
                 return message
             else:
-                raise commands.BadArgument(f'Message "{argument}" not found')
+                raise commands.BadArgument(
+                    f"Message {wrap_in_code(argument)} not found"
+                )
 
         channel = ctx.bot.get_channel(int(channel_id)) if channel_id else ctx.channel
         if not channel:
-            raise commands.BadArgument(f'Message "{argument}" not found')
+            raise commands.BadArgument(f"Message {wrap_in_code(argument)} not found")
 
         try:
             message = await channel.fetch_message(message_id)
@@ -217,11 +221,13 @@ class GuildMessageConverter(commands.Converter):
             ):
                 return message
             else:
-                raise commands.BadArgument(f'Message "{argument}" not found')
+                raise commands.BadArgument(
+                    f"Message {wrap_in_code(argument)} not found"
+                )
         except discord.NotFound:
-            raise commands.BadArgument(f'Message "{argument}" not found')
+            raise commands.BadArgument(f"Message {wrap_in_code(argument)} not found")
         except discord.Forbidden:
-            raise commands.BadArgument(f'Message "{argument}" not found')
+            raise commands.BadArgument(f"Message {wrap_in_code(argument)} not found")
 
 
 class WebhookConverter(commands.IDConverter):
@@ -257,6 +263,6 @@ class WebhookConverter(commands.IDConverter):
             result = discord.utils.get(webhooks, name=argument)
 
         if result is None:
-            raise commands.BadArgument(f'Webhook "{argument}" not found')
+            raise commands.BadArgument(f"Webhook {wrap_in_code(argument)} not found")
 
         return result
