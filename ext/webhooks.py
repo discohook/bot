@@ -194,10 +194,10 @@ class Webhooks(commands.Cog, metaclass=metacog.GroupCogMeta, command_parent=webh
 
         try:
             reaction, user = await ctx.bot.wait_for(
-                "reaction_add",
+                "raw_reaction_add",
                 timeout=30.0,
-                check=lambda reaction, user: str(reaction) == "\N{WASTEBASKET}"
-                and user == ctx.author,
+                check=lambda event: str(event.emoji) == "\N{WASTEBASKET}"
+                and event.user_id == ctx.author.id,
             )
         except asyncio.TimeoutError:
             await message.edit(
