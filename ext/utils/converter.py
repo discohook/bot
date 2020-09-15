@@ -2,6 +2,7 @@ import re
 
 import discord
 from discord.ext import commands
+from discord.utils import find, get
 
 from . import wrap_in_code
 
@@ -26,19 +27,28 @@ class GuildMemberConverter(commands.IDConverter):
         match = self._get_id_match(argument) or re.match(r"<@!?([0-9]+)>$", argument)
         result = None
 
-        if match is None:
-            result = ctx.guild.get_member_named(argument)
-
-        else:
+        if match:
             user_id = int(match.group(1))
-            result = ctx.guild.get_member(user_id) or discord.utils.get(
+
+            result = get(
                 ctx.message.mentions, id=user_id
-            )
+            ) or await ctx.guild.fetch_member(user_id)
 
-        if result is None:
-            raise commands.BadArgument(f"Member {wrap_in_code(argument)} not found")
+            if result:
+                return result
 
-        return result
+        async for member in ctx.guild.fetch_members(limit=None):
+            if len(argument) > 5 and argument[-5] == "#":
+                if (
+                    member.name == argument[:-5]
+                    and member.discriminator == argument[-4:]
+                ):
+                    return member
+
+            if member.name == argument or member.nick == argument:
+                return member
+
+        raise commands.BadArgument(f"Member {wrap_in_code(argument)} not found")
 
 
 class GuildRoleConverter(commands.IDConverter):
