@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 
-from .utils import converter
+from bot.utils import converter
 
 
 class Markdown(commands.Cog):

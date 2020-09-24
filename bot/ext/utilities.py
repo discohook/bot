@@ -8,7 +8,7 @@ import aiohttp
 import discord
 from discord.ext import commands
 
-from .utils import checks, converter
+from bot.utils import checks, converter
 
 
 class Utilities(commands.Cog):
