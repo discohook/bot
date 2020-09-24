@@ -15,17 +15,11 @@ initial_extensions = (
     "jishaku",
     "bot.ext.meta",
     "bot.ext.help",
+    "bot.ext.errors",
     "bot.ext.markdown",
     "bot.ext.utilities",
     "bot.ext.webhooks",
 )
-
-
-error_types = [
-    (commands.CommandOnCooldown, "Cooldown"),
-    (commands.UserInputError, "Bad input"),
-    (commands.CheckFailure, "Check failed"),
-]
 
 
 class Bot(commands.AutoShardedBot):
@@ -125,26 +119,6 @@ class Bot(commands.AutoShardedBot):
             return
 
         await self.process_commands(message)
-
-    async def on_command_error(self, ctx, error):
-        if isinstance(error, commands.CommandNotFound):
-            return
-
-        for (error_type, error_msg) in error_types:
-            if isinstance(error, error_type):
-                await ctx.send(
-                    embed=discord.Embed(title=error_msg, description=str(error)),
-                    delete_after=10,
-                )
-                return
-
-        err = error
-        if isinstance(error, commands.CommandInvokeError):
-            err = error.original
-
-        if not isinstance(err, discord.HTTPException):
-            traceback.print_tb(err.__traceback__)
-            print(f"{err.__class__.__name__}: {err}", file=sys.stderr)
 
     async def on_guild_remove(self, guild):
         await self.db.execute(
