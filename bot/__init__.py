@@ -48,13 +48,16 @@ class Bot(commands.AutoShardedBot):
             self.load_extension(extension)
 
     async def _prefix(self, bot, msg):
-        prefix = await self.db.fetchval(
-            """
-            SELECT prefix FROM guild_config
-            WHERE guild_id = $1
-            """,
-            msg.guild.id,
-        )
+        prefix = "d."
+
+        if msg.guild:
+            prefix = await self.db.fetchval(
+                """
+                    SELECT prefix FROM guild_config
+                    WHERE guild_id = $1
+                    """,
+                msg.guild.id,
+            )
 
         return (
             f"<@!{bot.user.id}> ",
