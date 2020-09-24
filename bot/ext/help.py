@@ -119,3 +119,7 @@ class HelpCommand(commands.HelpCommand):
 def setup(bot: commands.Bot):
     bot.help_command = HelpCommand()
     bot.help_command.cog = bot.get_cog("Meta")
+
+
+def setup(bot: commands.Bot):
+    bot.help_command = None
