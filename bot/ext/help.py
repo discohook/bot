@@ -5,10 +5,9 @@ import re
 import typing
 
 import discord
+from bot.utils import wrap_in_code
 from discord.ext import commands
 from discord.utils import get
-
-from bot.utils import wrap_in_code
 
 
 class HelpCommand(commands.HelpCommand):
@@ -121,5 +120,5 @@ def setup(bot: commands.Bot):
     bot.help_command.cog = bot.get_cog("Meta")
 
 
-def setup(bot: commands.Bot):
+def teardown(bot: commands.Bot):
     bot.help_command = None
