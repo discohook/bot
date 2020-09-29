@@ -5,10 +5,9 @@ import re
 import typing
 
 import discord
+from bot.utils import wrap_in_code
 from discord.ext import commands
 from discord.utils import get
-
-from bot.utils import wrap_in_code
 
 Configurable = collections.namedtuple(
     "Configurable", ["name", "description", "column", "type"]

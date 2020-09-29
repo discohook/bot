@@ -6,9 +6,8 @@ from os import environ
 
 import aiohttp
 import discord
-from discord.ext import commands
-
 from bot.utils import checks, converter
+from discord.ext import commands
 
 
 class Utilities(commands.Cog):

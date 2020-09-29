@@ -2,9 +2,8 @@ import sys
 import traceback
 
 import discord
-from discord.ext import commands
-
 from bot.utils import wrap_in_code
+from discord.ext import commands
 
 ignored_errors = (
     commands.CommandNotFound,
