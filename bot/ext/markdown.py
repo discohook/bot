@@ -1,7 +1,6 @@
 import discord
-from discord.ext import commands
-
 from bot.utils import converter
+from discord.ext import commands
 
 
 class Markdown(commands.Cog):
@@ -53,12 +52,34 @@ class Markdown(commands.Cog):
     @commands.cooldown(1, 3, commands.BucketType.member)
     @commands.guild_only()
     async def emoji(
-        self, ctx: commands.Context, *, emoji: converter.GuildEmojiConverter,
+        self, ctx: commands.Context, *, emoji: converter.GuildPartialEmojiConverter,
     ):
         """Gives formatting to use a given server emoji"""
 
-        embed = discord.Embed(title="Syntax", description=f"`{emoji}`")
+        guild_emoji = ctx.bot.get_emoji(emoji.id)
+
+        embed = discord.Embed(
+            title="Syntax",
+            description=f"`{emoji}`"
+            if guild_emoji and guild_emoji.is_usable()
+            else f"*`<`*`{'a' if emoji.animated else ''}:{emoji.name}:{emoji.id}>`",
+        )
         embed.add_field(name="Output", value=str(emoji))
+        if guild_emoji is None or guild_emoji.guild != ctx.guild:
+            embed.add_field(
+                name="Warning",
+                value="Emoji is from another server, please make sure the "
+                '@everyone role has the "Use External Emojis" permission in '
+                "the target channel in order to send it in a webhook message.",
+                inline=False,
+            )
+        if guild_emoji is None:
+            embed.add_field(
+                name="Note",
+                value="Bot does not have access to send this emoji, but emoji "
+                "will appear when sent in a webhook message.",
+                inline=False,
+            )
         embed.set_footer(text=f"ID: {emoji.id}")
 
         await ctx.send(embed=embed)
