@@ -19,6 +19,7 @@ initial_extensions = (
     "bot.ext.markdown",
     "bot.ext.utilities",
     "bot.ext.webhooks",
+    "bot.ext.reactions",
 )
 
 
