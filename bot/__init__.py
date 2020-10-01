@@ -36,6 +36,7 @@ class Bot(commands.AutoShardedBot):
                 guilds=True,
                 messages=True,
                 emojis=True,
+                reactions=True,
             ),
             member_cache_flags=discord.MemberCacheFlags.none(),
             max_messages=None,
