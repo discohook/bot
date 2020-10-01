@@ -71,7 +71,7 @@ class GuildRoleConverter(commands.IDConverter):
         if match:
             result = ctx.guild.get_role(int(match.group(1)))
         else:
-            result = discord.utils.get(ctx.guild._roles.values(), name=argument)
+            result = discord.utils.get(ctx.guild.roles, name=argument)
 
         if result is None:
             raise commands.BadArgument(f"Role {wrap_in_code(argument)} not found")
@@ -204,19 +204,6 @@ class GuildMessageConverter(commands.Converter):
 
         message_id = int(match.group("message_id"))
         channel_id = match.group("channel_id")
-        message = ctx.bot._connection._get_message(message_id)
-
-        if message:
-            if (
-                message.guild == ctx.guild
-                and message.channel.permissions_for(ctx.author).read_messages
-                and message.channel.permissions_for(ctx.author).read_message_history
-            ):
-                return message
-            else:
-                raise commands.BadArgument(
-                    f"Message {wrap_in_code(argument)} not found"
-                )
 
         channel = ctx.bot.get_channel(int(channel_id)) if channel_id else ctx.channel
         if not channel:
