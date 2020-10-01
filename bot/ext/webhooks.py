@@ -30,7 +30,7 @@ class Webhooks(commands.Cog):
         )
 
         url_signature = wrap_in_code(
-            f"{ctx.prefix}{self.url.qualified_name} {self.url.signature}"
+            f"{ctx.prefix}{self.webhook_url.qualified_name} {self.webhook_url.signature}"
         )
         url_message = (
             webhook.url if show_url else f"Use {url_signature} to obtain the URL"
@@ -52,12 +52,14 @@ class Webhooks(commands.Cog):
     @commands.has_guild_permissions(manage_webhooks=True)
     @commands.bot_has_guild_permissions(manage_webhooks=True)
     async def webhook_list(
-        self, ctx: commands.Context, channel: converter.GuildTextChannelConverter = None
+        self,
+        ctx: commands.Context,
+        channel: converter.GuildTextChannelConverter = None,
     ):
         """Lists webhooks for the server or a given channel"""
 
         get_signature = wrap_in_code(
-            f"{ctx.prefix}{self.get.qualified_name} {self.get.signature}"
+            f"{ctx.prefix}{self.webhook_get.qualified_name} {self.webhook_get.signature}"
         )
         embed = discord.Embed(
             title="Webhooks",
