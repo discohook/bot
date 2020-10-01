@@ -124,7 +124,7 @@ class Webhooks(commands.Cog):
                 )
             )
 
-    @webhook.command(name="new", aliases=["create"])
+    @webhook.command(name="new", aliases=["add", "create"])
     @commands.cooldown(3, 30, commands.BucketType.member)
     @commands.has_guild_permissions(manage_webhooks=True)
     @commands.bot_has_guild_permissions(manage_webhooks=True)
