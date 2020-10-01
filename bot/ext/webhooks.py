@@ -7,17 +7,8 @@ from discord.ext import commands
 from jishaku import metacog
 
 
-@commands.group(invoke_without_command=True)
-@commands.cooldown(1, 3, commands.BucketType.member)
-@commands.has_guild_permissions(manage_webhooks=True)
-@commands.bot_has_guild_permissions(manage_webhooks=True)
-async def webhook(self, ctx: commands.Context):
-    """Group of commands to manage webhooks in this server"""
-    await ctx.send_help("webhook")
-
-
-class Webhooks(commands.Cog, metaclass=metacog.GroupCogMeta, command_parent=webhook):
-    """Webhook management commands"""
+class Webhooks(commands.Cog):
+    """Webhook management"""
 
     def _get_webhook_embed(
         self,
@@ -48,11 +39,19 @@ class Webhooks(commands.Cog, metaclass=metacog.GroupCogMeta, command_parent=webh
 
         return embed
 
-    @commands.command()
+    @commands.group(invoke_without_command=True)
     @commands.cooldown(1, 3, commands.BucketType.member)
     @commands.has_guild_permissions(manage_webhooks=True)
     @commands.bot_has_guild_permissions(manage_webhooks=True)
-    async def list(
+    async def webhook(self, ctx: commands.Context):
+        """Group of commands to manage webhooks"""
+        await ctx.send_help("webhook")
+
+    @webhook.command(name="list")
+    @commands.cooldown(1, 3, commands.BucketType.member)
+    @commands.has_guild_permissions(manage_webhooks=True)
+    @commands.bot_has_guild_permissions(manage_webhooks=True)
+    async def webhook_list(
         self, ctx: commands.Context, channel: converter.GuildTextChannelConverter = None
     ):
         """Lists webhooks for the server or a given channel"""
@@ -82,23 +81,29 @@ class Webhooks(commands.Cog, metaclass=metacog.GroupCogMeta, command_parent=webh
 
         await ctx.send(embed=embed)
 
-    @commands.command(aliases=["show"])
+    @webhook.command(name="get", aliases=["show"])
     @commands.cooldown(3, 8, commands.BucketType.member)
     @commands.has_guild_permissions(manage_webhooks=True)
     @commands.bot_has_guild_permissions(manage_webhooks=True)
-    async def get(
-        self, ctx: commands.Context, *, webhook: converter.WebhookConverter,
+    async def webhook_get(
+        self,
+        ctx: commands.Context,
+        *,
+        webhook: converter.WebhookConverter,
     ):
         """Shows data for a given webhook"""
 
         await ctx.send(embed=self._get_webhook_embed(ctx, webhook))
 
-    @commands.command()
+    @webhook.command(name="url")
     @commands.cooldown(3, 8, commands.BucketType.member)
     @commands.has_guild_permissions(manage_webhooks=True)
     @commands.bot_has_guild_permissions(manage_webhooks=True)
-    async def url(
-        self, ctx: commands.Context, *, webhook: converter.WebhookConverter,
+    async def webhook_url(
+        self,
+        ctx: commands.Context,
+        *,
+        webhook: converter.WebhookConverter,
     ):
         """Obtains the URL for a given webhook"""
 
@@ -117,11 +122,11 @@ class Webhooks(commands.Cog, metaclass=metacog.GroupCogMeta, command_parent=webh
                 )
             )
 
-    @commands.command(aliases=["create"])
+    @webhook.command(name="new", aliases=["create"])
     @commands.cooldown(3, 30, commands.BucketType.member)
     @commands.has_guild_permissions(manage_webhooks=True)
     @commands.bot_has_guild_permissions(manage_webhooks=True)
-    async def new(
+    async def webhook_new(
         self,
         ctx: commands.Context,
         channel: converter.GuildTextChannelConverter,
@@ -142,11 +147,11 @@ class Webhooks(commands.Cog, metaclass=metacog.GroupCogMeta, command_parent=webh
             embed=self._get_webhook_embed(ctx, webhook, message="New webhook created")
         )
 
-    @commands.command(aliases=["rename", "avatar"])
+    @webhook.command(name="edit", aliases=["rename", "avatar"])
     @commands.cooldown(3, 30, commands.BucketType.member)
     @commands.has_guild_permissions(manage_webhooks=True)
     @commands.bot_has_guild_permissions(manage_webhooks=True)
-    async def edit(
+    async def webhook_edit(
         self,
         ctx: commands.Context,
         webhook: converter.WebhookConverter,
@@ -174,12 +179,15 @@ class Webhooks(commands.Cog, metaclass=metacog.GroupCogMeta, command_parent=webh
             embed=self._get_webhook_embed(ctx, webhook, message="Webhook edited")
         )
 
-    @commands.command(aliases=["remove"])
+    @webhook.command(name="delete", aliases=["remove"])
     @commands.cooldown(3, 30, commands.BucketType.member)
     @commands.has_guild_permissions(manage_webhooks=True)
     @commands.bot_has_guild_permissions(manage_webhooks=True)
-    async def delete(
-        self, ctx: commands.Context, *, webhook: converter.WebhookConverter,
+    async def webhook_delete(
+        self,
+        ctx: commands.Context,
+        *,
+        webhook: converter.WebhookConverter,
     ):
         """Deletes a webhook, this cannot be undone
         Messages sent by this webhook will not be deleted"""
