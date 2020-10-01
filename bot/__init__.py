@@ -31,9 +31,13 @@ class Bot(commands.AutoShardedBot):
             "\nWant me in your server? [Invite me](https://discohook.org/bot).",
             help_command=None,
             activity=discord.Game(name="at discohook.org | d.help"),
-            allowed_mentions=discord.AllowedMentions(
-                everyone=False, users=False, roles=False
+            allowed_mentions=discord.AllowedMentions.none(),
+            intents=discord.Intents(
+                guilds=True,
+                messages=True,
+                emojis=True,
             ),
+            member_cache_flags=discord.MemberCacheFlags.none(),
             max_messages=None,
             guild_subscriptions=False,
         )
