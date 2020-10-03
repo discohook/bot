@@ -227,6 +227,100 @@ class Reactions(commands.Cog):
             )
         )
 
+    @reactionrole.command(name="check")
+    @commands.cooldown(3, 30, commands.BucketType.member)
+    @commands.has_guild_permissions(manage_roles=True)
+    async def reactionrole_check(self, ctx: commands.Context):
+        """Checks if reaction roles are set up correctly"""
+
+        reaction_roles = await self.bot.db.fetch(
+            """
+            SELECT channel_id, message_id, role_id FROM reaction_role
+            WHERE guild_id = $1
+            ORDER BY message_id
+            """,
+            ctx.guild.id,
+        )
+
+        deleted_messages = []
+        cannot_read = []
+        role_hierachy = []
+
+        for reaction_role in reaction_roles:
+            channel = ctx.guild.get_channel(reaction_role["channel_id"])
+            if not channel:
+                deleted_messages.append(reaction_role)
+                continue
+
+            message = None
+            try:
+                message = await channel.fetch_message(reaction_role["message_id"])
+            except discord.NotFound:
+                deleted_messages.append(reaction_role)
+            except discord.HTTPException:
+                cannot_read.append(reaction_role)
+
+            role = ctx.guild.get_role(reaction_role["role_id"])
+            if not role:
+                deleted_messages.append(reaction_role)
+                continue
+
+            if role > ctx.me.top_role:
+                role_hierachy.append(reaction_role)
+
+        await self.bot.db.executemany(
+            """
+            DELETE FROM reaction_role
+            WHERE message_id = $1 AND reaction = $2
+            """,
+            [
+                (reaction_role["message_id"], reaction_role["reaction"])
+                for role in deleted_messages
+            ],
+        )
+
+        embed = discord.Embed(
+            title="Reaction role automated checkup",
+            description="There are problems inside of your server's permission"
+            " setup, please fix the issues below to ensure reaction roles will"
+            " work inside of your server:",
+        )
+
+        if not ctx.me.guild_permissions.manage_roles:
+            embed.add_field(
+                name="Missing role permissions",
+                value="To give members inside of the server the desired"
+                " roles, the bot needs to have permission to manage roles.",
+                inline=False,
+            )
+
+        if len(cannot_read) > 0:
+            embed.add_field(
+                name="Missing read permissions",
+                value="The bot does not have permission to read"
+                " message history in the following channels: "
+                + ", ".join({f"<#{rr['channel_id']}>" for rr in cannot_read}),
+                inline=False,
+            )
+
+        if len(role_hierachy) > 0:
+            managed_role = get(ctx.me.roles, managed=True) or ctx.me.top_role
+            must_win_over = max(ctx.guild.get_role(r["role_id"]) for r in role_hierachy)
+
+            embed.add_field(
+                name="Role hierachy issue",
+                value="The bot's highest role must be higher than all"
+                " reaction roles in the server. To fix this, move the"
+                f" {managed_role.mention} role to be above the"
+                f" {must_win_over.mention} role.",
+                inline=False,
+            )
+
+        if len(embed.fields) == 0:
+            embed.description = "No issues were found in your server's configuration."
+
+        await ctx.send(embed=embed)
+
     async def _process_reaction_event(self, event: discord.RawReactionActionEvent):
         role_id = await self.bot.db.fetchval(
             """
