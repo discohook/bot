@@ -2,7 +2,7 @@ import asyncio
 import itertools
 
 import discord
-from bot.utils import converter, paginators
+from bot.utils import converter, paginators, wrap_in_code
 from discord.ext import commands
 from discord.utils import get
 
@@ -136,12 +136,17 @@ class Reactions(commands.Cog):
             str(event.emoji),
         )
 
+        check_signature = wrap_in_code(
+            f"{ctx.prefix}{self.reactionrole_check.qualified_name} {self.reactionrole_check.signature}"
+        )
         await prompt_message.edit(
             embed=discord.Embed(
                 title="Reaction role created",
                 description=f"Members that react with {event.emoji} on"
                 f" [this message]({target_message.jump_url}) will now be"
-                f" assigned the {role.mention} role.",
+                f" assigned the {role.mention} role."
+                f"\nMake sure to use {check_signature} to make sure reaction"
+                " roles will function correctly in your server.",
             )
         )
 
