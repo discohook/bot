@@ -1,7 +1,8 @@
 import asyncio
+import itertools
 
 import discord
-from bot.utils import converter
+from bot.utils import converter, paginators
 from discord.ext import commands
 from discord.utils import get
 
@@ -21,6 +22,50 @@ class Reactions(commands.Cog):
     async def reactionrole(self, ctx: commands.Context):
         """Group of commands to manage reaction roles"""
         await ctx.send_help("reactionrole")
+
+    @reactionrole.command(name="list")
+    @commands.cooldown(1, 3, commands.BucketType.member)
+    @commands.has_guild_permissions(manage_roles=True)
+    @commands.bot_has_guild_permissions(
+        read_message_history=True, manage_roles=True, manage_messages=True
+    )
+    async def reactionrole_list(self, ctx: commands.Context):
+        """Lists all messages with reaction roles enabled"""
+
+        embed = discord.Embed(title="Reaction roles")
+        embed.set_footer(
+            text="Page {current_page}/{total_pages}, "
+            "showing message {first_field}..{last_field}/{total_fields}"
+        )
+        paginator = paginators.FieldPaginator(ctx.bot, base_embed=embed)
+
+        reaction_roles = itertools.groupby(
+            await self.bot.db.fetch(
+                """
+                SELECT channel_id, message_id, role_id, reaction FROM reaction_role
+                WHERE guild_id = $1
+                ORDER BY message_id
+                """,
+                ctx.guild.id,
+            ),
+            key=lambda rr: (rr["channel_id"], rr["message_id"]),
+        )
+
+        for (channel_id, message_id), roles in reaction_roles:
+            jump_url = (
+                f"https://discord.com/channels/{ctx.guild.id}/{channel_id}/{message_id}"
+            )
+
+            paginator.add_field(
+                name=f"Message {message_id}",
+                value=f"In <#{channel_id}> ([go to message]({jump_url}))\n\n"
+                + "\n".join(
+                    f"{role['reaction']} \N{RIGHTWARDS ARROW} <@&{role['role_id']}>"
+                    for role in roles
+                ),
+            )
+
+        await paginator.send(target=ctx.channel, owner=ctx.author)
 
     @reactionrole.command(name="new", aliases=["add", "create"])
     @commands.cooldown(3, 30, commands.BucketType.member)
@@ -87,10 +132,11 @@ class Reactions(commands.Cog):
 
         await self.bot.db.execute(
             """
-            INSERT INTO reaction_role (message_id, guild_id, role_id, emoji)
-            VALUES ($1, $2, $3, $4)
+            INSERT INTO reaction_role (message_id, channel_id, guild_id, role_id, reaction)
+            VALUES ($1, $2, $3, $4, $5)
             """,
             target_message.id,
+            target_message.channel.id,
             ctx.guild.id,
             role.id,
             str(event.emoji),
@@ -159,7 +205,7 @@ class Reactions(commands.Cog):
         role_id = await self.bot.db.fetchval(
             """
             DELETE FROM reaction_role
-            WHERE message_id = $1 AND emoji = $2
+            WHERE message_id = $1 AND reaction = $2
             RETURNING role_id
             """,
             target_message.id,
@@ -181,7 +227,7 @@ class Reactions(commands.Cog):
         role_id = await self.bot.db.fetchval(
             """
             SELECT role_id FROM reaction_role
-            WHERE message_id = $1 AND emoji = $2
+            WHERE message_id = $1 AND reaction = $2
             """,
             event.message_id,
             str(event.emoji),
@@ -228,6 +274,16 @@ class Reactions(commands.Cog):
             WHERE message_id = any($1::bigint[])
             """,
             event.message_ids,
+        )
+
+    @commands.Cog.listener()
+    async def on_guild_channel_delete(self, channel: discord.abc.GuildChannel):
+        await self.bot.db.execute(
+            """
+            DELETE FROM reaction_role
+            WHERE channel_id = $1
+            """,
+            channel.id,
         )
 
     @commands.Cog.listener()
