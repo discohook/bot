@@ -158,6 +158,8 @@ class Reactions(commands.Cog):
         read_message_history=True, manage_roles=True, manage_messages=True
     )
     async def reactionrole_delete(self, ctx: commands.Context):
+        """Deletes a reaction role for a message"""
+
         prompt_message = await ctx.send(
             embed=discord.Embed(
                 title="Deleting reaction role",
@@ -201,6 +203,8 @@ class Reactions(commands.Cog):
 
         channel = ctx.guild.get_channel(event.channel_id)
         target_message = await channel.fetch_message(event.message_id)
+
+        await target_message.remove_reaction(event.emoji, ctx.me)
 
         role_id = await self.bot.db.fetchval(
             """
