@@ -2,7 +2,7 @@ import asyncio
 import datetime
 
 import discord
-from bot.utils import converter, wrap_in_code
+from bot.utils import converter, paginators, wrap_in_code
 from discord.ext import commands
 from jishaku import metacog
 
@@ -61,27 +61,29 @@ class Webhooks(commands.Cog):
         get_signature = wrap_in_code(
             f"{ctx.prefix}{self.webhook_get.qualified_name} {self.webhook_get.signature}"
         )
+
         embed = discord.Embed(
             title="Webhooks",
             description=f"Use {get_signature} to get more info on a webhook",
         )
+        embed.set_footer(
+            text="Page {current_page}/{total_pages}, "
+            "showing webhook {first_field}..{last_field}/{total_fields}"
+        )
+        paginator = paginators.FieldPaginator(ctx.bot, base_embed=embed)
 
-        webhooks = await channel.webhooks() if channel else await ctx.guild.webhooks()
-        webhooks = [
-            webhook
-            for webhook in webhooks
-            if webhook.type == discord.WebhookType.incoming
-        ]
+        for webhook in await ctx.guild.webhooks():
+            if webhook.type != discord.WebhookType.incoming:
+                continue
+            if channel and webhook.channel_id != channel.id:
+                continue
 
-        for webhook in webhooks[:25]:
-            embed.add_field(name=webhook.name, value=f"In {webhook.channel.mention}")
-
-        if len(webhooks) > 25:
-            embed.set_footer(
-                text=f"Too many webhooks - {len(webhooks) - 25} results omitted."
+            paginator.add_field(
+                name=webhook.name,
+                value=f"In {webhook.channel.mention}",
             )
 
-        await ctx.send(embed=embed)
+        await paginator.send(target=ctx.channel, owner=ctx.author)
 
     @webhook.command(name="get", aliases=["show"])
     @commands.cooldown(3, 8, commands.BucketType.member)

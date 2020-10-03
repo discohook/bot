@@ -5,7 +5,7 @@ import re
 import typing
 
 import discord
-from bot.utils import wrap_in_code
+from bot.utils import paginators, wrap_in_code
 from discord.ext import commands
 from discord.utils import get
 
@@ -137,6 +137,7 @@ class Meta(commands.Cog):
 
         get_signature = wrap_in_code(f"{command} <option>")
         set_signature = wrap_in_code(f"{command} <option> <new value>")
+
         embed = discord.Embed(
             title="Configuration",
             description="Command to manage the bot's configuration for a server."
@@ -144,15 +145,19 @@ class Meta(commands.Cog):
             f"\nTo set the value of an option use {set_signature}."
             "\nList of options can be found below:",
         )
+        embed.set_footer(
+            text="Page {current_page}/{total_pages}, "
+            "showing option {first_field}..{last_field}/{total_fields}"
+        )
+        paginator = paginators.FieldPaginator(ctx.bot, base_embed=embed)
 
         for configurable in configurables:
-            embed.add_field(
+            paginator.add_field(
                 name=configurable.name.capitalize(),
                 value=configurable.description,
-                inline=False,
             )
 
-        await ctx.send(embed=embed)
+        await paginator.send(target=ctx.channel, owner=ctx.author)
 
     @commands.command()
     @commands.cooldown(3, 8, commands.BucketType.channel)
