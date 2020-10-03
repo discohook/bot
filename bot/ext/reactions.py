@@ -96,7 +96,10 @@ class Reactions(commands.Cog):
         target_message = await channel.fetch_message(event.message_id)
 
         await target_message.add_reaction(event.emoji)
-        await target_message.remove_reaction(event.emoji, ctx.author)
+        try:
+            await target_message.remove_reaction(event.emoji, ctx.author)
+        except discord.Forbidden:
+            pass
 
         await prompt_message.edit(
             embed=discord.Embed(
