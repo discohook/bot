@@ -16,9 +16,6 @@ class Reactions(commands.Cog):
     @commands.group(invoke_without_command=True, aliases=["rr"])
     @commands.cooldown(1, 3, commands.BucketType.member)
     @commands.has_guild_permissions(manage_roles=True)
-    @commands.bot_has_guild_permissions(
-        read_message_history=True, manage_roles=True, manage_messages=True
-    )
     async def reactionrole(self, ctx: commands.Context):
         """Group of commands to manage reaction roles"""
         await ctx.send_help("reactionrole")
@@ -26,9 +23,6 @@ class Reactions(commands.Cog):
     @reactionrole.command(name="list")
     @commands.cooldown(1, 3, commands.BucketType.member)
     @commands.has_guild_permissions(manage_roles=True)
-    @commands.bot_has_guild_permissions(
-        read_message_history=True, manage_roles=True, manage_messages=True
-    )
     async def reactionrole_list(self, ctx: commands.Context):
         """Lists all messages with reaction roles enabled"""
 
@@ -70,9 +64,6 @@ class Reactions(commands.Cog):
     @reactionrole.command(name="new", aliases=["add", "create"])
     @commands.cooldown(3, 30, commands.BucketType.member)
     @commands.has_guild_permissions(manage_roles=True)
-    @commands.bot_has_guild_permissions(
-        read_message_history=True, manage_roles=True, manage_messages=True
-    )
     async def reactionrole_new(self, ctx: commands.Context):
         """Creates a new reaction role"""
 
@@ -154,9 +145,6 @@ class Reactions(commands.Cog):
     @reactionrole.command(name="delete", aliases=["remove"])
     @commands.cooldown(3, 30, commands.BucketType.member)
     @commands.has_guild_permissions(manage_roles=True)
-    @commands.bot_has_guild_permissions(
-        read_message_history=True, manage_roles=True, manage_messages=True
-    )
     async def reactionrole_delete(self, ctx: commands.Context):
         """Deletes a reaction role for a message"""
 
