@@ -126,6 +126,11 @@ class Bot(commands.AutoShardedBot):
 
         await self.process_commands(message)
 
+    async def on_error(self, event, *args, **kwargs):
+        errors = self.get_cog("Errors")
+        if errors:
+            await errors.on_error(event, *args, **kwargs)
+
     async def on_guild_remove(self, guild):
         await self.db.execute(
             """

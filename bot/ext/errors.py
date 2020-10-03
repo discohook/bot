@@ -24,6 +24,52 @@ class Errors(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    async def report_error(self, error, *, fields):
+        exception = "".join(
+            traceback.format_exception(type(error), error, error.__traceback__)
+        )
+
+        print(exception, file=sys.stderr)
+
+        embed = discord.Embed(
+            title="Unhandled error", description=wrap_in_code(exception, block="py")
+        )
+        for field in fields:
+            embed.add_field(**field)
+
+        info = await self.bot.application_info()
+        await info.owner.send(embed=embed)
+
+    async def on_error(self, event, *args, **kwargs):
+        error = sys.exc_info()[1]
+
+        await self.report_error(
+            error,
+            fields=[
+                {
+                    "name": "Event",
+                    "value": f"```{event}```",
+                    "inline": False,
+                },
+                *(
+                    {
+                        "name": f"args[{index!r}]",
+                        "value": wrap_in_code(repr(arg), block=True),
+                        "inline": False,
+                    }
+                    for index, arg in enumerate(args)
+                ),
+                *(
+                    {
+                        "name": f"kwargs[{index!r}]",
+                        "value": wrap_in_code(repr(arg), block=True),
+                        "inline": False,
+                    }
+                    for index, arg in kwargs.items()
+                ),
+            ],
+        )
+
     @commands.Cog.listener()
     async def on_command_error(self, ctx: commands.Context, error):
         error = getattr(error, "original", error)
@@ -38,19 +84,16 @@ class Errors(commands.Cog):
                 )
                 return
 
-        exception = "".join(
-            traceback.format_exception(type(error), error, error.__traceback__)
+        await self.report_error(
+            error,
+            fields=[
+                {
+                    "name": "Message",
+                    "value": ctx.message.content,
+                    "inline": False,
+                },
+            ],
         )
-
-        print(exception, file=sys.stderr)
-
-        embed = discord.Embed(
-            title="Unhandled error", description=wrap_in_code(exception, block="py")
-        )
-        embed.add_field(name="Original message", value=ctx.message.content)
-
-        info = await self.bot.application_info()
-        await info.owner.send(embed=embed)
 
 
 def setup(bot):
