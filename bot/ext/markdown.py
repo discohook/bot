@@ -10,7 +10,10 @@ class Markdown(commands.Cog):
     @commands.cooldown(1, 3, commands.BucketType.member)
     @commands.guild_only()
     async def user(
-        self, ctx: commands.Context, *, member: converter.GuildMemberConverter,
+        self,
+        ctx: commands.Context,
+        *,
+        member: converter.GuildMemberConverter,
     ):
         """Gives formatting to mention a given member"""
 
@@ -24,7 +27,10 @@ class Markdown(commands.Cog):
     @commands.cooldown(1, 3, commands.BucketType.member)
     @commands.guild_only()
     async def role(
-        self, ctx: commands.Context, *, role: converter.GuildRoleConverter,
+        self,
+        ctx: commands.Context,
+        *,
+        role: converter.GuildRoleConverter,
     ):
         """Gives formatting to mention a given role"""
 
@@ -38,7 +44,10 @@ class Markdown(commands.Cog):
     @commands.cooldown(1, 3, commands.BucketType.member)
     @commands.guild_only()
     async def channel(
-        self, ctx: commands.Context, *, channel: converter.GuildTextChannelConverter,
+        self,
+        ctx: commands.Context,
+        *,
+        channel: converter.GuildTextChannelConverter,
     ):
         """Gives formatting to link to a given channel"""
 
@@ -52,7 +61,10 @@ class Markdown(commands.Cog):
     @commands.cooldown(1, 3, commands.BucketType.member)
     @commands.guild_only()
     async def emoji(
-        self, ctx: commands.Context, *, emoji: converter.GuildPartialEmojiConverter,
+        self,
+        ctx: commands.Context,
+        *,
+        emoji: converter.GuildPartialEmojiConverter,
     ):
         """Gives formatting to use a given server emoji"""
 
@@ -71,13 +83,6 @@ class Markdown(commands.Cog):
                 value="Emoji is from another server, please make sure the "
                 '@everyone role has the "Use External Emojis" permission in '
                 "the target channel in order to send it in a webhook message.",
-                inline=False,
-            )
-        if guild_emoji is None:
-            embed.add_field(
-                name="Note",
-                value="Bot does not have access to send this emoji, but emoji "
-                "will appear when sent in a webhook message.",
                 inline=False,
             )
         embed.set_footer(text=f"ID: {emoji.id}")
