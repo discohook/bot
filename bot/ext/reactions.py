@@ -112,7 +112,12 @@ class Reactions(commands.Cog):
 
         role_message = None
         try:
-            role_message = await ctx.bot.wait_for("message", timeout=60.0)
+            role_message = await ctx.bot.wait_for(
+                "message",
+                check=lambda m: m.author.id == ctx.author.id
+                and m.channel.id == ctx.channel.id,
+                timeout=60.0,
+            )
         except asyncio.TimeoutError:
             await prompt_message.edit(
                 embed=discord.Embed(
