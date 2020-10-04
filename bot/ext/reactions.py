@@ -1,5 +1,6 @@
 import asyncio
 import itertools
+import re
 
 import discord
 from bot.utils import converter, paginators, wrap_in_code
@@ -125,9 +126,48 @@ class Reactions(commands.Cog):
                     description="Timeout reached.",
                 )
             )
+            await target_message.remove_reaction(event.emoji, ctx.me)
             return
 
-        role = await converter.GuildRoleConverter().convert(ctx, role_message.content)
+        role = None
+
+        if match := re.match(r"([0-9]+)$|<@&([0-9]+)>$", role_message.content):
+            role = ctx.guild.get_role(int(match.group(1) or match.group(2)))
+        else:
+            role = get(ctx.guild.roles, name=role_message.content)
+
+        if role is None:
+            await prompt_message.edit(
+                embed=discord.Embed(
+                    title="Cancelled",
+                    description="No role could be found for"
+                    f" {wrap_in_code(role_message.content)}.",
+                )
+            )
+            await target_message.remove_reaction(event.emoji, ctx.me)
+            return
+
+        if role.managed:
+            await prompt_message.edit(
+                embed=discord.Embed(
+                    title="Cancelled",
+                    description="The role is managed by an integration and"
+                    " cannot be used.",
+                )
+            )
+            await target_message.remove_reaction(event.emoji, ctx.me)
+            return
+
+        if role == ctx.guild.default_role:
+            await prompt_message.edit(
+                embed=discord.Embed(
+                    title="Cancelled",
+                    description="You cannot create a reaction role for the"
+                    " @everyone role.",
+                )
+            )
+            await target_message.remove_reaction(event.emoji, ctx.me)
+            return
 
         await self.bot.db.execute(
             """
@@ -142,7 +182,7 @@ class Reactions(commands.Cog):
         )
 
         check_signature = wrap_in_code(
-            f"{ctx.prefix}{self.reactionrole_check.qualified_name} {self.reactionrole_check.signature}"
+            f"{ctx.prefix}{self.reactionrole_check.qualified_name}"
         )
         await prompt_message.edit(
             embed=discord.Embed(
