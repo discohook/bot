@@ -68,6 +68,25 @@ class Reactions(commands.Cog):
     async def reactionrole_new(self, ctx: commands.Context):
         """Creates a new reaction role"""
 
+        count = await self.bot.db.fetchval(
+            """
+            SELECT COUNT(DISTINCT message_id) FROM reaction_role
+            WHERE guild_id = $1
+            """,
+            ctx.guild.id,
+        )
+        if count >= 50:
+            await ctx.send(
+                embed=discord.Embed(
+                    title="Limit reached",
+                    description="You have reached the maximum number of"
+                    " messages with reaction roles in this server. Please"
+                    " clean up any reaction roles you no longer need, or merge"
+                    " some reaction roles into the same message.",
+                )
+            )
+            return
+
         prompt_message = await ctx.send(
             embed=discord.Embed(
                 title="Creating reaction role",
