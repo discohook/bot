@@ -44,8 +44,7 @@ class HelpCommand(commands.HelpCommand):
         )
 
     async def send_bot_help(self, mapping):
-        if self.context.bot.description:
-            self.embed.description = self.context.bot.description
+        self.embed.description = self.context.bot.description
 
         grouped = itertools.groupby(
             await self.filter_commands(
@@ -72,10 +71,8 @@ class HelpCommand(commands.HelpCommand):
         await self.get_destination().send(embed=self.embed)
 
     async def send_cog_help(self, cog: commands.Cog):
-        self.embed.title = f"Help: {cog.qualified_name}"
-
-        if cog.description:
-            self.embed.description = cog.description
+        self.embed.title = f"Help: `{cog.qualified_name}`"
+        self.embed.description = cog.description
 
         commands = await self.filter_commands(cog.get_commands(), sort=True)
 
@@ -89,28 +86,23 @@ class HelpCommand(commands.HelpCommand):
         await self.get_destination().send(embed=self.embed)
 
     async def send_group_help(self, group: commands.Group):
-        self.embed.title = f"Help: {group.qualified_name}"
-        self.embed.description = (
-            f"Syntax: {self.get_command_signature(group)}\n{group.help}"
-        )
+        self.embed.title = f"Help: {self.get_command_signature(group)}"
+        self.embed.description = group.help
 
         commands = await self.filter_commands(group.commands, sort=True)
 
         for command in commands:
             self.embed.add_field(
                 name=f"{self.get_command_signature(command, short=True)}",
-                value=command.help,
+                value=command.short_doc,
                 inline=False,
             )
 
         await self.get_destination().send(embed=self.embed)
 
     async def send_command_help(self, command: commands.Command):
-        self.embed.title = f"Help: {command.qualified_name}"
-
-        self.embed.description = (
-            f"Syntax: {self.get_command_signature(command)}\n{command.help}"
-        )
+        self.embed.title = f"Help: {self.get_command_signature(command)}"
+        self.embed.description = command.help
 
         await self.get_destination().send(embed=self.embed)
 
