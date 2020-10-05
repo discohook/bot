@@ -34,7 +34,9 @@ class Utilities(commands.Cog):
     @commands.cooldown(3, 30, type=commands.BucketType.user)
     @checks.private_command()
     async def link(
-        self, ctx: commands.Context, message: converter.GuildMessageConverter,
+        self,
+        ctx: commands.Context,
+        message: converter.GuildMessageConverter,
     ):
         """Sends a link to recreate a given message in Discohook by message link"""
 
@@ -60,19 +62,23 @@ class Utilities(commands.Cog):
             .decode("utf-8")
             .replace("=", "")
         )
-        url = f"https://discohook.org/?message={message_b64}"
+        url = f"https://discohook.app/?message={message_b64}"
 
         short_url, timestamp = await self._get_short_url(url)
 
         if short_url is None:
             await ctx.send(
                 embed=discord.Embed(
-                    title="Error", description="Failed to get short URL",
+                    title="Error",
+                    description="Failed to get short URL",
                 )
             )
             return
 
-        embed = discord.Embed(title="Message", description=short_url,)
+        embed = discord.Embed(
+            title="Message",
+            description=short_url,
+        )
         embed.set_footer(text="Expires")
         embed.timestamp = timestamp
         await ctx.send(embed=embed)
@@ -80,7 +86,10 @@ class Utilities(commands.Cog):
     @commands.command()
     @commands.cooldown(1, 3, commands.BucketType.member)
     async def big(
-        self, ctx: commands.Context, *, emoji: converter.GuildPartialEmojiConverter,
+        self,
+        ctx: commands.Context,
+        *,
+        emoji: converter.GuildPartialEmojiConverter,
     ):
         """Gives the URL to a custom emoji"""
 
