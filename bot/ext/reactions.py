@@ -70,19 +70,18 @@ class Reactions(commands.Cog):
 
         count = await self.bot.db.fetchval(
             """
-            SELECT COUNT(DISTINCT message_id) FROM reaction_role
+            SELECT COUNT(*) FROM reaction_role
             WHERE guild_id = $1
             """,
             ctx.guild.id,
         )
-        if count >= 50:
+        if count >= 250:
             await ctx.send(
                 embed=discord.Embed(
                     title="Limit reached",
                     description="You have reached the maximum number of"
-                    " messages with reaction roles in this server. Please"
-                    " clean up any reaction roles you no longer need, or merge"
-                    " some reaction roles into the same message.",
+                    " reaction roles in this server. Please clean up any"
+                    " reaction roles that you no longer need.",
                 )
             )
             return
