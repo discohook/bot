@@ -11,6 +11,14 @@ from discord.utils import get
 
 
 class HelpCommand(commands.HelpCommand):
+    def __init__(self, **options):
+        options.setdefault("verify_checks", False)
+        options.setdefault("command_attrs", {}).setdefault(
+            "help", "Shows help on how to use the bot and its commands"
+        )
+
+        super().__init__(**options)
+
     async def prepare_help_command(self, ctx, command=None):
         prefix = self.clean_prefix.replace(r"\\", "\\")
         command = f"{prefix}{self.invoked_with}"
