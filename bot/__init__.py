@@ -27,9 +27,7 @@ class Bot(commands.AutoShardedBot):
     def __init__(self):
         super().__init__(
             command_prefix=self._prefix,
-            description="Helper bot for Discohook (<https://discohook.app/>)"
-            "\nNeed help? Ask in the [support server](https://discohook.app/discord)."
-            "\nWant me in your server? [Invite me](https://discohook.app/bot).",
+            description="Discohook's official bot.",
             help_command=None,
             activity=discord.Game(name="at discohook.app | d.help"),
             allowed_mentions=discord.AllowedMentions.none(),

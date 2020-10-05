@@ -164,15 +164,22 @@ class Meta(commands.Cog):
     async def about(self, ctx: commands.Context):
         """Gives information about this bot"""
 
-        delete_data_signature = wrap_in_code(
-            f"{ctx.prefix}{self.deletemydata.qualified_name} {self.deletemydata.signature}"
+        app_info = await ctx.bot.application_info()
+
+        embed = discord.Embed(title="About", description=ctx.bot.description)
+
+        embed.add_field(
+            name="Links",
+            value="[Support server](https://discohook.app/discord)"
+            "\n[Invite link](https://discohook.app/bot)"
+            "\n[Source code](https://github.com/discohook/bot)",
+            inline=False,
         )
 
-        embed = discord.Embed(title="About", description=self.bot.description)
         embed.add_field(
-            name="Privacy and Security",
-            value=f"Want your data deleted? Use the {delete_data_signature} command to get more info."
-            "\nHave a security issue? Join the support server and DM vivi#1111.",
+            name="Owner",
+            value=f"[{app_info.owner}](https://discord.com/users/{app_info.owner.id})",
+            inline=False,
         )
 
         await ctx.send(embed=embed)
@@ -180,22 +187,27 @@ class Meta(commands.Cog):
     @commands.command()
     @commands.cooldown(3, 8, commands.BucketType.channel)
     async def invite(self, ctx: commands.Context):
-        """Gives information about this bot"""
+        """Sends the bot invite and support server links"""
 
         await ctx.send(
-            embed=discord.Embed(title="Invite", description=self.bot.description)
+            embed=discord.Embed(
+                title="Invite",
+                description="[Support server](https://discohook.app/discord)"
+                "\n[Invite link](https://discohook.app/bot)",
+            )
         )
 
     @commands.command()
     @commands.cooldown(3, 8, commands.BucketType.channel)
-    async def deletemydata(self, ctx: commands.Context):
-        """Gives information on how to delete your data"""
+    async def data(self, ctx: commands.Context):
+        """Manage data stored by Discobot"""
 
         await ctx.send(
             embed=discord.Embed(
-                title="Delete my data",
-                description="As of now, this bot stores zero data specific to users."
-                "\nIf you are a server owner you can delete data specific to this server by kicking or banning me.",
+                title="Data management",
+                description="As of now, this bot does not store data about you."
+                "\nIt does however store data about this server, you can delete"
+                " it by kicking me from the server.",
             )
         )
 
