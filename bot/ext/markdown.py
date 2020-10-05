@@ -38,6 +38,13 @@ class Markdown(commands.Cog):
         embed.add_field(name="Output", value=role.mention)
         embed.set_footer(text=f"ID: {role.id}")
 
+        if role == ctx.guild.default_role:
+            embed.add_field(
+                name="Warning",
+                value="This pings the '\\@everyone' role, not @everyone."
+                " To ping everyone just write `@everyone`.",
+            )
+
         await ctx.send(embed=embed)
 
     @commands.command()
