@@ -272,6 +272,16 @@ class Reactions(cog.Cog):
             str(event.emoji),
         )
 
+        if not role_id:
+            await prompt_message.edit(
+                embed=discord.Embed(
+                    title="Not found",
+                    description="There was no reaction role configured for the"
+                    f" {event.emoji} reactions on [this message]({target_message.jump_url}).",
+                )
+            )
+            return
+
         await prompt_message.edit(
             embed=discord.Embed(
                 title="Deleted reaction role",
