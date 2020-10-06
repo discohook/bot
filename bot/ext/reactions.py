@@ -272,14 +272,12 @@ class Reactions(cog.Cog):
             str(event.emoji),
         )
 
-        role = get(ctx.guild.roles, id=role_id)
-
         await prompt_message.edit(
             embed=discord.Embed(
                 title="Deleted reaction role",
                 description=f"Members that react with {event.emoji} on"
                 f" [this message]({target_message.jump_url}) will no longer be"
-                f" assigned the {role.mention} role.",
+                f" assigned the <@&{role_id}> role.",
             )
         )
 
