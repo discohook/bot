@@ -393,10 +393,13 @@ class Reactions(cog.Cog):
         if not member:
             return
 
-        if event.event_type == "REACTION_ADD":
-            await member.add_roles(discord.Object(id=role_id))
-        elif event.event_type == "REACTION_REMOVE":
-            await member.remove_roles(discord.Object(id=role_id))
+        try:
+            if event.event_type == "REACTION_ADD":
+                await member.add_roles(discord.Object(id=role_id))
+            elif event.event_type == "REACTION_REMOVE":
+                await member.remove_roles(discord.Object(id=role_id))
+        except discord.Forbidden:
+            pass
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, event: discord.RawReactionActionEvent):
