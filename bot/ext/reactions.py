@@ -3,16 +3,13 @@ import itertools
 import re
 
 import discord
-from bot.utils import converter, paginators, wrap_in_code
+from bot.utils import cog, converter, paginators, wrap_in_code
 from discord.ext import commands
 from discord.utils import get
 
 
-class Reactions(commands.Cog):
+class Reactions(cog.Cog):
     """Automated actions on message reactions"""
-
-    def __init__(self, bot):
-        self.bot = bot
 
     @commands.group(invoke_without_command=True, aliases=["rr"])
     @commands.cooldown(1, 3, commands.BucketType.member)
@@ -35,7 +32,7 @@ class Reactions(commands.Cog):
         paginator = paginators.FieldPaginator(self.bot, base_embed=embed)
 
         reaction_roles = itertools.groupby(
-            await self.bot.db.fetch(
+            await self.db.fetch(
                 """
                 SELECT channel_id, message_id, role_id, reaction FROM reaction_role
                 WHERE guild_id = $1
@@ -68,7 +65,7 @@ class Reactions(commands.Cog):
     async def reactionrole_new(self, ctx: commands.Context):
         """Creates a new reaction role"""
 
-        count = await self.bot.db.fetchval(
+        count = await self.db.fetchval(
             """
             SELECT COUNT(*) FROM reaction_role
             WHERE guild_id = $1
@@ -187,7 +184,7 @@ class Reactions(commands.Cog):
             await target_message.remove_reaction(event.emoji, ctx.me)
             return
 
-        await self.bot.db.execute(
+        await self.db.execute(
             """
             INSERT INTO reaction_role (message_id, channel_id, guild_id, role_id, reaction)
             VALUES ($1, $2, $3, $4, $5)
@@ -265,7 +262,7 @@ class Reactions(commands.Cog):
 
         await target_message.remove_reaction(event.emoji, ctx.me)
 
-        role_id = await self.bot.db.fetchval(
+        role_id = await self.db.fetchval(
             """
             DELETE FROM reaction_role
             WHERE message_id = $1 AND reaction = $2
@@ -292,7 +289,7 @@ class Reactions(commands.Cog):
     async def reactionrole_check(self, ctx: commands.Context):
         """Checks if reaction roles are set up correctly"""
 
-        reaction_roles = await self.bot.db.fetch(
+        reaction_roles = await self.db.fetch(
             """
             SELECT channel_id, message_id, role_id FROM reaction_role
             WHERE guild_id = $1
@@ -327,7 +324,7 @@ class Reactions(commands.Cog):
             if role > ctx.me.top_role:
                 role_hierachy.append(reaction_role)
 
-        await self.bot.db.executemany(
+        await self.db.executemany(
             """
             DELETE FROM reaction_role
             WHERE message_id = $1 AND reaction = $2
@@ -381,7 +378,7 @@ class Reactions(commands.Cog):
         await ctx.send(embed=embed)
 
     async def _process_reaction_event(self, event: discord.RawReactionActionEvent):
-        role_id = await self.bot.db.fetchval(
+        role_id = await self.db.fetchval(
             """
             SELECT role_id FROM reaction_role
             WHERE message_id = $1 AND reaction = $2
@@ -413,7 +410,7 @@ class Reactions(commands.Cog):
 
     @commands.Cog.listener()
     async def on_raw_message_delete(self, event: discord.RawMessageDeleteEvent):
-        await self.bot.db.execute(
+        await self.db.execute(
             """
             DELETE FROM reaction_role
             WHERE message_id = $1
@@ -425,7 +422,7 @@ class Reactions(commands.Cog):
     async def on_raw_bulk_message_delete(
         self, event: discord.RawBulkMessageDeleteEvent
     ):
-        await self.bot.db.execute(
+        await self.db.execute(
             """
             DELETE FROM reaction_role
             WHERE message_id = any($1::bigint[])
@@ -435,7 +432,7 @@ class Reactions(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_channel_delete(self, channel: discord.abc.GuildChannel):
-        await self.bot.db.execute(
+        await self.db.execute(
             """
             DELETE FROM reaction_role
             WHERE channel_id = $1
@@ -445,7 +442,7 @@ class Reactions(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_role_delete(self, role: discord.Role):
-        await self.bot.db.execute(
+        await self.db.execute(
             """
             DELETE FROM reaction_role
             WHERE role_id = $1

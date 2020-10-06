@@ -2,7 +2,7 @@ import sys
 import traceback
 
 import discord
-from bot.utils import wrap_in_code
+from bot.utils import cog, wrap_in_code
 from discord.ext import commands
 
 ignored_errors = (
@@ -18,11 +18,8 @@ error_types = (
 )
 
 
-class Errors(commands.Cog):
+class Errors(cog.Cog):
     """Error handlers"""
-
-    def __init__(self, bot):
-        self.bot = bot
 
     async def report_error(self, error, *, fields):
         exception = "".join(

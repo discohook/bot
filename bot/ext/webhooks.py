@@ -2,16 +2,13 @@ import asyncio
 import datetime
 
 import discord
-from bot.utils import converter, paginators, wrap_in_code
+from bot.utils import cog, converter, paginators, wrap_in_code
 from discord.ext import commands
 from jishaku import metacog
 
 
-class Webhooks(commands.Cog):
+class Webhooks(cog.Cog):
     """Webhook management"""
-
-    def __init__(self, bot):
-        self.bot = bot
 
     def _get_webhook_embed(
         self,

@@ -1,8 +1,4 @@
-import asyncio
-import collections
 import itertools
-import re
-import typing
 
 import discord
 from bot.utils import wrap_in_code

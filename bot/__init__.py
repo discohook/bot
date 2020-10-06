@@ -1,7 +1,4 @@
-import asyncio
 import re
-import sys
-import traceback
 from os import environ
 
 import aiohttp

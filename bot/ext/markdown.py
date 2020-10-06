@@ -1,13 +1,10 @@
 import discord
-from bot.utils import converter
+from bot.utils import cog, converter
 from discord.ext import commands
 
 
-class Markdown(commands.Cog):
+class Markdown(cog.Cog):
     """Markdown syntax helpers"""
-
-    def __init__(self, bot):
-        self.bot = bot
 
     @commands.command(aliases=["member"])
     @commands.cooldown(1, 3, commands.BucketType.member)

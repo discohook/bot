@@ -1,11 +1,8 @@
-import asyncio
 import collections
-import itertools
-import re
 import typing
 
 import discord
-from bot.utils import paginators, wrap_in_code
+from bot.utils import cog, paginators, wrap_in_code
 from discord.ext import commands
 from discord.utils import get
 
@@ -31,11 +28,8 @@ configurables = [
 type_names = {str: "text", bool: "boolean", int: "number"}
 
 
-class Meta(commands.Cog):
+class Meta(cog.Cog):
     """Commands related to the bot itself"""
-
-    def __init__(self, bot):
-        self.bot = bot
 
     def _resolve_value(self, expected_type, raw_value):
         type_name = type_names[expected_type]
@@ -60,7 +54,7 @@ class Meta(commands.Cog):
                 )
 
     async def _config_get(self, guild, configurable):
-        return await self.bot.db.fetchval(
+        return await self.db.fetchval(
             """
             SELECT {} FROM guild_config
             WHERE guild_id = $1
@@ -71,7 +65,7 @@ class Meta(commands.Cog):
         )
 
     async def _config_set(self, guild, configurable, new_value):
-        await self.bot.db.execute(
+        await self.db.execute(
             """
             UPDATE guild_config
             SET {} = $2

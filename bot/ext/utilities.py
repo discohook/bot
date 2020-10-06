@@ -6,21 +6,18 @@ from os import environ
 
 import aiohttp
 import discord
-from bot.utils import checks, converter
+from bot.utils import checks, cog, converter
 from discord.ext import commands
 
 
-class Utilities(commands.Cog):
+class Utilities(cog.Cog):
     """Message helpers"""
-
-    def __init__(self, bot):
-        self.bot = bot
 
     async def _get_short_url(self, url):
         post_url = f"{environ.get('SHORTER_URL')}/create"
         post_json = {"url": url}
 
-        async with self.bot.session.post(post_url, json=post_json) as resp:
+        async with self.session.post(post_url, json=post_json) as resp:
             if resp.status != 200:
                 return None, None
 
