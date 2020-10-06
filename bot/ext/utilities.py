@@ -22,7 +22,7 @@ class Utilities(commands.Cog):
 
         async with self.bot.session.post(post_url, json=post_json) as resp:
             if resp.status != 200:
-                return
+                return None, None
 
             data = await resp.json()
             url = data["url"]
