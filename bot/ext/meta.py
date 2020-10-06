@@ -149,7 +149,7 @@ class Meta(commands.Cog):
             text="Page {current_page}/{total_pages}, "
             "showing option {first_field}..{last_field}/{total_fields}"
         )
-        paginator = paginators.FieldPaginator(ctx.bot, base_embed=embed)
+        paginator = paginators.FieldPaginator(self.bot, base_embed=embed)
 
         for configurable in configurables:
             paginator.add_field(
@@ -164,9 +164,9 @@ class Meta(commands.Cog):
     async def about(self, ctx: commands.Context):
         """Gives information about this bot"""
 
-        app_info = await ctx.bot.application_info()
+        app_info = await self.bot.application_info()
 
-        embed = discord.Embed(title="About", description=ctx.bot.description)
+        embed = discord.Embed(title="About", description=self.bot.description)
 
         embed.add_field(
             name="Links",

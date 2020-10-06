@@ -32,7 +32,7 @@ class Reactions(commands.Cog):
             text="Page {current_page}/{total_pages}, "
             "showing message {first_field}..{last_field}/{total_fields}"
         )
-        paginator = paginators.FieldPaginator(ctx.bot, base_embed=embed)
+        paginator = paginators.FieldPaginator(self.bot, base_embed=embed)
 
         reaction_roles = itertools.groupby(
             await self.bot.db.fetch(
@@ -96,7 +96,7 @@ class Reactions(commands.Cog):
 
         event = None
         try:
-            event = await ctx.bot.wait_for(
+            event = await self.bot.wait_for(
                 "raw_reaction_add",
                 check=lambda event: event.user_id == ctx.author.id
                 and event.guild_id == ctx.guild.id,
@@ -131,7 +131,7 @@ class Reactions(commands.Cog):
 
         role_message = None
         try:
-            role_message = await ctx.bot.wait_for(
+            role_message = await self.bot.wait_for(
                 "message",
                 check=lambda m: m.author.id == ctx.author.id
                 and m.channel.id == ctx.channel.id,
@@ -230,13 +230,13 @@ class Reactions(commands.Cog):
         event = None
         done, pending = await asyncio.wait(
             [
-                ctx.bot.wait_for(
+                self.bot.wait_for(
                     "raw_reaction_add",
                     check=lambda event: event.user_id == ctx.author.id
                     and event.guild_id == ctx.guild.id,
                     timeout=60.0,
                 ),
-                ctx.bot.wait_for(
+                self.bot.wait_for(
                     "raw_reaction_remove",
                     check=lambda event: event.user_id == ctx.author.id
                     and event.guild_id == ctx.guild.id,

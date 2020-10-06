@@ -6,6 +6,9 @@ from discord.ext import commands
 class Markdown(commands.Cog):
     """Markdown syntax helpers"""
 
+    def __init__(self, bot):
+        self.bot = bot
+
     @commands.command(aliases=["member"])
     @commands.cooldown(1, 3, commands.BucketType.member)
     @commands.guild_only()
@@ -75,7 +78,7 @@ class Markdown(commands.Cog):
     ):
         """Gives formatting to use a given server emoji"""
 
-        guild_emoji = ctx.bot.get_emoji(emoji.id)
+        guild_emoji = self.bot.get_emoji(emoji.id)
 
         embed = discord.Embed(
             title="Syntax",

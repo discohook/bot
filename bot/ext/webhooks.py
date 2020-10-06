@@ -10,6 +10,9 @@ from jishaku import metacog
 class Webhooks(commands.Cog):
     """Webhook management"""
 
+    def __init__(self, bot):
+        self.bot = bot
+
     def _get_webhook_embed(
         self,
         ctx: commands.Context,
@@ -70,7 +73,7 @@ class Webhooks(commands.Cog):
             text="Page {current_page}/{total_pages}, "
             "showing webhook {first_field}..{last_field}/{total_fields}"
         )
-        paginator = paginators.FieldPaginator(ctx.bot, base_embed=embed)
+        paginator = paginators.FieldPaginator(self.bot, base_embed=embed)
 
         for webhook in await ctx.guild.webhooks():
             if webhook.type != discord.WebhookType.incoming:
@@ -178,7 +181,7 @@ class Webhooks(commands.Cog):
 
         await webhook.edit(name=new_name, avatar=avatar_file)
 
-        webhook = await ctx.bot.fetch_webhook(webhook.id)
+        webhook = await self.bot.fetch_webhook(webhook.id)
         await ctx.send(
             embed=self._get_webhook_embed(ctx, webhook, message="Webhook edited")
         )
@@ -206,7 +209,7 @@ class Webhooks(commands.Cog):
         await message.add_reaction("\N{WASTEBASKET}")
 
         try:
-            await ctx.bot.wait_for(
+            await self.bot.wait_for(
                 "raw_reaction_add",
                 timeout=30.0,
                 check=lambda event: (
