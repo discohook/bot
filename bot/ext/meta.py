@@ -2,80 +2,14 @@ import collections
 import typing
 
 import discord
+from bot.ext import config
 from bot.utils import cog, paginators, wrap_in_code
 from discord.ext import commands
 from discord.utils import get
 
-Configurable = collections.namedtuple(
-    "Configurable", ["name", "description", "column", "type"]
-)
-
-configurables = [
-    Configurable(
-        name="prefix",
-        description="Prefix specific to server, mention prefix will always work.",
-        column="prefix",
-        type=str,
-    ),
-    Configurable(
-        name="private",
-        description="Make certain sensitive commands private to server moderators.",
-        column="commands_private",
-        type=bool,
-    ),
-]
-
-type_names = {str: "text", bool: "boolean", int: "number"}
-
 
 class Meta(cog.Cog):
     """Commands related to the bot itself"""
-
-    def _resolve_value(self, expected_type, raw_value):
-        type_name = type_names[expected_type]
-        escaped_value = wrap_in_code(raw_value)
-
-        if expected_type is bool:
-            lowered = raw_value.lower()
-            if lowered in ("yes", "y", "true", "t", "1", "enable", "on"):
-                return True
-            elif lowered in ("no", "n", "false", "f", "0", "disable", "off"):
-                return False
-            else:
-                raise commands.BadArgument(
-                    f"Value {escaped_value} is not a {type_name}"
-                )
-        else:
-            try:
-                return expected_type(raw_value)
-            except:
-                raise commands.BadArgument(
-                    f"Value {escaped_value} is not a {type_name}"
-                )
-
-    async def _config_get(self, guild, configurable):
-        return await self.db.fetchval(
-            """
-            SELECT {} FROM guild_config
-            WHERE guild_id = $1
-            """.format(
-                configurable.column
-            ),
-            guild.id,
-        )
-
-    async def _config_set(self, guild, configurable, new_value):
-        await self.db.execute(
-            """
-            UPDATE guild_config
-            SET {} = $2
-            WHERE guild_id = $1
-            """.format(
-                configurable.column
-            ),
-            guild.id,
-            new_value,
-        )
 
     @commands.group(invoke_without_command=True)
     @commands.cooldown(3, 8, commands.BucketType.channel)
@@ -92,7 +26,7 @@ class Meta(cog.Cog):
         command = f"{ctx.prefix}{self.config.qualified_name}"
 
         if option:
-            configurable = get(configurables, name=option.lower())
+            configurable = get(config.configurables, name=option.lower())
             if configurable is None:
                 raise commands.UserInputError(
                     f"Option {wrap_in_code(option)} not found"
@@ -101,13 +35,19 @@ class Meta(cog.Cog):
             if new_value:
                 await commands.has_guild_permissions(manage_guild=True).predicate(ctx)
 
-                parsed_value = self._resolve_value(configurable.type, new_value)
-                await self._config_set(ctx.guild, configurable, parsed_value)
+                try:
+                    parsed_value = config.resolve_value(configurable.type, new_value)
+                    await self.cfg.set_value(ctx.guild, configurable, parsed_value)
+                except:
+                    raise commands.BadArgument(
+                        f"Value {wrap_in_code(new_value)} is does not fit"
+                        f" expected type {config.type_names[configurable.type]}"
+                    )
 
             value = (
                 parsed_value
                 if new_value is not None
-                else await self._config_get(ctx.guild, configurable)
+                else await self.cfg.get_value(ctx.guild, configurable)
             )
             value = (
                 ("yes" if value else "no") if isinstance(value, bool) else str(value)
@@ -145,7 +85,7 @@ class Meta(cog.Cog):
         )
         paginator = paginators.FieldPaginator(self.bot, base_embed=embed)
 
-        for configurable in configurables:
+        for configurable in config.configurables:
             paginator.add_field(
                 name=configurable.name.capitalize(),
                 value=configurable.description,

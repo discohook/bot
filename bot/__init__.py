@@ -5,11 +5,14 @@ import aiohttp
 import asyncpg
 import discord
 from discord.ext import commands
+from discord.utils import get
 
+from bot.ext import config
 from bot.utils import wrap_in_code
 
 initial_extensions = (
     "jishaku",
+    "bot.ext.config",
     "bot.ext.meta",
     "bot.ext.help",
     "bot.ext.errors",
@@ -23,7 +26,7 @@ initial_extensions = (
 class Bot(commands.AutoShardedBot):
     def __init__(self):
         super().__init__(
-            command_prefix=self._prefix,
+            command_prefix=self.get_prefix_list,
             description="Discohook's official bot.",
             help_command=None,
             activity=discord.Game(name="at discohook.app | d.help"),
@@ -42,17 +45,14 @@ class Bot(commands.AutoShardedBot):
         for extension in initial_extensions:
             self.load_extension(extension)
 
-    async def _prefix(self, bot, msg):
-        prefix = "d."
+    async def get_prefix_list(self, bot, message):
+        cfg = self.get_cog("Config")
 
-        if msg.guild:
-            prefix = await self.db.fetchval(
-                """
-                    SELECT prefix FROM guild_config
-                    WHERE guild_id = $1
-                    """,
-                msg.guild.id,
-            )
+        prefix = (
+            await cfg.get_value(message.guild, get(config.configurables, name="prefix"))
+            if message.guild
+            else "d."
+        )
 
         return (
             f"<@!{bot.user.id}> ",
@@ -63,12 +63,10 @@ class Bot(commands.AutoShardedBot):
 
     async def start(self, *args, **kwargs):
         self.session = aiohttp.ClientSession()
-        self.db = await asyncpg.create_pool(dsn=environ.get("DATABASE_DSN"))
         await super().start(*args, **kwargs)
 
     async def close(self):
         await self.session.close()
-        await self.db.close()
         await super().close()
 
     async def on_ready(self):
@@ -78,46 +76,18 @@ class Bot(commands.AutoShardedBot):
         if message.author.bot:
             return
 
-        if message.guild:
-            try:
-                has_config = await self.db.fetchval(
-                    """
-                    SELECT true FROM guild_config
-                    WHERE guild_id = $1
-                    """,
-                    message.guild.id,
-                )
-
-                if not has_config:
-                    await self.db.execute(
-                        """
-                        INSERT INTO guild_config (guild_id)
-                        VALUES ($1)
-                        """,
-                        message.guild.id,
-                    )
-            except asyncpg.UniqueViolationError:
-                pass
+        cfg = self.get_cog("Config")
 
         if re.fullmatch(rf"<@!?{self.user.id}>", message.content):
-            description = 'The prefix for Discobot is "d."'
+            embed = discord.Embed(title="Prefix", description="My prefix is `d.`")
 
             if message.guild:
-                prefix = await self.db.fetchval(
-                    """
-                    SELECT prefix FROM guild_config
-                    WHERE guild_id = $1
-                    """,
-                    message.guild.id,
+                prefix = await cfg.get_value(
+                    message.guild, get(config.configurables, name="prefix")
                 )
-                description = (
-                    f"The prefix for Discobot in this server is {wrap_in_code(prefix)}"
-                )
+                embed.description = f"My prefix is {wrap_in_code(prefix)}"
 
-            await message.channel.send(
-                embed=discord.Embed(title="Prefix", description=description)
-            )
-            return
+            await message.channel.send(embed=embed)
 
         await self.process_commands(message)
 
@@ -125,12 +95,3 @@ class Bot(commands.AutoShardedBot):
         errors = self.get_cog("Errors")
         if errors:
             await errors.on_error(event, *args, **kwargs)
-
-    async def on_guild_remove(self, guild):
-        await self.db.execute(
-            """
-            DELETE FROM guild_config
-            WHERE guild_id = $1
-            """,
-            guild.id,
-        )
