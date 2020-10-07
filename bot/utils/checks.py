@@ -1,5 +1,7 @@
 import discord
+from bot.ext import config
 from discord.ext import commands
+from discord.utils import get
 
 
 def private_command():
@@ -9,12 +11,8 @@ def private_command():
     async def extended_check(ctx):
         await check_guild(ctx)
 
-        commands_private = await ctx.bot.db.fetchval(
-            """
-            SELECT commands_private FROM guild_config
-            WHERE guild_id = $1
-            """,
-            ctx.guild.id,
+        commands_private = await ctx.bot.get_cog("Config").get_value(
+            ctx.guild, get(config.configurables, name="private")
         )
 
         if commands_private:
