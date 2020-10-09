@@ -1,8 +1,6 @@
 import re
-from os import environ
 
 import aiohttp
-import asyncpg
 import discord
 from discord.ext import commands
 from discord.utils import get
