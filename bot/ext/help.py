@@ -3,7 +3,6 @@ import itertools
 import discord
 from bot.utils import wrap_in_code
 from discord.ext import commands
-from discord.utils import get
 
 
 class HelpCommand(commands.HelpCommand):

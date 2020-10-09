@@ -1,11 +1,10 @@
 import asyncio
 import collections
-import pprint
 from os import environ
 
 import asyncpg
 import discord
-from bot.utils import cog, paginators, wrap_in_code
+from bot.utils import cog
 from discord.ext import commands
 from discord.utils import get
 

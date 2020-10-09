@@ -1,10 +1,8 @@
 import base64
-import io
 import json
 from datetime import datetime
 from os import environ
 
-import aiohttp
 import discord
 from bot.utils import checks, cog, converter
 from discord.ext import commands

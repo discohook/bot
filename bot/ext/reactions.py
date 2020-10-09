@@ -3,7 +3,7 @@ import itertools
 import re
 
 import discord
-from bot.utils import cog, converter, paginators, wrap_in_code
+from bot.utils import cog, paginators, wrap_in_code
 from discord.ext import commands
 from discord.utils import get
 
