@@ -129,6 +129,17 @@ class Config(cog.Cog):
             new_value,
         )
 
+    async def delete_data(self, guild: discord.Guild):
+        await self.db.execute(
+            f"""
+            DELETE FROM guild_config
+            WHERE guild_id = $1
+            """,
+            guild.id,
+        )
+
+        del self.cache[guild.id]
+
 
 def setup(bot: commands.Bot):
     config = Config(bot)

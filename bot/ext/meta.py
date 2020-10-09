@@ -1,3 +1,4 @@
+import asyncio
 import collections
 import typing
 
@@ -131,19 +132,62 @@ class Meta(cog.Cog):
             )
         )
 
-    @commands.command()
-    @commands.cooldown(3, 8, commands.BucketType.channel)
+    @commands.group()
+    @commands.cooldown(1, 3, commands.BucketType.member)
     async def data(self, ctx: commands.Context):
-        """Manage data stored by Discobot"""
+        """Commands to manage data stored by this bot"""
+        await ctx.send_help("data")
 
-        await ctx.send(
+    @data.command(name="delete")
+    @commands.cooldown(3, 30, commands.BucketType.member)
+    @commands.has_guild_permissions(administrator=True)
+    async def data_delete(self, ctx: commands.Context):
+        """Delete the server's data stored by this bot"""
+
+        message = await ctx.send(
             embed=discord.Embed(
-                title="Data management",
-                description="As of now, this bot does not store data about you."
-                "\nIt does however store data about this server, you can delete"
-                " it by kicking me from the server.",
+                title="Confirmation",
+                description="Are you sure you want to delete all data for this"
+                " server? This action cannot be reverted.\n\nTo ensure no data"
+                " is kept, the bot will leave the server immediately. If you"
+                " desire to keep me, you can reinvite me at"
+                " https://discohook.app/bot.",
             )
         )
+
+        await message.add_reaction("\N{WASTEBASKET}")
+
+        try:
+            await self.bot.wait_for(
+                "raw_reaction_add",
+                timeout=30.0,
+                check=lambda event: (
+                    str(event.emoji) == "\N{WASTEBASKET}"
+                    and event.message_id == message.id
+                    and event.user_id == ctx.author.id
+                ),
+            )
+        except asyncio.TimeoutError:
+            await message.edit(
+                embed=discord.Embed(
+                    title="Confirmation cancelled",
+                    description="30 second timeout reached",
+                )
+            )
+            await message.remove_reaction("\N{WASTEBASKET}", ctx.guild.me)
+            return
+
+        await message.edit(
+            embed=discord.Embed(
+                title="Leaving server",
+                description="Data will be deleted hereafter."
+                " If you have any questions, please ask them in the"
+                " [support server](https://discohook.app/discord).",
+            )
+        )
+
+        await ctx.guild.leave()
+        await self.cfg.delete_data(ctx.guild)
 
 
 def setup(bot: commands.Bot):
