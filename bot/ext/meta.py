@@ -1,5 +1,7 @@
 import asyncio
 import collections
+import io
+import json
 import typing
 
 import discord
@@ -132,7 +134,7 @@ class Meta(cog.Cog):
             )
         )
 
-    @commands.group()
+    @commands.group(invoke_without_command=True)
     @commands.cooldown(1, 3, commands.BucketType.member)
     async def data(self, ctx: commands.Context):
         """Commands to manage data stored by this bot"""
@@ -188,6 +190,49 @@ class Meta(cog.Cog):
 
         await ctx.guild.leave()
         await self.cfg.delete_data(ctx.guild)
+
+    @data.command(name="dump")
+    @commands.cooldown(3, 30, commands.BucketType.member)
+    @commands.has_guild_permissions(administrator=True)
+    async def dump(self, ctx: commands.Context):
+        """Dumps all data stored by this bot"""
+
+        config = dict(await self.cfg.ensure(ctx.guild))
+
+        reaction_roles = await self.db.fetch(
+            """
+            SELECT * FROM reaction_role
+            WHERE guild_id = $1
+            """,
+            ctx.guild.id,
+        )
+        config["reaction_roles"] = [dict(row) for row in reaction_roles]
+
+        fp = io.StringIO()
+        json.dump(config, fp, indent=2)
+        fp.seek(0)
+
+        try:
+            await ctx.author.send(
+                embed=discord.Embed(
+                    title="Data dump",
+                    description=f"Data dump requested inside of {ctx.guild}.",
+                ),
+                file=discord.File(fp, filename=f"{ctx.guild.id}.json"),
+            )
+            await ctx.channel.send(
+                embed=discord.Embed(
+                    title="Data dump sent",
+                    description="Please check your DMs.",
+                )
+            )
+        except discord.Forbidden:
+            await ctx.channel.send(
+                embed=discord.Embed(
+                    title="DM failed",
+                    description="Could not send DM, check server privacy settings or unblock me.",
+                )
+            )
 
 
 def setup(bot: commands.Bot):
