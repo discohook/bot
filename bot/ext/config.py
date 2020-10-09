@@ -25,7 +25,7 @@ configurables = [
     Configurable(
         name="private",
         description="Make certain sensitive commands private to server moderators.",
-        column="commands_private",
+        column="sensitive",
         type=bool,
     ),
 ]

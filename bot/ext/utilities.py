@@ -29,7 +29,7 @@ class Utilities(cog.Cog):
 
     @commands.command()
     @commands.cooldown(3, 30, type=commands.BucketType.user)
-    @checks.private_command()
+    @checks.sensitive()
     async def link(
         self,
         ctx: commands.Context,

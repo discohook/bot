@@ -4,18 +4,18 @@ from discord.ext import commands
 from discord.utils import get
 
 
-def private_command():
+def sensitive():
     check_guild = commands.guild_only().predicate
     has_bypass = commands.has_guild_permissions(manage_messages=True).predicate
 
     async def extended_check(ctx):
         await check_guild(ctx)
 
-        commands_private = await ctx.bot.get_cog("Config").get_value(
+        sensitive = await ctx.bot.get_cog("Config").get_value(
             ctx.guild, get(config.configurables, name="private")
         )
 
-        if commands_private:
+        if sensitive:
             return await has_bypass(ctx)
 
         return True
