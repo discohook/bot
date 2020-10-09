@@ -385,7 +385,7 @@ class Reactions(cog.Cog):
 
         await ctx.send(embed=embed)
 
-    async def _process_reaction_event(self, event: discord.RawReactionActionEvent):
+    async def process_reaction_event(self, event: discord.RawReactionActionEvent):
         role_id = await self.db.fetchval(
             """
             SELECT role_id FROM reaction_role
@@ -413,11 +413,11 @@ class Reactions(cog.Cog):
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, event: discord.RawReactionActionEvent):
-        await self._process_reaction_event(event)
+        await self.process_reaction_event(event)
 
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, event: discord.RawReactionActionEvent):
-        await self._process_reaction_event(event)
+        await self.process_reaction_event(event)
 
     @commands.Cog.listener()
     async def on_raw_message_delete(self, event: discord.RawMessageDeleteEvent):

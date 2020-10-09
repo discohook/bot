@@ -13,7 +13,7 @@ from discord.ext import commands
 class Utilities(cog.Cog):
     """Message helpers"""
 
-    async def _get_short_url(self, url):
+    async def get_short_url(self, url):
         post_url = f"{environ.get('SHORTER_URL')}/create"
         post_json = {"url": url}
 
@@ -61,7 +61,7 @@ class Utilities(cog.Cog):
         )
         url = f"https://discohook.app/?message={message_b64}"
 
-        short_url, timestamp = await self._get_short_url(url)
+        short_url, timestamp = await self.get_short_url(url)
 
         if short_url is None:
             await ctx.send(

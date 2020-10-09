@@ -10,7 +10,7 @@ from jishaku import metacog
 class Webhooks(cog.Cog):
     """Webhook management"""
 
-    def _get_webhook_embed(
+    def get_webhook_embed(
         self,
         ctx: commands.Context,
         webhook: discord.Webhook,
@@ -97,7 +97,7 @@ class Webhooks(cog.Cog):
     ):
         """Shows data for a given webhook"""
 
-        await ctx.send(embed=self._get_webhook_embed(ctx, webhook))
+        await ctx.send(embed=self.get_webhook_embed(ctx, webhook))
 
     @webhook.command(name="url")
     @commands.cooldown(3, 8, commands.BucketType.member)
@@ -113,7 +113,7 @@ class Webhooks(cog.Cog):
 
         try:
             await ctx.author.send(
-                embed=self._get_webhook_embed(ctx, webhook, show_url=True)
+                embed=self.get_webhook_embed(ctx, webhook, show_url=True)
             )
         except discord.HTTPException as error:
             if error.code != 403:
@@ -148,7 +148,7 @@ class Webhooks(cog.Cog):
         webhook = await channel.create_webhook(name=name, avatar=avatar_file)
 
         await ctx.send(
-            embed=self._get_webhook_embed(ctx, webhook, message="New webhook created")
+            embed=self.get_webhook_embed(ctx, webhook, message="New webhook created")
         )
 
     @webhook.command(name="edit", aliases=["rename", "avatar"])
@@ -180,7 +180,7 @@ class Webhooks(cog.Cog):
 
         webhook = await self.bot.fetch_webhook(webhook.id)
         await ctx.send(
-            embed=self._get_webhook_embed(ctx, webhook, message="Webhook edited")
+            embed=self.get_webhook_embed(ctx, webhook, message="Webhook edited")
         )
 
     @webhook.command(name="delete", aliases=["remove"])
