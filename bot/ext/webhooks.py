@@ -115,10 +115,13 @@ class Webhooks(cog.Cog):
             await ctx.author.send(
                 embed=self.get_webhook_embed(ctx, webhook, show_url=True)
             )
-        except discord.HTTPException as error:
-            if error.code != 403:
-                raise
-
+            await ctx.channel.send(
+                embed=discord.Embed(
+                    title="Webhook URL sent",
+                    description="Because the URL should be kept secret, a message has been sent to your DMs.",
+                )
+            )
+        except discord.Forbidden:
             await ctx.channel.send(
                 embed=discord.Embed(
                     title="Forbidden",
