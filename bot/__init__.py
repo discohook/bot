@@ -27,7 +27,7 @@ class Bot(commands.AutoShardedBot):
             command_prefix=self.get_prefix_list,
             description="Discohook's official bot.",
             help_command=None,
-            activity=discord.Game(name="at discohook.app | d.help"),
+            activity=discord.Game(name="discohook.app | d.help"),
             allowed_mentions=discord.AllowedMentions.none(),
             intents=discord.Intents(
                 guilds=True,
