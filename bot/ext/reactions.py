@@ -3,6 +3,7 @@ import itertools
 import re
 
 import discord
+import lru
 from bot.utils import cog, paginators, wrap_in_code
 from discord.ext import commands
 from discord.utils import get
@@ -10,6 +11,11 @@ from discord.utils import get
 
 class Reactions(cog.Cog):
     """Automated actions on message reactions"""
+
+    def __init__(self, bot):
+        super().__init__(bot)
+
+        self.cache = lru.LRU(1024)
 
     @commands.group(invoke_without_command=True, aliases=["rr"])
     @commands.cooldown(1, 3, commands.BucketType.member)
@@ -196,6 +202,8 @@ class Reactions(cog.Cog):
             str(event.emoji),
         )
 
+        del self.cache[(target_message.id, str(event.emoji))]
+
         check_signature = wrap_in_code(
             f"{ctx.prefix}{self.reactionrole_check.qualified_name}"
         )
@@ -271,6 +279,8 @@ class Reactions(cog.Cog):
             target_message.id,
             str(event.emoji),
         )
+
+        del self.cache[(target_message.id, str(event.emoji))]
 
         if not role_id:
             await prompt_message.edit(
@@ -386,14 +396,19 @@ class Reactions(cog.Cog):
         await ctx.send(embed=embed)
 
     async def process_reaction_event(self, event: discord.RawReactionActionEvent):
-        role_id = await self.db.fetchval(
-            """
-            SELECT role_id FROM reaction_role
-            WHERE message_id = $1 AND reaction = $2
-            """,
-            event.message_id,
-            str(event.emoji),
-        )
+        role_id = None
+        if (event.message_id, str(event.emoji)) in self.cache:
+            role_id = self.cache[(event.message_id, str(event.emoji))]
+        else:
+            role_id = await self.db.fetchval(
+                """
+                SELECT role_id FROM reaction_role
+                WHERE message_id = $1 AND reaction = $2
+                """,
+                event.message_id,
+                str(event.emoji),
+            )
+            self.cache[(event.message_id, str(event.emoji))] = role_id
 
         if not role_id:
             return
@@ -408,7 +423,7 @@ class Reactions(cog.Cog):
                 await member.add_roles(discord.Object(id=role_id))
             elif event.event_type == "REACTION_REMOVE":
                 await member.remove_roles(discord.Object(id=role_id))
-        except discord.Forbidden:
+        except discord.HTTPException:
             pass
 
     @commands.Cog.listener()
