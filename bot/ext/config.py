@@ -4,6 +4,7 @@ from os import environ
 
 import asyncpg
 import discord
+import lru
 from bot.utils import cog
 from discord.ext import commands
 from discord.utils import get
@@ -60,7 +61,7 @@ class Config(cog.Cog):
     def __init__(self, bot):
         super().__init__(bot)
 
-        self.cache = {}
+        self.cache = lru.LRU(256)
 
         self.ready = asyncio.Event()
         if self.loop.is_running():
