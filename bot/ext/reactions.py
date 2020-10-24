@@ -93,7 +93,7 @@ class Reactions(cog.Cog):
             embed=discord.Embed(
                 title="Creating reaction role",
                 description="Give any message in your server a reaction to"
-                " create a reaction role. You have 60 seconds to do this.",
+                " create a reaction role. You have 5 minutes to do this.",
             )
         )
 
@@ -103,7 +103,7 @@ class Reactions(cog.Cog):
                 "raw_reaction_add",
                 check=lambda event: event.user_id == ctx.author.id
                 and event.guild_id == ctx.guild.id,
-                timeout=60.0,
+                timeout=300.0,
             )
         except asyncio.TimeoutError:
             await prompt_message.edit(
@@ -128,7 +128,7 @@ class Reactions(cog.Cog):
                 title="Creating reaction role",
                 description="Ping or give the name of the role that should be"
                 " granted when a user reacts to this message."
-                " You have 60 seconds to do this.",
+                " You have 5 minutes to do this.",
             )
         )
 
@@ -138,7 +138,7 @@ class Reactions(cog.Cog):
                 "message",
                 check=lambda m: m.author.id == ctx.author.id
                 and m.channel.id == ctx.channel.id,
-                timeout=60.0,
+                timeout=300.0,
             )
         except asyncio.TimeoutError:
             await prompt_message.edit(
@@ -228,7 +228,7 @@ class Reactions(cog.Cog):
             embed=discord.Embed(
                 title="Deleting reaction role",
                 description="Toggle any reaction that is managed by this bot"
-                " to remove the integration. You have 60 seconds to do this.",
+                " to remove the integration. You have 5 minutes to do this.",
             )
         )
 
@@ -239,7 +239,7 @@ class Reactions(cog.Cog):
                     "raw_reaction_add",
                     check=lambda event: event.user_id == ctx.author.id
                     and event.guild_id == ctx.guild.id,
-                    timeout=60.0,
+                    timeout=300.0,
                 ),
                 self.bot.wait_for(
                     "raw_reaction_remove",
