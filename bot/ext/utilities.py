@@ -96,6 +96,74 @@ class Utilities(cog.Cog):
 
         await ctx.send(embed=embed)
 
+    @commands.group(invoke_without_command=True)
+    @commands.cooldown(1, 3, commands.BucketType.member)
+    async def avatar(
+        self,
+        ctx: commands.Context,
+        *,
+        user: converter.GuildMemberConverter = None,
+    ):
+        """Gives the URL to a user's avatar"""
+
+        if not user:
+            user = ctx.author
+
+        url = str(user.avatar_url_as(static_format="png", size=4096))
+
+        embed = discord.Embed(title=f"Avatar URL for @{user}", description=url)
+        embed.set_image(url=url)
+        embed.set_footer(text=f"ID: {user.id}")
+
+        await ctx.send(embed=embed)
+
+    @avatar.command(name="static")
+    @commands.cooldown(1, 3, commands.BucketType.member)
+    async def avatar_static(
+        self,
+        ctx: commands.Context,
+        *,
+        user: converter.GuildMemberConverter = None,
+    ):
+        """Gives the URL to a user's non-animated avatar"""
+
+        if not user:
+            user = ctx.author
+
+        url = str(user.avatar_url_as(format="png", size=4096))
+
+        embed = discord.Embed(title=f"Avatar URL for @{user}", description=url)
+        embed.set_image(url=url)
+        embed.set_footer(text=f"ID: {user.id}")
+
+        await ctx.send(embed=embed)
+
+    @commands.group(invoke_without_command=True)
+    @commands.cooldown(1, 3, commands.BucketType.member)
+    async def icon(self, ctx: commands.Context):
+        """Gives the URL to a user's icon"""
+
+        url = str(ctx.guild.icon_url_as(static_format="png", size=4096))
+
+        embed = discord.Embed(title=f"Icon URL for {ctx.guild}", description=url)
+        embed.set_image(url=url)
+        embed.set_footer(text=f"ID: {ctx.guild.id}")
+
+        await ctx.send(embed=embed)
+
+    @icon.command(name="static")
+    @commands.cooldown(1, 3, commands.BucketType.member)
+    async def icon_static(self, ctx: commands.Context):
+        """Gives the URL to a user's non-animated icon"""
+
+        url = str(ctx.guild.icon_url_as(format="png", size=4096))
+
+        embed = discord.Embed(title=f"Icon URL for {ctx.guild}", description=url)
+        embed.set_image(url=url)
+        embed.set_footer(text=f"ID: {ctx.guild.id}")
+
+        await ctx.send(embed=embed)
+
 
 def setup(bot):
     bot.add_cog(Utilities(bot))
