@@ -348,26 +348,14 @@ class Reactions(cog.Cog):
             )
         )
 
-        done, pending = await asyncio.wait(
-            [
-                self.bot.wait_for(
-                    "raw_reaction_add",
-                    check=lambda event: event.user_id == ctx.author.id
-                    and event.guild_id == ctx.guild.id,
-                    timeout=300.0,
-                ),
-                self.bot.wait_for(
-                    "raw_reaction_remove",
-                    check=lambda event: event.user_id == ctx.author.id
-                    and event.guild_id == ctx.guild.id,
-                ),
-            ],
-            return_when=asyncio.FIRST_COMPLETED,
-        )
-
         event = None
         try:
-            event = done.pop().result()
+            event = await self.bot.wait_for(
+                "raw_reaction_toggle",
+                check=lambda event: event.user_id == ctx.author.id
+                and event.guild_id == ctx.guild.id,
+                timeout=300.0,
+            )
         except asyncio.TimeoutError:
             await prompt_message.edit(
                 embed=discord.Embed(
@@ -376,10 +364,6 @@ class Reactions(cog.Cog):
                 )
             )
             return
-        for future in done:
-            future.exception()
-        for future in pending:
-            future.cancel()
 
         channel = ctx.guild.get_channel(event.channel_id)
         target_message = await channel.fetch_message(event.message_id)
