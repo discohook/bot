@@ -17,6 +17,174 @@ class Reactions(cog.Cog):
 
         self.cache = lru.LRU(1024)
 
+    @commands.Cog.listener()
+    async def on_raw_reaction_add(self, event: discord.RawReactionActionEvent):
+        self.bot.dispatch("raw_reaction_toggle", event)
+
+    @commands.Cog.listener()
+    async def on_raw_reaction_remove(self, event: discord.RawReactionActionEvent):
+        self.bot.dispatch("raw_reaction_toggle", event)
+
+    async def prompt_message_emoji(
+        self, ctx: commands.Context, prompt_message: discord.Message
+    ):
+        await prompt_message.edit(
+            embed=discord.Embed(
+                title="Creating reaction role",
+                description="Give any message in your server a reaction to"
+                " create a reaction role on that message for that reaction."
+                " If you want an animated emoji but don't have nitro, reply"
+                " with a message link. You have 5 minutes to do this.",
+            )
+        )
+
+        done, pending = await asyncio.wait(
+            [
+                self.bot.wait_for(
+                    "raw_reaction_add",
+                    check=lambda event: event.user_id == ctx.author.id
+                    and event.guild_id == ctx.guild.id,
+                    timeout=300.0,
+                ),
+                self.bot.wait_for(
+                    "message",
+                    check=lambda m: m.author.id == ctx.author.id
+                    and m.channel.id == ctx.channel.id,
+                ),
+            ],
+            return_when=asyncio.FIRST_COMPLETED,
+        )
+
+        target_message = None
+        emoji = None
+
+        result = done.pop().result()
+
+        if isinstance(result, discord.RawReactionActionEvent):
+            channel = ctx.guild.get_channel(result.channel_id)
+            target_message = await channel.fetch_message(result.message_id)
+            emoji = result.emoji
+
+        elif isinstance(result, discord.Message):
+            id_re = re.compile(r"^(?:(?P<channel_id>\d+)-)?(?P<message_id>\d+)$")
+            link_re = re.compile(
+                r"^https?://(?:(?:ptb|canary)\.)?discord(?:app)?\.com/channels/"
+                f"{ctx.guild.id}"
+                r"/(?P<channel_id>\d+)/(?P<message_id>\d+)/?$"
+            )
+
+            match = id_re.match(result.content) or link_re.match(result.content)
+            if not match:
+                await prompt_message.edit(
+                    embed=discord.Embed(
+                        title="Cancelled",
+                        description="No message could be found for"
+                        f" {wrap_in_code(result.content)}.",
+                    )
+                )
+                raise commands.BadArgument()
+
+            message_id = int(match.group("message_id"))
+            channel_id = match.group("channel_id")
+
+            channel = ctx.guild.get_channel(int(channel_id))
+            if not channel:
+                await prompt_message.edit(
+                    embed=discord.Embed(
+                        title="Cancelled",
+                        description="No message could be found for"
+                        f" {wrap_in_code(result.content)}.",
+                    )
+                )
+                raise commands.BadArgument()
+
+            try:
+                target_message = await channel.fetch_message(message_id)
+            except discord.HTTPException:
+                await prompt_message.edit(
+                    embed=discord.Embed(
+                        title="Cancelled",
+                        description="No message could be found for"
+                        f" {wrap_in_code(result.content)}.",
+                    )
+                )
+                raise commands.BadArgument()
+
+            await prompt_message.edit(
+                embed=discord.Embed(
+                    title="Creating reaction role",
+                    description="Give the name of the emoji in this server you want"
+                    " the reaction role for. You have 5 minutes to do this.",
+                )
+            )
+
+            emoji_message = await self.bot.wait_for(
+                "message",
+                check=lambda m: m.author.id == ctx.author.id
+                and m.channel.id == ctx.channel.id,
+                timeout=300.0,
+            )
+
+            emoji = get(ctx.guild.emojis, name=emoji_message.content)
+            if not emoji or not emoji.is_usable():
+                await prompt_message.edit(
+                    embed=discord.Embed(
+                        title="Cancelled",
+                        description="No emoji could be found for"
+                        f" {wrap_in_code(emoji_message.content)}.",
+                    )
+                )
+                raise commands.BadArgument()
+
+        for future in done:
+            future.exception()
+        for future in pending:
+            future.cancel()
+
+        await target_message.add_reaction(emoji)
+        try:
+            await target_message.remove_reaction(emoji, ctx.author)
+        except discord.HTTPException:
+            pass
+
+        return target_message, emoji
+
+    async def prompt_role(self, ctx: commands.Context, prompt_message: discord.Message):
+        await prompt_message.edit(
+            embed=discord.Embed(
+                title="Creating reaction role",
+                description="Ping or give the name of the role that should be"
+                " granted when a user reacts to this message."
+                " You have 5 minutes to do this.",
+            )
+        )
+
+        role_message = await self.bot.wait_for(
+            "message",
+            check=lambda m: m.author.id == ctx.author.id
+            and m.channel.id == ctx.channel.id,
+            timeout=300.0,
+        )
+
+        role = None
+
+        if match := re.match(r"(\d+)$|<@&(\d+)>$", role_message.content):
+            role = ctx.guild.get_role(int(match.group(1) or match.group(2)))
+        else:
+            role = get(ctx.guild.roles, name=role_message.content)
+
+        if not role:
+            await prompt_message.edit(
+                embed=discord.Embed(
+                    title="Cancelled",
+                    description="No role could be found for"
+                    f" {wrap_in_code(role_message.content)}.",
+                )
+            )
+            raise commands.BadArgument()
+
+        return role
+
     @commands.group(invoke_without_command=True, aliases=["rr"])
     @commands.cooldown(1, 3, commands.BucketType.member)
     @commands.has_guild_permissions(manage_roles=True)
@@ -90,185 +258,30 @@ class Reactions(cog.Cog):
             return
 
         prompt_message = await ctx.send(
-            embed=discord.Embed(
-                title="Creating reaction role",
-                description="Give any message in your server a reaction to"
-                " create a reaction role on that message for that reaction."
-                " If you want an animated emoji but don't have nitro, reply"
-                " with a message link. You have 5 minutes to do this.",
-            )
-        )
-
-        done, pending = await asyncio.wait(
-            [
-                self.bot.wait_for(
-                    "raw_reaction_add",
-                    check=lambda event: event.user_id == ctx.author.id
-                    and event.guild_id == ctx.guild.id,
-                    timeout=300.0,
-                ),
-                self.bot.wait_for(
-                    "message",
-                    check=lambda m: m.author.id == ctx.author.id
-                    and m.channel.id == ctx.channel.id,
-                ),
-            ],
-            return_when=asyncio.FIRST_COMPLETED,
+            embed=discord.Embed(title="Creating reaction role")
         )
 
         target_message = None
         emoji = None
-        try:
-            result = done.pop().result()
-
-            if isinstance(result, discord.RawReactionActionEvent):
-                channel = ctx.guild.get_channel(result.channel_id)
-                target_message = await channel.fetch_message(result.message_id)
-                emoji = result.emoji
-
-            elif isinstance(result, discord.Message):
-                id_re = re.compile(r"^(?:(?P<channel_id>\d+)-)?(?P<message_id>\d+)$")
-                link_re = re.compile(
-                    r"^https?://(?:(?:ptb|canary)\.)?discord(?:app)?\.com/channels/"
-                    f"{ctx.guild.id}"
-                    r"/(?P<channel_id>\d+)/(?P<message_id>\d+)/?$"
-                )
-
-                match = id_re.match(result.content) or link_re.match(result.content)
-                if not match:
-                    await prompt_message.edit(
-                        embed=discord.Embed(
-                            title="Cancelled",
-                            description="No message could be found for"
-                            f" {wrap_in_code(result.content)}.",
-                        )
-                    )
-                    return
-
-                message_id = int(match.group("message_id"))
-                channel_id = match.group("channel_id")
-
-                channel = ctx.guild.get_channel(int(channel_id))
-                if not channel:
-                    await prompt_message.edit(
-                        embed=discord.Embed(
-                            title="Cancelled",
-                            description="No message could be found for"
-                            f" {wrap_in_code(result.content)}.",
-                        )
-                    )
-                    return
-
-                try:
-                    target_message = await channel.fetch_message(message_id)
-                except discord.HTTPException:
-                    await prompt_message.edit(
-                        embed=discord.Embed(
-                            title="Cancelled",
-                            description="No message could be found for"
-                            f" {wrap_in_code(result.content)}.",
-                        )
-                    )
-                    return
-
-                await prompt_message.edit(
-                    embed=discord.Embed(
-                        title="Creating reaction role",
-                        description="Give the name of the emoji in this server you want"
-                        " the reaction role for. You have 5 minutes to do this.",
-                    )
-                )
-
-                emoji_message = None
-                try:
-                    emoji_message = await self.bot.wait_for(
-                        "message",
-                        check=lambda m: m.author.id == ctx.author.id
-                        and m.channel.id == ctx.channel.id,
-                        timeout=300.0,
-                    )
-                except asyncio.TimeoutError:
-                    await prompt_message.edit(
-                        embed=discord.Embed(
-                            title="Cancelled",
-                            description="Timeout reached.",
-                        )
-                    )
-                    return
-
-                emoji = get(ctx.guild.emojis, name=emoji_message.content)
-                if not emoji or not emoji.is_usable():
-                    await prompt_message.edit(
-                        embed=discord.Embed(
-                            title="Cancelled",
-                            description="No emoji could be found for"
-                            f" {wrap_in_code(emoji_message.content)}.",
-                        )
-                    )
-                    return
-
-        except asyncio.TimeoutError:
-            await prompt_message.edit(
-                embed=discord.Embed(
-                    title="Cancelled",
-                    description="Timeout reached.",
-                )
-            )
-            return
-        for future in done:
-            future.exception()
-        for future in pending:
-            future.cancel()
-
-        await target_message.add_reaction(emoji)
-        try:
-            await target_message.remove_reaction(emoji, ctx.author)
-        except discord.HTTPException:
-            pass
-
-        await prompt_message.edit(
-            embed=discord.Embed(
-                title="Creating reaction role",
-                description="Ping or give the name of the role that should be"
-                " granted when a user reacts to this message."
-                " You have 5 minutes to do this.",
-            )
-        )
-
-        role_message = None
-        try:
-            role_message = await self.bot.wait_for(
-                "message",
-                check=lambda m: m.author.id == ctx.author.id
-                and m.channel.id == ctx.channel.id,
-                timeout=300.0,
-            )
-        except asyncio.TimeoutError:
-            await prompt_message.edit(
-                embed=discord.Embed(
-                    title="Cancelled",
-                    description="Timeout reached.",
-                )
-            )
-            await target_message.remove_reaction(emoji, ctx.me)
-            return
-
         role = None
 
-        if match := re.match(r"([0-9]+)$|<@&([0-9]+)>$", role_message.content):
-            role = ctx.guild.get_role(int(match.group(1) or match.group(2)))
-        else:
-            role = get(ctx.guild.roles, name=role_message.content)
-
-        if role is None:
+        try:
+            target_message, emoji = await self.prompt_message_emoji(ctx, prompt_message)
+            role = await self.prompt_role(ctx, prompt_message)
+        except asyncio.TimeoutError:
             await prompt_message.edit(
                 embed=discord.Embed(
                     title="Cancelled",
-                    description="No role could be found for"
-                    f" {wrap_in_code(role_message.content)}.",
+                    description="Timeout reached.",
                 )
             )
-            await target_message.remove_reaction(emoji, ctx.me)
+
+            if target_message and emoji:
+                await target_message.remove_reaction(emoji, ctx.me)
+            return
+        except commands.BadArgument:
+            if target_message and emoji:
+                await target_message.remove_reaction(emoji, ctx.me)
             return
 
         if role.managed:
@@ -498,7 +511,8 @@ class Reactions(cog.Cog):
 
         await ctx.send(embed=embed)
 
-    async def process_reaction_event(self, event: discord.RawReactionActionEvent):
+    @commands.Cog.listener()
+    async def on_raw_reaction_toggle(self, event: discord.RawReactionActionEvent):
         role_id = None
         if (event.message_id, str(event.emoji)) in self.cache:
             role_id = self.cache[(event.message_id, str(event.emoji))]
@@ -528,14 +542,6 @@ class Reactions(cog.Cog):
                 await member.remove_roles(discord.Object(id=role_id))
         except discord.HTTPException:
             pass
-
-    @commands.Cog.listener()
-    async def on_raw_reaction_add(self, event: discord.RawReactionActionEvent):
-        await self.process_reaction_event(event)
-
-    @commands.Cog.listener()
-    async def on_raw_reaction_remove(self, event: discord.RawReactionActionEvent):
-        await self.process_reaction_event(event)
 
     @commands.Cog.listener()
     async def on_raw_message_delete(self, event: discord.RawMessageDeleteEvent):
