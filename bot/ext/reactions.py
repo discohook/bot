@@ -93,18 +93,120 @@ class Reactions(cog.Cog):
             embed=discord.Embed(
                 title="Creating reaction role",
                 description="Give any message in your server a reaction to"
-                " create a reaction role. You have 5 minutes to do this.",
+                " create a reaction role on that message for that reaction."
+                " If you want an animated emoji but don't have nitro, reply"
+                " with a message link. You have 5 minutes to do this.",
             )
         )
 
-        event = None
+        done, pending = await asyncio.wait(
+            [
+                self.bot.wait_for(
+                    "raw_reaction_add",
+                    check=lambda event: event.user_id == ctx.author.id
+                    and event.guild_id == ctx.guild.id,
+                    timeout=300.0,
+                ),
+                self.bot.wait_for(
+                    "message",
+                    check=lambda m: m.author.id == ctx.author.id
+                    and m.channel.id == ctx.channel.id,
+                ),
+            ],
+            return_when=asyncio.FIRST_COMPLETED,
+        )
+
+        target_message = None
+        emoji = None
         try:
-            event = await self.bot.wait_for(
-                "raw_reaction_add",
-                check=lambda event: event.user_id == ctx.author.id
-                and event.guild_id == ctx.guild.id,
-                timeout=300.0,
-            )
+            result = done.pop().result()
+
+            if isinstance(result, discord.RawReactionActionEvent):
+                channel = ctx.guild.get_channel(result.channel_id)
+                target_message = await channel.fetch_message(result.message_id)
+                emoji = result.emoji
+
+            elif isinstance(result, discord.Message):
+                id_re = re.compile(r"^(?:(?P<channel_id>\d+)-)?(?P<message_id>\d+)$")
+                link_re = re.compile(
+                    r"^https?://(?:(?:ptb|canary)\.)?discord(?:app)?\.com/channels/"
+                    f"{ctx.guild.id}"
+                    r"/(?P<channel_id>\d+)/(?P<message_id>\d+)/?$"
+                )
+
+                match = id_re.match(result.content) or link_re.match(result.content)
+                if not match:
+                    await prompt_message.edit(
+                        embed=discord.Embed(
+                            title="Cancelled",
+                            description="No message could be found for"
+                            f" {wrap_in_code(result.content)}.",
+                        )
+                    )
+                    return
+
+                message_id = int(match.group("message_id"))
+                channel_id = match.group("channel_id")
+
+                channel = ctx.guild.get_channel(int(channel_id))
+                if not channel:
+                    await prompt_message.edit(
+                        embed=discord.Embed(
+                            title="Cancelled",
+                            description="No message could be found for"
+                            f" {wrap_in_code(result.content)}.",
+                        )
+                    )
+                    return
+
+                try:
+                    target_message = await channel.fetch_message(message_id)
+                except discord.HTTPException:
+                    await prompt_message.edit(
+                        embed=discord.Embed(
+                            title="Cancelled",
+                            description="No message could be found for"
+                            f" {wrap_in_code(result.content)}.",
+                        )
+                    )
+                    return
+
+                await prompt_message.edit(
+                    embed=discord.Embed(
+                        title="Creating reaction role",
+                        description="Give the name of the emoji in this server you want"
+                        " the reaction role for. You have 5 minutes to do this.",
+                    )
+                )
+
+                emoji_message = None
+                try:
+                    emoji_message = await self.bot.wait_for(
+                        "message",
+                        check=lambda m: m.author.id == ctx.author.id
+                        and m.channel.id == ctx.channel.id,
+                        timeout=300.0,
+                    )
+                except asyncio.TimeoutError:
+                    await prompt_message.edit(
+                        embed=discord.Embed(
+                            title="Cancelled",
+                            description="Timeout reached.",
+                        )
+                    )
+                    return
+
+                emoji = get(ctx.guild.emojis, name=emoji_message.content)
+                if not emoji or not emoji.is_usable():
+                    await prompt_message.edit(
+                        embed=discord.Embed(
+                            title="Cancelled",
+                            description="No emoji could be found for"
+                            f" {wrap_in_code(emoji_message.content)}.",
+                        )
+                    )
+                    return
+
         except asyncio.TimeoutError:
             await prompt_message.edit(
                 embed=discord.Embed(
@@ -113,14 +215,15 @@ class Reactions(cog.Cog):
                 )
             )
             return
+        for future in done:
+            future.exception()
+        for future in pending:
+            future.cancel()
 
-        channel = ctx.guild.get_channel(event.channel_id)
-        target_message = await channel.fetch_message(event.message_id)
-
-        await target_message.add_reaction(event.emoji)
+        await target_message.add_reaction(emoji)
         try:
-            await target_message.remove_reaction(event.emoji, ctx.author)
-        except discord.Forbidden:
+            await target_message.remove_reaction(emoji, ctx.author)
+        except discord.HTTPException:
             pass
 
         await prompt_message.edit(
@@ -147,7 +250,7 @@ class Reactions(cog.Cog):
                     description="Timeout reached.",
                 )
             )
-            await target_message.remove_reaction(event.emoji, ctx.me)
+            await target_message.remove_reaction(emoji, ctx.me)
             return
 
         role = None
@@ -165,7 +268,7 @@ class Reactions(cog.Cog):
                     f" {wrap_in_code(role_message.content)}.",
                 )
             )
-            await target_message.remove_reaction(event.emoji, ctx.me)
+            await target_message.remove_reaction(emoji, ctx.me)
             return
 
         if role.managed:
@@ -176,7 +279,7 @@ class Reactions(cog.Cog):
                     " cannot be used.",
                 )
             )
-            await target_message.remove_reaction(event.emoji, ctx.me)
+            await target_message.remove_reaction(emoji, ctx.me)
             return
 
         if role == ctx.guild.default_role:
@@ -187,7 +290,7 @@ class Reactions(cog.Cog):
                     " @everyone role.",
                 )
             )
-            await target_message.remove_reaction(event.emoji, ctx.me)
+            await target_message.remove_reaction(emoji, ctx.me)
             return
 
         await self.db.execute(
@@ -199,10 +302,10 @@ class Reactions(cog.Cog):
             target_message.channel.id,
             ctx.guild.id,
             role.id,
-            str(event.emoji),
+            str(emoji),
         )
 
-        del self.cache[(target_message.id, str(event.emoji))]
+        del self.cache[(target_message.id, str(emoji))]
 
         check_signature = wrap_in_code(
             f"{ctx.prefix}{self.reactionrole_check.qualified_name}"
@@ -210,7 +313,7 @@ class Reactions(cog.Cog):
         await prompt_message.edit(
             embed=discord.Embed(
                 title="Reaction role created",
-                description=f"Members that react with {event.emoji} on"
+                description=f"Members that react with {emoji} on"
                 f" [this message]({target_message.jump_url}) will now be"
                 f" assigned the {role.mention} role."
                 f"\nMake sure to use {check_signature} to make sure reaction"
@@ -232,7 +335,6 @@ class Reactions(cog.Cog):
             )
         )
 
-        event = None
         done, pending = await asyncio.wait(
             [
                 self.bot.wait_for(
@@ -250,6 +352,7 @@ class Reactions(cog.Cog):
             return_when=asyncio.FIRST_COMPLETED,
         )
 
+        event = None
         try:
             event = done.pop().result()
         except asyncio.TimeoutError:
