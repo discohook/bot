@@ -1,9 +1,10 @@
 import asyncio
 import itertools
+import math
 import re
 
+import cachetools
 import discord
-import lru
 from bot.utils import cog, paginators, wrap_in_code
 from discord.ext import commands
 from discord.utils import get
@@ -15,7 +16,8 @@ class Reactions(cog.Cog):
     def __init__(self, bot):
         super().__init__(bot)
 
-        self.cache = lru.LRU(1024)
+        self.recent_message_cache = cachetools.TTLCache(maxsize=float("inf"), ttl=300)
+        self.cache = cachetools.TTLCache(maxsize=float("inf"), ttl=900)
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, event: discord.RawReactionActionEvent):
@@ -318,7 +320,8 @@ class Reactions(cog.Cog):
             str(emoji),
         )
 
-        del self.cache[(target_message.id, str(emoji))]
+        self.cache.pop((target_message.id, str(emoji)), None)
+        self.recent_message_cache.pop(target_message.id, None)
 
         check_signature = wrap_in_code(
             f"{ctx.prefix}{self.reactionrole_check.qualified_name}"
@@ -380,7 +383,7 @@ class Reactions(cog.Cog):
             str(event.emoji),
         )
 
-        del self.cache[(target_message.id, str(event.emoji))]
+        self.cache.pop((target_message.id, str(event.emoji)), None)
 
         if not role_id:
             await prompt_message.edit(
@@ -501,11 +504,18 @@ class Reactions(cog.Cog):
             await ctx.send(embed=embed)
 
     @commands.Cog.listener()
+    async def on_message(self, message: discord.Message):
+        self.recent_message_cache[message.id] = True
+
+    @commands.Cog.listener()
     async def on_raw_reaction_toggle(self, event: discord.RawReactionActionEvent):
+        if event.message_id in self.recent_message_cache:
+            return
+
         role_id = None
-        if (event.message_id, str(event.emoji)) in self.cache:
+        try:
             role_id = self.cache[(event.message_id, str(event.emoji))]
-        else:
+        except KeyError:
             role_id = await self.db.fetchval(
                 """
                 SELECT role_id FROM reaction_role

@@ -2,6 +2,7 @@ agnostic==1.0.2
 aiohttp==3.7.2
 asyncpg==0.21.0
 black==20.8b1
+cachetools==4.1.1
 discord.py==1.5.1
 jishaku==1.19.2.202
 lru-dict==1.1.6
