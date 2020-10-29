@@ -28,11 +28,7 @@ class Utilities(cog.Cog):
     @commands.command()
     @commands.cooldown(3, 30, type=commands.BucketType.user)
     @checks.sensitive()
-    async def link(
-        self,
-        ctx: commands.Context,
-        message: converter.GuildMessageConverter,
-    ):
+    async def link(self, ctx: commands.Context, message: converter.MessageConverter):
         """Sends a link to recreate a given message in Discohook by message link"""
 
         message_data = {}
@@ -80,12 +76,7 @@ class Utilities(cog.Cog):
 
     @commands.command()
     @commands.cooldown(1, 3, commands.BucketType.member)
-    async def big(
-        self,
-        ctx: commands.Context,
-        *,
-        emoji: converter.GuildPartialEmojiConverter,
-    ):
+    async def big(self, ctx: commands.Context, *, emoji: discord.PartialEmoji):
         """Gives the URL to a custom emoji"""
 
         embed = discord.Embed(
@@ -98,12 +89,7 @@ class Utilities(cog.Cog):
 
     @commands.group(invoke_without_command=True)
     @commands.cooldown(1, 3, commands.BucketType.member)
-    async def avatar(
-        self,
-        ctx: commands.Context,
-        *,
-        user: converter.GuildMemberConverter = None,
-    ):
+    async def avatar(self, ctx: commands.Context, *, user: discord.User = None):
         """Gives the URL to a user's avatar"""
 
         if not user:
@@ -119,12 +105,7 @@ class Utilities(cog.Cog):
 
     @avatar.command(name="static")
     @commands.cooldown(1, 3, commands.BucketType.member)
-    async def avatar_static(
-        self,
-        ctx: commands.Context,
-        *,
-        user: converter.GuildMemberConverter = None,
-    ):
+    async def avatar_static(self, ctx: commands.Context, *, user: discord.User = None):
         """Gives the URL to a user's non-animated avatar"""
 
         if not user:

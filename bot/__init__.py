@@ -40,8 +40,18 @@ class Bot(commands.AutoShardedBot):
             guild_subscriptions=False,
         )
 
+        self.add_check(self.global_check)
+
         for extension in initial_extensions:
             self.load_extension(extension)
+
+    async def start(self, *args, **kwargs):
+        self.session = aiohttp.ClientSession()
+        await super().start(*args, **kwargs)
+
+    async def close(self):
+        await self.session.close()
+        await super().close()
 
     async def get_prefix_list(self, bot, message):
         cfg = self.get_cog("Config")
@@ -59,13 +69,14 @@ class Bot(commands.AutoShardedBot):
             prefix,
         )
 
-    async def start(self, *args, **kwargs):
-        self.session = aiohttp.ClientSession()
-        await super().start(*args, **kwargs)
+    async def global_check(self, ctx):
+        await commands.bot_has_permissions(
+            send_messages=True,
+            embed_links=True,
+            attach_files=True,
+        ).predicate(ctx)
 
-    async def close(self):
-        await self.session.close()
-        await super().close()
+        return True
 
     async def on_ready(self):
         print(f"Ready as {self.user} ({self.user.id})")

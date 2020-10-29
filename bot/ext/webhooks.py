@@ -50,9 +50,7 @@ class Webhooks(cog.Cog):
     @commands.has_guild_permissions(manage_webhooks=True)
     @commands.bot_has_guild_permissions(manage_webhooks=True)
     async def webhook_list(
-        self,
-        ctx: commands.Context,
-        channel: converter.GuildTextChannelConverter = None,
+        self, ctx: commands.Context, channel: discord.TextChannel = None
     ):
         """Lists webhooks for the server or a given channel"""
 
@@ -88,10 +86,7 @@ class Webhooks(cog.Cog):
     @commands.has_guild_permissions(manage_webhooks=True)
     @commands.bot_has_guild_permissions(manage_webhooks=True)
     async def webhook_get(
-        self,
-        ctx: commands.Context,
-        *,
-        webhook: converter.WebhookConverter,
+        self, ctx: commands.Context, *, webhook: converter.WebhookConverter
     ):
         """Shows data for a given webhook"""
 
@@ -102,10 +97,7 @@ class Webhooks(cog.Cog):
     @commands.has_guild_permissions(manage_webhooks=True)
     @commands.bot_has_guild_permissions(manage_webhooks=True)
     async def webhook_url(
-        self,
-        ctx: commands.Context,
-        *,
-        webhook: converter.WebhookConverter,
+        self, ctx: commands.Context, *, webhook: converter.WebhookConverter
     ):
         """Obtains the URL for a given webhook"""
 
@@ -132,11 +124,7 @@ class Webhooks(cog.Cog):
     @commands.has_guild_permissions(manage_webhooks=True)
     @commands.bot_has_guild_permissions(manage_webhooks=True)
     async def webhook_new(
-        self,
-        ctx: commands.Context,
-        channel: converter.GuildTextChannelConverter,
-        *,
-        name: str,
+        self, ctx: commands.Context, channel: discord.TextChannel, *, name: str
     ):
         """Creates a new webhook for a given channel"""
 
@@ -189,10 +177,7 @@ class Webhooks(cog.Cog):
     @commands.has_guild_permissions(manage_webhooks=True)
     @commands.bot_has_guild_permissions(manage_webhooks=True)
     async def webhook_delete(
-        self,
-        ctx: commands.Context,
-        *,
-        webhook: converter.WebhookConverter,
+        self, ctx: commands.Context, *, webhook: converter.WebhookConverter
     ):
         """Deletes a webhook, this cannot be undone
         Messages sent by this webhook will not be deleted"""

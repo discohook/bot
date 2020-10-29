@@ -8,14 +8,16 @@ class Markdown(cog.Cog):
 
     @commands.command(aliases=["member"])
     @commands.cooldown(1, 3, commands.BucketType.member)
-    @commands.guild_only()
     async def user(
         self,
         ctx: commands.Context,
         *,
-        member: converter.GuildMemberConverter,
+        member: discord.Member = None,
     ):
         """Gives formatting to mention a given member"""
+
+        if member is None:
+            member = ctx.author
 
         embed = discord.Embed(title="Syntax", description=f"`{member.mention}`")
         embed.add_field(name="Output", value=member.mention)
@@ -26,12 +28,7 @@ class Markdown(cog.Cog):
     @commands.command()
     @commands.cooldown(1, 3, commands.BucketType.member)
     @commands.guild_only()
-    async def role(
-        self,
-        ctx: commands.Context,
-        *,
-        role: converter.GuildRoleConverter,
-    ):
+    async def role(self, ctx: commands.Context, *, role: discord.Role):
         """Gives formatting to mention a given role"""
 
         embed = discord.Embed(title="Syntax", description=f"`{role.mention}`")
@@ -50,12 +47,7 @@ class Markdown(cog.Cog):
     @commands.command()
     @commands.cooldown(1, 3, commands.BucketType.member)
     @commands.guild_only()
-    async def channel(
-        self,
-        ctx: commands.Context,
-        *,
-        channel: converter.GuildTextChannelConverter,
-    ):
+    async def channel(self, ctx: commands.Context, *, channel: discord.TextChannel):
         """Gives formatting to link to a given channel"""
 
         embed = discord.Embed(title="Syntax", description=f"`{channel.mention}`")
@@ -66,13 +58,7 @@ class Markdown(cog.Cog):
 
     @commands.command(aliases=["emote"])
     @commands.cooldown(1, 3, commands.BucketType.member)
-    @commands.guild_only()
-    async def emoji(
-        self,
-        ctx: commands.Context,
-        *,
-        emoji: converter.GuildPartialEmojiConverter,
-    ):
+    async def emoji(self, ctx: commands.Context, *, emoji: discord.PartialEmoji):
         """Gives formatting to use a given server emoji"""
 
         guild_emoji = self.bot.get_emoji(emoji.id)
