@@ -36,9 +36,6 @@ class Utilities(cog.Cog):
         if len(message.content) > 0:
             message_data["content"] = message.content
 
-        message_data["username"] = message.author.display_name
-        message_data["avatar_url"] = str(message.author.avatar_url_as(format="webp"))
-
         embeds = [embed.to_dict() for embed in message.embeds if embed.type == "rich"]
 
         for embed in embeds:
