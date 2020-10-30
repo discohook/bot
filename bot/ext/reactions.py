@@ -403,6 +403,7 @@ class Reactions(cog.Cog):
 
     @reactionrole.command(name="check")
     @commands.cooldown(3, 30, commands.BucketType.member)
+    @commands.max_concurrency(1, commands.BucketType.guild)
     @commands.has_guild_permissions(manage_roles=True)
     async def reactionrole_check(self, ctx: commands.Context):
         """Checks if reaction roles are set up correctly"""
