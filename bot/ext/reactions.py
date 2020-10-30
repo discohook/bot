@@ -188,14 +188,14 @@ class Reactions(cog.Cog):
         return role
 
     @commands.group(invoke_without_command=True, aliases=["rr"])
-    @commands.cooldown(1, 3, commands.BucketType.member)
+    @commands.cooldown(4, 4, commands.BucketType.member)
     @commands.has_guild_permissions(manage_roles=True)
     async def reactionrole(self, ctx: commands.Context):
         """Group of commands to manage reaction roles"""
         await ctx.send_help("reactionrole")
 
     @reactionrole.command(name="list")
-    @commands.cooldown(1, 3, commands.BucketType.member)
+    @commands.cooldown(4, 4, commands.BucketType.member)
     @commands.has_guild_permissions(manage_roles=True)
     async def reactionrole_list(self, ctx: commands.Context):
         """Lists all messages with reaction roles enabled"""

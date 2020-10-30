@@ -132,7 +132,7 @@ class Meta(cog.Cog):
         )
 
     @commands.group(invoke_without_command=True)
-    @commands.cooldown(1, 3, commands.BucketType.member)
+    @commands.cooldown(4, 4, commands.BucketType.member)
     async def data(self, ctx: commands.Context):
         """Commands to manage data stored by this bot"""
         await ctx.send_help("data")

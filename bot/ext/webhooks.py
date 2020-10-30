@@ -1,7 +1,8 @@
 import asyncio
 
 import discord
-from bot.utils import cog, converter, get_command_signature, paginators, wrap_in_code
+from bot.utils import (cog, converter, get_command_signature, paginators,
+                       wrap_in_code)
 from discord.ext import commands
 
 
@@ -37,7 +38,7 @@ class Webhooks(cog.Cog):
         return embed
 
     @commands.group(invoke_without_command=True)
-    @commands.cooldown(1, 3, commands.BucketType.member)
+    @commands.cooldown(4,4, commands.BucketType.member)
     @commands.has_guild_permissions(manage_webhooks=True)
     @commands.bot_has_guild_permissions(manage_webhooks=True)
     async def webhook(self, ctx: commands.Context):
@@ -45,7 +46,7 @@ class Webhooks(cog.Cog):
         await ctx.send_help("webhook")
 
     @webhook.command(name="list")
-    @commands.cooldown(1, 3, commands.BucketType.member)
+    @commands.cooldown(4,4, commands.BucketType.member)
     @commands.has_guild_permissions(manage_webhooks=True)
     @commands.bot_has_guild_permissions(manage_webhooks=True)
     async def webhook_list(

@@ -72,7 +72,7 @@ class Utilities(cog.Cog):
         await ctx.send(embed=embed)
 
     @commands.command()
-    @commands.cooldown(1, 3, commands.BucketType.member)
+    @commands.cooldown(4, 4, commands.BucketType.member)
     async def big(
         self, ctx: commands.Context, *, emoji: converter.PartialEmojiConverter
     ):
@@ -87,7 +87,7 @@ class Utilities(cog.Cog):
         await ctx.send(embed=embed)
 
     @commands.group(invoke_without_command=True)
-    @commands.cooldown(1, 3, commands.BucketType.member)
+    @commands.cooldown(4, 4, commands.BucketType.member)
     async def avatar(self, ctx: commands.Context, *, user: discord.User = None):
         """Gives the URL to a user's avatar"""
 
@@ -103,7 +103,7 @@ class Utilities(cog.Cog):
         await ctx.send(embed=embed)
 
     @avatar.command(name="static")
-    @commands.cooldown(1, 3, commands.BucketType.member)
+    @commands.cooldown(4, 4, commands.BucketType.member)
     async def avatar_static(self, ctx: commands.Context, *, user: discord.User = None):
         """Gives the URL to a user's non-animated avatar"""
 
@@ -119,7 +119,7 @@ class Utilities(cog.Cog):
         await ctx.send(embed=embed)
 
     @commands.group(invoke_without_command=True)
-    @commands.cooldown(1, 3, commands.BucketType.member)
+    @commands.cooldown(4, 4, commands.BucketType.member)
     async def icon(self, ctx: commands.Context):
         """Gives the URL to a user's icon"""
 
@@ -132,7 +132,7 @@ class Utilities(cog.Cog):
         await ctx.send(embed=embed)
 
     @icon.command(name="static")
-    @commands.cooldown(1, 3, commands.BucketType.member)
+    @commands.cooldown(4, 4, commands.BucketType.member)
     async def icon_static(self, ctx: commands.Context):
         """Gives the URL to a user's non-animated icon"""
 

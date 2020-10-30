@@ -7,7 +7,7 @@ class Markdown(cog.Cog):
     """Markdown syntax helpers"""
 
     @commands.command(aliases=["member"])
-    @commands.cooldown(1, 3, commands.BucketType.member)
+    @commands.cooldown(4, 4, commands.BucketType.member)
     async def user(
         self,
         ctx: commands.Context,
@@ -26,7 +26,7 @@ class Markdown(cog.Cog):
         await ctx.send(embed=embed)
 
     @commands.command()
-    @commands.cooldown(1, 3, commands.BucketType.member)
+    @commands.cooldown(4, 4, commands.BucketType.member)
     @commands.guild_only()
     async def role(self, ctx: commands.Context, *, role: discord.Role):
         """Gives formatting to mention a given role"""
@@ -45,7 +45,7 @@ class Markdown(cog.Cog):
         await ctx.send(embed=embed)
 
     @commands.command()
-    @commands.cooldown(1, 3, commands.BucketType.member)
+    @commands.cooldown(4, 4, commands.BucketType.member)
     @commands.guild_only()
     async def channel(self, ctx: commands.Context, *, channel: discord.TextChannel):
         """Gives formatting to link to a given channel"""
@@ -57,7 +57,7 @@ class Markdown(cog.Cog):
         await ctx.send(embed=embed)
 
     @commands.command(aliases=["emote"])
-    @commands.cooldown(1, 3, commands.BucketType.member)
+    @commands.cooldown(4, 4, commands.BucketType.member)
     async def emoji(
         self, ctx: commands.Context, *, emoji: converter.PartialEmojiConverter
     ):
