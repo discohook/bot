@@ -21,13 +21,34 @@ class FieldPaginator:
         self.base_embed = base_embed.copy()
         self.pages = [[]]
 
-    def add_field(self, *, name: str, value: str, inline: bool = True):
-        last_page = self.pages[-1]
-        if len(last_page) >= 25 - len(self.base_embed.fields):
-            last_page = []
-            self.pages.append(last_page)
+    def _should_create_new_page(self, *, page, name, value):
+        page_field_limit = 25 - len(self.base_embed.fields)
+        if len(page) >= page_field_limit:
+            return True
 
-        last_page.append({"name": name, "value": value, "inline": inline})
+        current_page_length = len(self.base_embed)
+        for field in page:
+            current_page_length += len(field["name"]) + len(field["value"])
+
+        if current_page_length + len(name) + len(value) > 6000:
+            return True
+
+        return False
+
+    def add_field(self, *, name: str, value: str, inline: bool = True):
+        current_page = self.pages[-1]
+
+        if self._should_create_new_page(page=current_page, name=name, value=value):
+            current_page = []
+            self.pages.append(current_page)
+
+        current_page.append(
+            {
+                "name": name,
+                "value": value,
+                "inline": inline,
+            }
+        )
 
     def get_embed_for_page(self, index: int):
         embed = self.base_embed.copy()
