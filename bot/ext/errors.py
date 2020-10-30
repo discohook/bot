@@ -171,8 +171,6 @@ class Errors(cog.Cog):
 
         error = getattr(error, "original", error)
 
-        print(error)
-
         if isinstance(error, tuple(ignored_errors)):
             return
 
