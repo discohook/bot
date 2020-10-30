@@ -1,7 +1,7 @@
 import itertools
 
 import discord
-from bot.utils import wrap_in_code
+from bot.utils import get_clean_prefix, get_command_signature, paginators, wrap_in_code
 from discord.ext import commands
 
 
@@ -14,32 +14,31 @@ class HelpCommand(commands.HelpCommand):
 
         super().__init__(**options)
 
-    async def prepare_help_command(self, ctx, command=None):
-        prefix = self.clean_prefix.replace(r"\\", "\\")
-        command = f"{prefix}{self.invoked_with}"
+    async def prepare_help_command(self, ctx, command):
+        prefix = get_clean_prefix(ctx)
 
         self.embed = discord.Embed(title="Help")
-        self.embed.set_footer(text=f'Use "help" or "help <command>" for more info')
+        self.embed.set_footer(
+            text=f'Use "{prefix}help" or "{prefix}help <command>" for more info'
+        )
 
-    def get_command_signature(self, command, *, short=False):
-        parent = command.full_parent_name
-        alias = command.name if not parent else parent + " " + command.name
+    def get_paginator(self):
+        embed = self.embed.copy()
+        embed.set_footer(
+            text=embed.footer.text + "\nPage {current_page}/{total_pages},"
+            " showing module {first_field}..{last_field}/{total_fields}"
+        )
 
-        if not short and len(command.aliases) > 0:
-            name_with_aliases = f"[{command.name}|{'|'.join(command.aliases)}]"
-            alias = f"{parent} {name_with_aliases}" if parent else name_with_aliases
+        return paginators.FieldPaginator(self.context.bot, base_embed=embed)
 
-        signature = f"{self.context.prefix}{alias}" if not short else alias
-        if command.signature:
-            signature += f" {command.signature}".replace("_", " ")
-
-        return wrap_in_code(signature)
+    def get_command_signature(self, command, *, full=False):
+        return get_command_signature(self.context, command, full=full)
 
     def command_not_found(self, string):
-        return f"Command {wrap_in_code(string)} does not exist"
+        return f"Command {wrap_in_code(string)} does not exist."
 
     def subcommand_not_found(self, command, string):
-        return f"Command {wrap_in_code(command.qualified_name)} has no subcommand named {wrap_in_code(string)}"
+        return f"Command {wrap_in_code(command.qualified_name)} has no subcommand named {wrap_in_code(string)}."
 
     async def send_error_message(self, error):
         await self.get_destination().send(
@@ -58,53 +57,57 @@ class HelpCommand(commands.HelpCommand):
             key=lambda command: command.cog.qualified_name,
         )
 
+        paginator = self.get_paginator()
+
         for category, commands in grouped:
             commands = sorted(commands, key=lambda command: command.name)
             description = []
 
             for command in commands:
                 description.append(
-                    f"{self.get_command_signature(command, short=True)}: {command.help}"
+                    f"{self.get_command_signature(command)}: {command.help}"
                 )
 
-            self.embed.add_field(
+            paginator.add_field(
                 name=category, value="\n".join(description), inline=False
             )
 
-        await self.get_destination().send(embed=self.embed)
+        await paginator.send(target=self.get_destination(), owner=self.context.author)
 
     async def send_cog_help(self, cog: commands.Cog):
-        self.embed.title = f"Help: `{cog.qualified_name}`"
+        self.embed.title = f"Help: {cog.qualified_name}"
         self.embed.description = cog.description
 
-        commands = await self.filter_commands(cog.get_commands(), sort=True)
+        paginator = self.get_paginator()
 
+        commands = await self.filter_commands(cog.get_commands(), sort=True)
         for command in commands:
-            self.embed.add_field(
-                name=f"{self.get_command_signature(command, short=True)}",
+            paginator.add_field(
+                name=f"{self.get_command_signature(command)}",
                 value=command.short_doc,
                 inline=False,
             )
 
-        await self.get_destination().send(embed=self.embed)
+        await paginator.send(target=self.get_destination(), owner=self.context.author)
 
     async def send_group_help(self, group: commands.Group):
-        self.embed.title = f"Help: {self.get_command_signature(group)}"
+        self.embed.title = f"Help: {self.get_command_signature(group, full=True)}"
         self.embed.description = group.help
 
-        commands = await self.filter_commands(group.commands, sort=True)
+        paginator = self.get_paginator()
 
+        commands = await self.filter_commands(group.commands, sort=True)
         for command in commands:
-            self.embed.add_field(
-                name=f"{self.get_command_signature(command, short=True)}",
+            paginator.add_field(
+                name=f"{self.get_command_signature(command)}",
                 value=command.short_doc,
                 inline=False,
             )
 
-        await self.get_destination().send(embed=self.embed)
+        await paginator.send(target=self.get_destination(), owner=self.context.author)
 
     async def send_command_help(self, command: commands.Command):
-        self.embed.title = f"Help: {self.get_command_signature(command)}"
+        self.embed.title = f"Help: {self.get_command_signature(command, full=True)}"
         self.embed.description = command.help
 
         await self.get_destination().send(embed=self.embed)
