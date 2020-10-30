@@ -5,7 +5,7 @@ import re
 
 import cachetools
 import discord
-from bot.utils import cog, paginators, wrap_in_code
+from bot.utils import cog, get_command_signature, paginators, wrap_in_code
 from discord.ext import commands
 from discord.utils import get
 
@@ -323,17 +323,14 @@ class Reactions(cog.Cog):
         self.cache.pop((target_message.id, str(emoji)), None)
         self.recent_message_cache.pop(target_message.id, None)
 
-        check_signature = wrap_in_code(
-            f"{ctx.prefix}{self.reactionrole_check.qualified_name}"
-        )
         await prompt_message.edit(
             embed=discord.Embed(
                 title="Reaction role created",
                 description=f"Members that react with {emoji} on"
                 f" [this message]({target_message.jump_url}) will now be"
                 f" assigned the {role.mention} role."
-                f"\nMake sure to use {check_signature} to make sure reaction"
-                " roles will function correctly in your server.",
+                f"\nMake sure to use {get_command_signature(ctx, self.reactionrole_check)}"
+                " to make sure reaction roles will function correctly in your server.",
             )
         )
 

@@ -1,7 +1,7 @@
 import asyncio
 
 import discord
-from bot.utils import cog, converter, paginators, wrap_in_code
+from bot.utils import cog, converter, get_command_signature, paginators, wrap_in_code
 from discord.ext import commands
 
 
@@ -27,11 +27,10 @@ class Webhooks(cog.Cog):
             value=f"{webhook.created_at.ctime()} UTC".replace("  ", " "),
         )
 
-        url_signature = wrap_in_code(
-            f"{ctx.prefix}{self.webhook_url.qualified_name} {self.webhook_url.signature}"
-        )
         url_message = (
-            webhook.url if show_url else f"Use {url_signature} to obtain the URL"
+            webhook.url
+            if show_url
+            else f"Use {get_command_signature(ctx, self.webhook_url)} to obtain the URL."
         )
         embed.add_field(name="Webhook URL", value=url_message, inline=False)
 
@@ -54,17 +53,14 @@ class Webhooks(cog.Cog):
     ):
         """Lists webhooks for the server or a given channel"""
 
-        get_signature = wrap_in_code(
-            f"{ctx.prefix}{self.webhook_get.qualified_name} {self.webhook_get.signature}"
-        )
-
         embed = discord.Embed(
             title="Webhooks",
-            description=f"Use {get_signature} to get more info on a webhook",
+            description=f"Use {get_command_signature(ctx, self.webhook_get)}"
+            " to get more info on a webhook.",
         )
         embed.set_footer(
             text="Page {current_page}/{total_pages}, "
-            "showing webhook {first_field}..{last_field}/{total_fields}"
+            "showing webhook {first_field}..{last_field}/{total_fields}."
         )
         paginator = paginators.FieldPaginator(self.bot, base_embed=embed)
 
@@ -185,7 +181,8 @@ class Webhooks(cog.Cog):
         message = await ctx.send(
             embed=discord.Embed(
                 title="Confirmation",
-                description=f"Are you sure you want to delete {wrap_in_code(webhook.name)}? This action cannot be reverted.",
+                description=f"Are you sure you want to delete {wrap_in_code(webhook.name)}?"
+                " This action cannot be reverted.",
             )
         )
 
@@ -214,7 +211,7 @@ class Webhooks(cog.Cog):
             await message.edit(
                 embed=discord.Embed(
                     title="Webhook deleted",
-                    description="Messages sent by this webhook have not been deleted",
+                    description="Messages sent by this webhook have not been deleted.",
                 )
             )
         finally:

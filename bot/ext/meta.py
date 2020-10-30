@@ -5,7 +5,7 @@ import typing
 
 import discord
 from bot.ext import config
-from bot.utils import cog, paginators, wrap_in_code
+from bot.utils import cog, get_clean_prefix, paginators, wrap_in_code
 from discord.ext import commands
 from discord.utils import get
 
@@ -25,7 +25,7 @@ class Meta(cog.Cog):
     ):
         """Manages server configuration for bot"""
 
-        command = f"{ctx.prefix}{self.config.qualified_name}"
+        command = f"{get_clean_prefix(ctx)}{self.config.qualified_name}"
 
         if option:
             configurable = get(config.configurables, name=option.lower())
@@ -56,14 +56,12 @@ class Meta(cog.Cog):
             )
             value = wrap_in_code(value)
 
-            set_configurable_signature = wrap_in_code(
-                f"{command} {configurable.name} <new value>"
-            )
+            set_signature = wrap_in_code(f"{command} {configurable.name} <new value>")
             message = (
                 f"Option {configurable.name} has been set to {value}."
                 if new_value is not None
                 else f"Option {configurable.name} is currently set to {value}."
-                f"\nUse {set_configurable_signature} to set it."
+                f"\nUse {set_signature} to set it."
             )
 
             await ctx.send(
