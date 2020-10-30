@@ -178,9 +178,13 @@ class Errors(cog.Cog):
             if "send_messages" in error.missing_perms:
                 try:
                     await ctx.author.send(
-                        "Hey, I don't have permission to send messages in"
-                        f" {escape_markdown(ctx.guild)}, {ctx.channel.mention}."
-                        " Please notify an administrator about this.",
+                        embed=discord.Embed(
+                            title="Missing permissions",
+                            description="Hey, I don't have permission to send messages"
+                            f" in {wrap_in_code(ctx.guild.name)}, {ctx.channel.mention}."
+                            "\nIf you think this is an error, please notify a server"
+                            " administrator about this.",
+                        )
                     )
                 except discord.HTTPException:
                     pass
