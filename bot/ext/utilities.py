@@ -73,7 +73,9 @@ class Utilities(cog.Cog):
 
     @commands.command()
     @commands.cooldown(1, 3, commands.BucketType.member)
-    async def big(self, ctx: commands.Context, *, emoji: discord.PartialEmoji):
+    async def big(
+        self, ctx: commands.Context, *, emoji: converter.PartialEmojiConverter
+    ):
         """Gives the URL to a custom emoji"""
 
         embed = discord.Embed(

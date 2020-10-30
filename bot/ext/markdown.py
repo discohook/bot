@@ -58,7 +58,9 @@ class Markdown(cog.Cog):
 
     @commands.command(aliases=["emote"])
     @commands.cooldown(1, 3, commands.BucketType.member)
-    async def emoji(self, ctx: commands.Context, *, emoji: discord.PartialEmoji):
+    async def emoji(
+        self, ctx: commands.Context, *, emoji: converter.PartialEmojiConverter
+    ):
         """Gives formatting to use a given server emoji"""
 
         guild_emoji = self.bot.get_emoji(emoji.id)

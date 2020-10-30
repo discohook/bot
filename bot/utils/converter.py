@@ -1,10 +1,6 @@
-import re
-
 import discord
 from discord.ext import commands
-from discord.utils import find, get
-
-from . import wrap_in_code
+from discord.utils import get
 
 
 class MessageConverter(commands.MessageConverter):
@@ -26,6 +22,27 @@ class MessageConverter(commands.MessageConverter):
             return message
 
         raise commands.ChannelNotReadable(message.channel)
+
+
+class PartialEmojiConverter(commands.PartialEmojiConverter):
+    """Converts to a :class:`~discord.PartialEmoji`.
+
+    Different from `discord.ext.commands.converter.PartialEmojiConverter` by
+    falling back to getting emoji by name from the guild.
+    """
+
+    async def convert(self, ctx: commands.Context, argument):
+        try:
+            return await super().convert(ctx, argument)
+        except commands.PartialEmojiConversionFailure:
+            if not ctx.guild:
+                raise
+
+            guild_emoji = get(ctx.guild.emojis, name=argument)
+            if guild_emoji is None:
+                guild_emoji = get(ctx.guild.emojis, id=argument)
+
+            return await super().convert(ctx, str(guild_emoji or argument))
 
 
 class WebhookConverter(commands.IDConverter):
@@ -61,6 +78,6 @@ class WebhookConverter(commands.IDConverter):
             result = discord.utils.get(webhooks, name=argument)
 
         if result is None:
-            raise commands.BadArgument(f"Webhook {wrap_in_code(argument)} not found")
+            raise commands.BadArgument(f"Webhook {argument!r} not found")
 
         return result
