@@ -269,6 +269,38 @@ class Reactions(cog.Cog):
 
         try:
             target_message, emoji = await self.prompt_message_emoji(ctx, prompt_message)
+
+            role_id = await self.db.fetchval(
+                """
+                SELECT role_id FROM reaction_role
+                WHERE message_id = $1 AND reaction = $2
+                """,
+                target_message.id,
+                str(emoji),
+            )
+            if role_id:
+                role = ctx.guild.get_role(role_id)
+                if role:
+                    await prompt_message.edit(
+                        embed=discord.Embed(
+                            title="Already exists",
+                            description=f"Reaction role for {emoji} on"
+                            f" [this message]({target_message.jump_url}) already"
+                            " exists.",
+                        )
+                    )
+                    await target_message.remove_reaction(emoji, ctx.me)
+                    return
+
+                await self.db.execute(
+                    """
+                    DELETE FROM reaction_role
+                    WHERE message_id = $1 AND reaction = $2
+                    """,
+                    target_message.id,
+                    str(emoji),
+                )
+
             role = await self.prompt_role(ctx, prompt_message)
         except asyncio.TimeoutError:
             await prompt_message.edit(
