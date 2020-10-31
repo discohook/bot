@@ -527,9 +527,11 @@ class Reactions(cog.Cog):
         if not role_id:
             return
 
-        member = await self.bot.get_guild(event.guild_id).fetch_member(event.user_id)
-
-        if not member:
+        member = None
+        try:
+            guild = self.bot.get_guild(event.guild_id)
+            member = await guild.fetch_member(event.user_id)
+        except discord.NotFound:
             return
 
         try:
