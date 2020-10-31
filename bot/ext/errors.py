@@ -13,6 +13,11 @@ ignored_errors = [
     commands.NotOwner,
 ]
 
+
+def humanize_perm(permission):
+    return permission.replace("_", " ").replace("guild", "server").title()
+
+
 error_types = [
     (
         commands.MissingRequiredArgument,
@@ -77,12 +82,12 @@ error_types = [
     (
         commands.MissingPermissions,
         "Missing permissions",
-        lambda e: f"You are missing permissions: {', '.join(wrap_in_code(perm) for perm in e.missing_perms)}.",
+        lambda e: f"You are missing permissions: {', '.join(humanize_perm(perm) for perm in e.missing_perms)}.",
     ),
     (
         commands.BotMissingPermissions,
         "Missing permissions",
-        lambda e: f"I am missing permissions: {', '.join(wrap_in_code(perm) for perm in e.missing_perms)}.",
+        lambda e: f"I am missing permissions: {', '.join(humanize_perm(perm) for perm in e.missing_perms)}.",
     ),
     (
         commands.PrivateMessageOnly,
