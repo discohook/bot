@@ -38,7 +38,7 @@ class PartialEmojiConverter(commands.PartialEmojiConverter):
             if not ctx.guild:
                 raise
 
-            guild_emoji = get(ctx.guild.emojis, name=argument)
+            guild_emoji = get(ctx.guild.emojis, name=argument.strip(":"))
             if guild_emoji is None:
                 guild_emoji = get(ctx.guild.emojis, id=argument)
 
