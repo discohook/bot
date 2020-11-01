@@ -36,32 +36,32 @@ error_types = [
     ),
     (
         commands.MemberNotFound,
-        "Message not found",
+        "Member not found",
         lambda e: f"Could not find member for {wrap_in_code(e.argument)}.",
     ),
     (
         commands.UserNotFound,
-        "Message not found",
+        "User not found",
         lambda e: f"Could not find user for {wrap_in_code(e.argument)}.",
     ),
     (
         commands.ChannelNotFound,
-        "Message not found",
+        "Channel not found",
         lambda e: f"Could not find channel for {wrap_in_code(e.argument)}.",
     ),
     (
         (commands.EmojiNotFound, commands.PartialEmojiConversionFailure),
-        "Message not found",
+        "Emoji not found",
         lambda e: f"Could not find emoji for {wrap_in_code(e.argument)}.",
     ),
     (
         commands.ChannelNotReadable,
-        "Message not found",
+        "Channel not readable",
         lambda e: f"Could not read messages in {e.argument.mention}.",
     ),
     (
         commands.RoleNotFound,
-        "Message not found",
+        "Role not found",
         lambda e: f"Could not find role for {wrap_in_code(e.argument)}.",
     ),
     (
