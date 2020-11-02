@@ -87,9 +87,9 @@ class Reactions(cog.Cog):
                 raise commands.BadArgument()
 
             message_id = int(match.group("message_id"))
-            channel_id = match.group("channel_id")
+            channel_id = int(match.group("channel_id") or 0)
 
-            channel = ctx.guild.get_channel(int(channel_id))
+            channel = ctx.guild.get_channel(channel_id)
             if not channel:
                 await prompt_message.edit(
                     embed=discord.Embed(
