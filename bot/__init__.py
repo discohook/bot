@@ -88,13 +88,20 @@ class Bot(commands.AutoShardedBot):
         cfg = self.get_cog("Config")
 
         if re.fullmatch(rf"<@!?{self.user.id}>", message.content):
-            embed = discord.Embed(title="Prefix", description="My prefix is `d.`")
+            embed = discord.Embed(title="Prefix", description="My prefix is `d.`.")
 
             if message.guild:
+                ctx = await self.get_context(message)
+                try:
+                    await self.global_check(ctx)
+                except commands.BotMissingPermissions as error:
+                    await self.get_cog("Errors").on_command_error(ctx, error)
+                    return
+
                 prefix = await cfg.get_value(
                     message.guild, get(config.configurables, name="prefix")
                 )
-                embed.description = f"My prefix is {wrap_in_code(prefix)}"
+                embed.description = f"My prefix is {wrap_in_code(prefix)}."
 
             await message.channel.send(embed=embed)
 
