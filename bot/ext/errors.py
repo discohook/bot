@@ -205,38 +205,37 @@ class Errors(cog.Cog):
                 )
                 return
 
-        else:
-            for error_type, title, description in error_types:
-                if isinstance(error, error_type):
-                    await ctx.send(
-                        embed=discord.Embed(
-                            title=title,
-                            description=description(error)
-                            if callable(description)
-                            else description,
-                        ),
-                    )
-
-                    break
-
-            else:
+        for error_type, title, description in error_types:
+            if isinstance(error, error_type):
                 await ctx.send(
                     embed=discord.Embed(
-                        title="Error",
-                        description="An unknown error has occured, please report this.",
-                    )
+                        title=title,
+                        description=description(error)
+                        if callable(description)
+                        else description,
+                    ),
                 )
 
-                await self.report_error(
-                    error,
-                    fields=[
-                        {
-                            "name": "Message",
-                            "value": ctx.message.content,
-                            "inline": False,
-                        },
-                    ],
+                break
+
+        else:
+            await ctx.send(
+                embed=discord.Embed(
+                    title="Error",
+                    description="An unknown error has occured, please report this.",
                 )
+            )
+
+            await self.report_error(
+                error,
+                fields=[
+                    {
+                        "name": "Message",
+                        "value": ctx.message.content,
+                        "inline": False,
+                    },
+                ],
+            )
 
 
 def setup(bot):
