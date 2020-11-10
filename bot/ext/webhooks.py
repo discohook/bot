@@ -152,16 +152,18 @@ class Webhooks(cog.Cog):
         To edit the avatar, attach a image file with the message
         """
 
-        avatar_file = (
-            await ctx.message.attachments[0].read()
-            if len(ctx.message.attachments) > 0
-            else None
-        )
+        edit_kwargs = {}
 
-        if avatar_file is None and new_name is None:
+        if new_name:
+            edit_kwargs["name"] = new_name
+
+        if len(ctx.message.attachments) > 0:
+            edit_kwargs["avatar"] = ctx.message.attachments[0].read()
+
+        if len(edit_kwargs.keys()) <= 0:
             raise commands.UserInputError("No new name or avatar was given")
 
-        await webhook.edit(name=new_name, avatar=avatar_file)
+        await webhook.edit(**edit_kwargs)
 
         webhook = await self.bot.fetch_webhook(webhook.id)
         await ctx.send(
