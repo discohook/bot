@@ -121,7 +121,7 @@ class Utilities(cog.Cog):
     @commands.group(invoke_without_command=True)
     @commands.cooldown(4, 4, commands.BucketType.member)
     async def icon(self, ctx: commands.Context):
-        """Gives the URL to a user's icon"""
+        """Gives the URL to the server's icon"""
 
         url = str(ctx.guild.icon_url_as(static_format="png", size=4096))
 
@@ -134,7 +134,7 @@ class Utilities(cog.Cog):
     @icon.command(name="static")
     @commands.cooldown(4, 4, commands.BucketType.member)
     async def icon_static(self, ctx: commands.Context):
-        """Gives the URL to a user's non-animated icon"""
+        """Gives the URL to the server's non-animated icon"""
 
         url = str(ctx.guild.icon_url_as(format="png", size=4096))
 
