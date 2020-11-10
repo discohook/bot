@@ -158,7 +158,7 @@ class Webhooks(cog.Cog):
             edit_kwargs["name"] = new_name
 
         if len(ctx.message.attachments) > 0:
-            edit_kwargs["avatar"] = ctx.message.attachments[0].read()
+            edit_kwargs["avatar"] = await ctx.message.attachments[0].read()
 
         if len(edit_kwargs.keys()) <= 0:
             raise commands.UserInputError("No new name or avatar was given")
