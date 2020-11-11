@@ -12,16 +12,16 @@ class Utilities(cog.Cog):
     """Message helpers"""
 
     async def get_short_url(self, url):
-        post_url = f"{environ.get('SHORTER_URL')}/create"
-        post_json = {"url": url}
-
-        async with self.session.post(post_url, json=post_json) as resp:
-            if resp.status != 200:
+        async with self.session.post(
+            f"{environ.get('SHORTER_URL')}/create",
+            json={"url": url},
+        ) as resp:
+            if not resp.ok:
                 return None, None
 
             data = await resp.json()
-            url = data["url"]
-            expires = datetime.strptime(data["expires"], "%Y-%m-%dT%H:%M:%S.%f%z")
+            url = f"https://share.discohook.app/go/{data['id']}"
+            expires = datetime.strptime(data["expires"], "%Y-%m-%dT%H:%M:%S.%f")
 
             return url, expires
 
