@@ -13,8 +13,7 @@ class Utilities(cog.Cog):
 
     async def get_short_url(self, url):
         async with self.session.post(
-            f"{environ.get('SHORTER_URL')}/create",
-            json={"url": url},
+            "https://share.discohook.app/create", json={"url": url}
         ) as resp:
             if not resp.ok:
                 return None, None
