@@ -5,7 +5,7 @@ from os import environ
 import asyncpg
 import discord
 import lru
-from bot.utils import cog
+from bot import cmd
 from discord.ext import commands
 from discord.utils import get
 
@@ -55,7 +55,7 @@ def resolve_value(expected_type, user_input: str):
         raise RuntimeError(f"{user_input!r} can't be resolved to {expected_type}")
 
 
-class Config(cog.Cog):
+class Config(cmd.Cog):
     """State management for the bot"""
 
     def __init__(self, bot):
@@ -63,19 +63,7 @@ class Config(cog.Cog):
 
         self.cache = lru.LRU(256)
 
-        self.ready = asyncio.Event()
-        if self.loop.is_running():
-            self.loop.create_task(self.init())
-        else:
-            self.loop.run_until_complete(self.init())
-        self.ready.set()
-
-    async def init(self):
-        self.pool = await asyncpg.create_pool(dsn=environ.get("DATABASE_DSN"))
-
     async def ensure(self, guild: discord.Guild):
-        await self.ready.wait()
-
         if guild.id in self.cache:
             return self.cache[guild.id]
 

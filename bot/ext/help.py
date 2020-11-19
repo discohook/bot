@@ -1,7 +1,8 @@
 import itertools
 
 import discord
-from bot.utils import get_clean_prefix, get_command_signature, paginators, wrap_in_code
+from bot import paginators
+from bot.utils import get_clean_prefix, get_command_signature, wrap_in_code
 from discord.ext import commands
 
 

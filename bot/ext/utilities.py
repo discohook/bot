@@ -3,12 +3,13 @@ import json
 from datetime import datetime
 from os import environ
 
+from bot import cmd
 import discord
-from bot.utils import checks, cog, converter
+from bot import checks, converter
 from discord.ext import commands
 
 
-class Utilities(cog.Cog):
+class Utilities(cmd.Cog):
     """Message helpers"""
 
     async def get_short_url(self, url):

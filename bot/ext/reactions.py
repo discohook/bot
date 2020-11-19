@@ -3,14 +3,16 @@ import itertools
 import math
 import re
 
+from bot import cmd
 import cachetools
 import discord
-from bot.utils import cog, get_command_signature, paginators, wrap_in_code
+from bot import paginators
+from bot.utils import get_command_signature, wrap_in_code
 from discord.ext import commands
 from discord.utils import get
 
 
-class Reactions(cog.Cog):
+class Reactions(cmd.Cog):
     """Automated actions on message reactions"""
 
     def __init__(self, bot):

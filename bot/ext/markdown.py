@@ -1,9 +1,10 @@
+from bot import cmd
 import discord
-from bot.utils import cog, converter
+from bot import converter
 from discord.ext import commands
 
 
-class Markdown(cog.Cog):
+class Markdown(cmd.Cog):
     """Markdown syntax helpers"""
 
     @commands.command(aliases=["member"])

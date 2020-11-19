@@ -1,11 +1,13 @@
 import asyncio
 
+from bot import cmd
 import discord
-from bot.utils import cog, converter, get_command_signature, paginators, wrap_in_code
+from bot import converter, paginators
+from bot.utils import get_command_signature, wrap_in_code
 from discord.ext import commands
 
 
-class Webhooks(cog.Cog):
+class Webhooks(cmd.Cog):
     """Webhook management"""
 
     def get_webhook_embed(

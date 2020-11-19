@@ -1,6 +1,8 @@
 import re
+from os import environ
 
 import aiohttp
+import asyncpg
 import discord
 from discord.ext import commands
 from discord.utils import get
@@ -47,10 +49,12 @@ class Bot(commands.AutoShardedBot):
 
     async def start(self, *args, **kwargs):
         self.session = aiohttp.ClientSession()
+        self.pool = await asyncpg.create_pool(dsn=environ.get("DATABASE_DSN"))
         await super().start(*args, **kwargs)
 
     async def close(self):
         await self.session.close()
+        await self.pool.close()
         await super().close()
 
     async def get_prefix_list(self, bot, message):

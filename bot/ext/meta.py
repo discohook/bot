@@ -3,14 +3,16 @@ import io
 import json
 import typing
 
+from bot import cmd
 import discord
+from bot import paginators
 from bot.ext import config
-from bot.utils import cog, get_clean_prefix, paginators, wrap_in_code
+from bot.utils import get_clean_prefix, wrap_in_code
 from discord.ext import commands
 from discord.utils import get
 
 
-class Meta(cog.Cog):
+class Meta(cmd.Cog):
     """Commands related to the bot itself"""
 
     @commands.group(invoke_without_command=True)

@@ -2,8 +2,9 @@ import math
 import sys
 import traceback
 
+from bot import cmd
 import discord
-from bot.utils import cog, wrap_in_code
+from bot.utils import wrap_in_code
 from discord.ext import commands
 from discord.utils import escape_markdown
 
@@ -117,7 +118,7 @@ error_types = [
 ]
 
 
-class Errors(cog.Cog):
+class Errors(cmd.Cog):
     """Error handlers"""
 
     async def report_error(self, error, *, fields):

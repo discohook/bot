@@ -12,12 +12,12 @@ class Cog(commands.Cog):
         return self.bot.loop
 
     @property
-    def cfg(self):
-        return self.bot.get_cog("Config")
+    def db(self):
+        return self.bot.pool
 
     @property
-    def db(self):
-        return self.cfg.pool
+    def cfg(self):
+        return self.bot.get_cog("Config")
 
     @property
     def session(self):
