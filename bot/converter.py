@@ -2,6 +2,8 @@ import discord
 from discord.ext import commands
 from discord.utils import get
 
+from bot import cmd
+
 
 class MessageConverter(commands.MessageConverter):
     """Converts to a :class:`discord.Message`.
