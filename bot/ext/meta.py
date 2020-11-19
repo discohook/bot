@@ -3,9 +3,8 @@ import io
 import json
 import typing
 
-from bot import cmd
 import discord
-from bot import paginators
+from bot import cmd, paginators
 from bot.ext import config
 from bot.utils import get_clean_prefix, wrap_in_code
 from discord.ext import commands
@@ -20,7 +19,7 @@ class Meta(cmd.Cog):
     @commands.guild_only()
     async def config(
         self,
-        ctx: commands.Context,
+        ctx: cmd.Context,
         option: typing.Optional[str],
         *,
         new_value: typing.Optional[str],
@@ -97,7 +96,7 @@ class Meta(cmd.Cog):
 
     @commands.command()
     @commands.cooldown(3, 8, commands.BucketType.channel)
-    async def about(self, ctx: commands.Context):
+    async def about(self, ctx: cmd.Context):
         """Gives information about this bot"""
 
         app_info = await self.bot.application_info()
@@ -122,7 +121,7 @@ class Meta(cmd.Cog):
 
     @commands.command()
     @commands.cooldown(3, 8, commands.BucketType.channel)
-    async def invite(self, ctx: commands.Context):
+    async def invite(self, ctx: cmd.Context):
         """Sends the bot invite and support server links"""
 
         await ctx.send(
@@ -135,14 +134,14 @@ class Meta(cmd.Cog):
 
     @commands.group(invoke_without_command=True)
     @commands.cooldown(4, 4, commands.BucketType.member)
-    async def data(self, ctx: commands.Context):
+    async def data(self, ctx: cmd.Context):
         """Commands to manage data stored by this bot"""
         await ctx.send_help("data")
 
     @data.command(name="delete")
     @commands.cooldown(3, 30, commands.BucketType.member)
     @commands.has_guild_permissions(administrator=True)
-    async def data_delete(self, ctx: commands.Context):
+    async def data_delete(self, ctx: cmd.Context):
         """Delete the server's data stored by this bot"""
 
         message = await ctx.send(
@@ -169,7 +168,7 @@ class Meta(cmd.Cog):
                 ),
             )
         except asyncio.TimeoutError:
-            await message.edit(
+            await ctx.send(
                 embed=discord.Embed(
                     title="Confirmation cancelled",
                     description="30 second timeout reached",
@@ -178,7 +177,7 @@ class Meta(cmd.Cog):
             await message.remove_reaction("\N{WASTEBASKET}", ctx.guild.me)
             return
 
-        await message.edit(
+        await ctx.send(
             embed=discord.Embed(
                 title="Leaving server",
                 description="Data will be deleted hereafter."
@@ -193,7 +192,7 @@ class Meta(cmd.Cog):
     @data.command(name="dump")
     @commands.cooldown(3, 30, commands.BucketType.member)
     @commands.has_guild_permissions(administrator=True)
-    async def dump(self, ctx: commands.Context):
+    async def dump(self, ctx: cmd.Context):
         """Dumps all data stored by this bot"""
 
         config = dict(await self.cfg.ensure(ctx.guild))

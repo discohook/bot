@@ -1,8 +1,7 @@
 import asyncio
 
-from bot import cmd
 import discord
-from bot import converter, paginators
+from bot import cmd, converter, paginators
 from bot.utils import get_command_signature, wrap_in_code
 from discord.ext import commands
 
@@ -12,7 +11,7 @@ class Webhooks(cmd.Cog):
 
     def get_webhook_embed(
         self,
-        ctx: commands.Context,
+        ctx: cmd.Context,
         webhook: discord.Webhook,
         *,
         message=None,
@@ -42,7 +41,7 @@ class Webhooks(cmd.Cog):
     @commands.cooldown(4, 4, commands.BucketType.member)
     @commands.has_guild_permissions(manage_webhooks=True)
     @commands.bot_has_guild_permissions(manage_webhooks=True)
-    async def webhook(self, ctx: commands.Context):
+    async def webhook(self, ctx: cmd.Context):
         """Group of commands to manage webhooks"""
         await ctx.send_help("webhook")
 
@@ -50,9 +49,7 @@ class Webhooks(cmd.Cog):
     @commands.cooldown(4, 4, commands.BucketType.member)
     @commands.has_guild_permissions(manage_webhooks=True)
     @commands.bot_has_guild_permissions(manage_webhooks=True)
-    async def webhook_list(
-        self, ctx: commands.Context, channel: discord.TextChannel = None
-    ):
+    async def webhook_list(self, ctx: cmd.Context, channel: discord.TextChannel = None):
         """Lists webhooks for the server or a given channel"""
 
         embed = discord.Embed(
@@ -84,7 +81,7 @@ class Webhooks(cmd.Cog):
     @commands.has_guild_permissions(manage_webhooks=True)
     @commands.bot_has_guild_permissions(manage_webhooks=True)
     async def webhook_get(
-        self, ctx: commands.Context, *, webhook: converter.WebhookConverter
+        self, ctx: cmd.Context, *, webhook: converter.WebhookConverter
     ):
         """Shows data for a given webhook"""
 
@@ -95,7 +92,7 @@ class Webhooks(cmd.Cog):
     @commands.has_guild_permissions(manage_webhooks=True)
     @commands.bot_has_guild_permissions(manage_webhooks=True)
     async def webhook_url(
-        self, ctx: commands.Context, *, webhook: converter.WebhookConverter
+        self, ctx: cmd.Context, *, webhook: converter.WebhookConverter
     ):
         """Obtains the URL for a given webhook"""
 
@@ -122,7 +119,7 @@ class Webhooks(cmd.Cog):
     @commands.has_guild_permissions(manage_webhooks=True)
     @commands.bot_has_guild_permissions(manage_webhooks=True)
     async def webhook_new(
-        self, ctx: commands.Context, channel: discord.TextChannel, *, name: str
+        self, ctx: cmd.Context, channel: discord.TextChannel, *, name: str
     ):
         """Creates a new webhook for a given channel"""
 
@@ -144,7 +141,7 @@ class Webhooks(cmd.Cog):
     @commands.bot_has_guild_permissions(manage_webhooks=True)
     async def webhook_edit(
         self,
-        ctx: commands.Context,
+        ctx: cmd.Context,
         webhook: converter.WebhookConverter,
         *,
         new_name: str = None,
@@ -177,7 +174,7 @@ class Webhooks(cmd.Cog):
     @commands.has_guild_permissions(manage_webhooks=True)
     @commands.bot_has_guild_permissions(manage_webhooks=True)
     async def webhook_delete(
-        self, ctx: commands.Context, *, webhook: converter.WebhookConverter
+        self, ctx: cmd.Context, *, webhook: converter.WebhookConverter
     ):
         """Deletes a webhook, this cannot be undone
         Messages sent by this webhook will not be deleted"""
@@ -203,7 +200,7 @@ class Webhooks(cmd.Cog):
                 ),
             )
         except asyncio.TimeoutError:
-            await message.edit(
+            await ctx.send(
                 embed=discord.Embed(
                     title="Confirmation cancelled",
                     description="30 second timeout reached",
@@ -212,7 +209,7 @@ class Webhooks(cmd.Cog):
         else:
             await webhook.delete()
 
-            await message.edit(
+            await ctx.send(
                 embed=discord.Embed(
                     title="Webhook deleted",
                     description="Messages sent by this webhook have not been deleted.",

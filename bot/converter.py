@@ -10,7 +10,7 @@ class MessageConverter(commands.MessageConverter):
     leaking messages from other guilds, or channels the member cannot read.
     """
 
-    async def convert(self, ctx: commands.Context, argument):
+    async def convert(self, ctx: cmd.Context, argument):
         message = await super().convert(ctx, argument)
 
         perms = message.channel.permissions_for(ctx.author)
@@ -31,7 +31,7 @@ class PartialEmojiConverter(commands.PartialEmojiConverter):
     falling back to getting emoji by name from the guild.
     """
 
-    async def convert(self, ctx: commands.Context, argument):
+    async def convert(self, ctx: cmd.Context, argument):
         try:
             return await super().convert(ctx, argument)
         except commands.PartialEmojiConversionFailure:
@@ -53,7 +53,7 @@ class WebhookConverter(commands.IDConverter):
     3. Lookup by name in current guild
     """
 
-    async def convert(self, ctx: commands.Context, argument: str):
+    async def convert(self, ctx: cmd.Context, argument: str):
         if not ctx.guild:
             raise commands.NoPrivateMessage()
 

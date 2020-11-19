@@ -3,9 +3,8 @@ import json
 from datetime import datetime
 from os import environ
 
-from bot import cmd
 import discord
-from bot import checks, converter
+from bot import checks, cmd, converter
 from discord.ext import commands
 
 
@@ -20,7 +19,7 @@ class Utilities(cmd.Cog):
                 return None, None
 
             data = await resp.json()
-            url = f"https://share.discohook.app/go/{data['id']}"
+            url = data["url"]
             expires = datetime.strptime(data["expires"], "%Y-%m-%dT%H:%M:%S.%f")
 
             return url, expires
@@ -28,7 +27,7 @@ class Utilities(cmd.Cog):
     @commands.command()
     @commands.cooldown(3, 30, type=commands.BucketType.user)
     @checks.sensitive()
-    async def link(self, ctx: commands.Context, message: converter.MessageConverter):
+    async def link(self, ctx: cmd.Context, message: converter.MessageConverter):
         """Sends a link to recreate a given message in Discohook by message link"""
 
         message_data = {}
@@ -73,9 +72,7 @@ class Utilities(cmd.Cog):
 
     @commands.command()
     @commands.cooldown(4, 4, commands.BucketType.member)
-    async def big(
-        self, ctx: commands.Context, *, emoji: converter.PartialEmojiConverter
-    ):
+    async def big(self, ctx: cmd.Context, *, emoji: converter.PartialEmojiConverter):
         """Gives the URL to a custom emoji"""
 
         embed = discord.Embed(
@@ -88,7 +85,7 @@ class Utilities(cmd.Cog):
 
     @commands.group(invoke_without_command=True)
     @commands.cooldown(4, 4, commands.BucketType.member)
-    async def avatar(self, ctx: commands.Context, *, user: discord.User = None):
+    async def avatar(self, ctx: cmd.Context, *, user: discord.User = None):
         """Gives the URL to a user's avatar"""
 
         if not user:
@@ -104,7 +101,7 @@ class Utilities(cmd.Cog):
 
     @avatar.command(name="static")
     @commands.cooldown(4, 4, commands.BucketType.member)
-    async def avatar_static(self, ctx: commands.Context, *, user: discord.User = None):
+    async def avatar_static(self, ctx: cmd.Context, *, user: discord.User = None):
         """Gives the URL to a user's non-animated avatar"""
 
         if not user:
@@ -120,7 +117,7 @@ class Utilities(cmd.Cog):
 
     @commands.group(invoke_without_command=True)
     @commands.cooldown(4, 4, commands.BucketType.member)
-    async def icon(self, ctx: commands.Context):
+    async def icon(self, ctx: cmd.Context):
         """Gives the URL to the server's icon"""
 
         url = str(ctx.guild.icon_url_as(static_format="png", size=4096))
@@ -133,7 +130,7 @@ class Utilities(cmd.Cog):
 
     @icon.command(name="static")
     @commands.cooldown(4, 4, commands.BucketType.member)
-    async def icon_static(self, ctx: commands.Context):
+    async def icon_static(self, ctx: cmd.Context):
         """Gives the URL to the server's non-animated icon"""
 
         url = str(ctx.guild.icon_url_as(format="png", size=4096))

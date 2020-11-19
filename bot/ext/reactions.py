@@ -3,10 +3,9 @@ import itertools
 import math
 import re
 
-from bot import cmd
 import cachetools
 import discord
-from bot import paginators
+from bot import cmd, paginators
 from bot.utils import get_command_signature, wrap_in_code
 from discord.ext import commands
 from discord.utils import get
@@ -29,10 +28,8 @@ class Reactions(cmd.Cog):
     async def on_raw_reaction_remove(self, event: discord.RawReactionActionEvent):
         self.bot.dispatch("raw_reaction_toggle", event)
 
-    async def prompt_message_emoji(
-        self, ctx: commands.Context, prompt_message: discord.Message
-    ):
-        await prompt_message.edit(
+    async def prompt_message_emoji(self, ctx: cmd.Context):
+        await ctx.send(
             embed=discord.Embed(
                 title="Creating reaction role",
                 description="Give any message in your server a reaction to"
@@ -79,7 +76,7 @@ class Reactions(cmd.Cog):
 
             match = id_re.match(result.content) or link_re.match(result.content)
             if not match:
-                await prompt_message.edit(
+                await ctx.send(
                     embed=discord.Embed(
                         title="Cancelled",
                         description="No message could be found for"
@@ -93,7 +90,7 @@ class Reactions(cmd.Cog):
 
             channel = ctx.guild.get_channel(channel_id)
             if not channel:
-                await prompt_message.edit(
+                await ctx.send(
                     embed=discord.Embed(
                         title="Cancelled",
                         description="No message could be found for"
@@ -105,7 +102,7 @@ class Reactions(cmd.Cog):
             try:
                 target_message = await channel.fetch_message(message_id)
             except discord.HTTPException:
-                await prompt_message.edit(
+                await ctx.send(
                     embed=discord.Embed(
                         title="Cancelled",
                         description="No message could be found for"
@@ -114,7 +111,7 @@ class Reactions(cmd.Cog):
                 )
                 raise commands.BadArgument()
 
-            await prompt_message.edit(
+            await ctx.send(
                 embed=discord.Embed(
                     title="Creating reaction role",
                     description="Give the name of the emoji in this server you want"
@@ -131,7 +128,7 @@ class Reactions(cmd.Cog):
 
             emoji = get(ctx.guild.emojis, name=emoji_message.content)
             if not emoji or not emoji.is_usable():
-                await prompt_message.edit(
+                await ctx.send(
                     embed=discord.Embed(
                         title="Cancelled",
                         description="No emoji could be found for"
@@ -153,8 +150,8 @@ class Reactions(cmd.Cog):
 
         return target_message, emoji
 
-    async def prompt_role(self, ctx: commands.Context, prompt_message: discord.Message):
-        await prompt_message.edit(
+    async def prompt_role(self, ctx: cmd.Context):
+        await ctx.send(
             embed=discord.Embed(
                 title="Creating reaction role",
                 description="Ping or give the name of the role that should be"
@@ -178,7 +175,7 @@ class Reactions(cmd.Cog):
             role = get(ctx.guild.roles, name=role_message.content)
 
         if not role:
-            await prompt_message.edit(
+            await ctx.send(
                 embed=discord.Embed(
                     title="Cancelled",
                     description="No role could be found for"
@@ -192,14 +189,14 @@ class Reactions(cmd.Cog):
     @commands.group(invoke_without_command=True, aliases=["rr"])
     @commands.cooldown(4, 4, commands.BucketType.member)
     @commands.has_guild_permissions(manage_roles=True)
-    async def reactionrole(self, ctx: commands.Context):
+    async def reactionrole(self, ctx: cmd.Context):
         """Group of commands to manage reaction roles"""
         await ctx.send_help("reactionrole")
 
     @reactionrole.command(name="list")
     @commands.cooldown(4, 4, commands.BucketType.member)
     @commands.has_guild_permissions(manage_roles=True)
-    async def reactionrole_list(self, ctx: commands.Context):
+    async def reactionrole_list(self, ctx: cmd.Context):
         """Lists all messages with reaction roles enabled"""
 
         embed = discord.Embed(title="Reaction roles")
@@ -240,7 +237,7 @@ class Reactions(cmd.Cog):
     @reactionrole.command(name="new", aliases=["add", "create"])
     @commands.cooldown(3, 30, commands.BucketType.member)
     @commands.has_guild_permissions(manage_roles=True)
-    async def reactionrole_new(self, ctx: commands.Context):
+    async def reactionrole_new(self, ctx: cmd.Context):
         """Creates a new reaction role"""
 
         count = await self.db.fetchval(
@@ -261,16 +258,12 @@ class Reactions(cmd.Cog):
             )
             return
 
-        prompt_message = await ctx.send(
-            embed=discord.Embed(title="Creating reaction role")
-        )
-
         target_message = None
         emoji = None
         role = None
 
         try:
-            target_message, emoji = await self.prompt_message_emoji(ctx, prompt_message)
+            target_message, emoji = await self.prompt_message_emoji(ctx)
 
             role_id = await self.db.fetchval(
                 """
@@ -283,7 +276,7 @@ class Reactions(cmd.Cog):
             if role_id:
                 role = ctx.guild.get_role(role_id)
                 if role:
-                    await prompt_message.edit(
+                    await ctx.send(
                         embed=discord.Embed(
                             title="Already exists",
                             description=f"Reaction role for {emoji} on"
@@ -303,9 +296,9 @@ class Reactions(cmd.Cog):
                     str(emoji),
                 )
 
-            role = await self.prompt_role(ctx, prompt_message)
+            role = await self.prompt_role(ctx)
         except asyncio.TimeoutError:
-            await prompt_message.edit(
+            await ctx.send(
                 embed=discord.Embed(
                     title="Cancelled",
                     description="Timeout reached.",
@@ -321,7 +314,7 @@ class Reactions(cmd.Cog):
             return
 
         if role.managed:
-            await prompt_message.edit(
+            await ctx.send(
                 embed=discord.Embed(
                     title="Cancelled",
                     description="The role is managed by an integration and"
@@ -332,7 +325,7 @@ class Reactions(cmd.Cog):
             return
 
         if role == ctx.guild.default_role:
-            await prompt_message.edit(
+            await ctx.send(
                 embed=discord.Embed(
                     title="Cancelled",
                     description="You cannot create a reaction role for the"
@@ -357,7 +350,7 @@ class Reactions(cmd.Cog):
         self.cache.pop((target_message.id, str(emoji)), None)
         self.recent_message_cache.pop(target_message.id, None)
 
-        await prompt_message.edit(
+        await ctx.send(
             embed=discord.Embed(
                 title="Reaction role created",
                 description=f"Members that react with {emoji} on"
@@ -371,7 +364,7 @@ class Reactions(cmd.Cog):
     @reactionrole.command(name="delete", aliases=["remove"])
     @commands.cooldown(3, 30, commands.BucketType.member)
     @commands.has_guild_permissions(manage_roles=True)
-    async def reactionrole_delete(self, ctx: commands.Context):
+    async def reactionrole_delete(self, ctx: cmd.Context):
         """Deletes a reaction role for a message"""
 
         prompt_message = await ctx.send(
@@ -391,7 +384,7 @@ class Reactions(cmd.Cog):
                 timeout=300.0,
             )
         except asyncio.TimeoutError:
-            await prompt_message.edit(
+            await ctx.send(
                 embed=discord.Embed(
                     title="Cancelled",
                     description="Timeout reached.",
@@ -417,7 +410,7 @@ class Reactions(cmd.Cog):
         self.cache.pop((target_message.id, str(event.emoji)), None)
 
         if not role_id:
-            await prompt_message.edit(
+            await ctx.send(
                 embed=discord.Embed(
                     title="Not found",
                     description="There was no reaction role configured for the"
@@ -426,7 +419,7 @@ class Reactions(cmd.Cog):
             )
             return
 
-        await prompt_message.edit(
+        await ctx.send(
             embed=discord.Embed(
                 title="Deleted reaction role",
                 description=f"Members that react with {event.emoji} on"
@@ -439,7 +432,7 @@ class Reactions(cmd.Cog):
     @commands.cooldown(3, 30, commands.BucketType.member)
     @commands.max_concurrency(1, commands.BucketType.guild)
     @commands.has_guild_permissions(manage_roles=True)
-    async def reactionrole_check(self, ctx: commands.Context):
+    async def reactionrole_check(self, ctx: cmd.Context):
         """Checks if reaction roles are set up correctly"""
 
         async with ctx.typing():

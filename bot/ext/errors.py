@@ -2,8 +2,8 @@ import math
 import sys
 import traceback
 
-from bot import cmd
 import discord
+from bot import cmd
 from bot.utils import wrap_in_code
 from discord.ext import commands
 from discord.utils import escape_markdown
@@ -168,7 +168,7 @@ class Errors(cmd.Cog):
         )
 
     @commands.Cog.listener()
-    async def on_command_error(self, ctx: commands.Context, error):
+    async def on_command_error(self, ctx: cmd.Context, error):
         if str(error).startswith("The global check "):
             try:
                 await self.bot.global_check(ctx)

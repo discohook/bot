@@ -16,7 +16,7 @@ def wrap_in_code(value: str, *, block: Optional[Union[bool, str]] = None):
     return f"```{block}\n" + value + "\n```"
 
 
-def get_clean_prefix(ctx: commands.Context):
+def get_clean_prefix(ctx: cmd.Context):
     if re.match(f"<@!?{ctx.me.id}>", ctx.prefix):
         return f"@{ctx.me.display_name} "
 
@@ -24,7 +24,7 @@ def get_clean_prefix(ctx: commands.Context):
 
 
 def get_command_signature(
-    ctx: commands.Context,
+    ctx: cmd.Context,
     command: commands.Command,
     *,
     with_prefix=True,

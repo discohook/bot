@@ -7,6 +7,7 @@ import discord
 from discord.ext import commands
 from discord.utils import get
 
+from bot import cmd
 from bot.ext import config
 from bot.utils import wrap_in_code
 
@@ -89,13 +90,13 @@ class Bot(commands.AutoShardedBot):
         if message.author.bot:
             return
 
+        ctx = await self.get_context(message, cls=cmd.Context)
         cfg = self.get_cog("Config")
 
         if re.fullmatch(rf"<@!?{self.user.id}>", message.content):
             embed = discord.Embed(title="Prefix", description="My prefix is `d.`.")
 
             if message.guild:
-                ctx = await self.get_context(message)
                 try:
                     await self.global_check(ctx)
                 except commands.BotMissingPermissions as error:
@@ -109,7 +110,7 @@ class Bot(commands.AutoShardedBot):
 
             await message.channel.send(embed=embed)
 
-        await self.process_commands(message)
+        await self.invoke(ctx)
 
     async def on_error(self, event, *args, **kwargs):
         errors = self.get_cog("Errors")

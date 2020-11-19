@@ -1,6 +1,5 @@
-from bot import cmd
 import discord
-from bot import converter
+from bot import cmd, converter
 from discord.ext import commands
 
 
@@ -9,12 +8,7 @@ class Markdown(cmd.Cog):
 
     @commands.command(aliases=["member"])
     @commands.cooldown(4, 4, commands.BucketType.member)
-    async def user(
-        self,
-        ctx: commands.Context,
-        *,
-        member: discord.Member = None,
-    ):
+    async def user(self, ctx: cmd.Context, *, member: discord.Member = None):
         """Gives formatting to mention a given member"""
 
         if member is None:
@@ -29,7 +23,7 @@ class Markdown(cmd.Cog):
     @commands.command()
     @commands.cooldown(4, 4, commands.BucketType.member)
     @commands.guild_only()
-    async def role(self, ctx: commands.Context, *, role: discord.Role):
+    async def role(self, ctx: cmd.Context, *, role: discord.Role):
         """Gives formatting to mention a given role"""
 
         embed = discord.Embed(title="Syntax", description=f"`{role.mention}`")
@@ -48,7 +42,7 @@ class Markdown(cmd.Cog):
     @commands.command()
     @commands.cooldown(4, 4, commands.BucketType.member)
     @commands.guild_only()
-    async def channel(self, ctx: commands.Context, *, channel: discord.TextChannel):
+    async def channel(self, ctx: cmd.Context, *, channel: discord.TextChannel):
         """Gives formatting to link to a given channel"""
 
         embed = discord.Embed(title="Syntax", description=f"`{channel.mention}`")
@@ -59,9 +53,7 @@ class Markdown(cmd.Cog):
 
     @commands.command(aliases=["emote"])
     @commands.cooldown(4, 4, commands.BucketType.member)
-    async def emoji(
-        self, ctx: commands.Context, *, emoji: converter.PartialEmojiConverter
-    ):
+    async def emoji(self, ctx: cmd.Context, *, emoji: converter.PartialEmojiConverter):
         """Gives formatting to use a given server emoji"""
 
         guild_emoji = self.bot.get_emoji(emoji.id)
