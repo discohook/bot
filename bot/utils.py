@@ -3,6 +3,8 @@ from typing import Optional, Union
 
 from discord.ext import commands
 
+from bot import cmd
+
 
 def wrap_in_code(value: str, *, block: Optional[Union[bool, str]] = None):
     value = value.replace("`", "\u200b`\u200b")
