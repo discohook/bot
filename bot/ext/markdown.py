@@ -1,3 +1,5 @@
+import io
+
 import discord
 from bot import cmd, converter
 from discord.ext import commands
@@ -76,6 +78,15 @@ class Markdown(cmd.Cog):
         embed.set_footer(text=f"ID: {emoji.id}")
 
         await ctx.send(embed=embed)
+
+    @commands.command()
+    @commands.cooldown(4, 4, commands.BucketType.member)
+    async def raw(self, ctx: cmd.Context, *, content: str):
+        """Uploads a text file with the raw message"""
+
+        fp = io.StringIO(content)
+
+        await ctx.send(files=[discord.File(fp, filename=f"{ctx.message.id}.txt")])
 
 
 def setup(bot):
