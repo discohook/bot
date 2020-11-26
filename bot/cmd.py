@@ -47,7 +47,7 @@ class Context(commands.Context):
             self.sent_message = None
 
         if self.sent_message:
-            self.sent_message = await self.sent_message.edit(
+            await self.sent_message.edit(
                 content=content,
                 embed=embed,
                 delete_after=delete_after,
