@@ -2,6 +2,7 @@ import base64
 import json
 from datetime import datetime
 from os import environ
+from urllib.parse import urlunparse
 
 import discord
 from bot import checks, cmd, converter
@@ -20,36 +21,42 @@ class Utilities(cmd.Cog):
 
             data = await resp.json()
             url = data["url"]
-            expires = datetime.strptime(data["expires"], "%Y-%m-%dT%H:%M:%S.%f")
+            expires = datetime.fromisoformat(data["expires"])
 
             return url, expires
 
-    @commands.command()
+    def get_message_data(self, message: discord.Message):
+        data = {
+            "content": message.content,
+            "embeds": [],
+        }
+
+        for embed in message.embeds:
+            if embed.type != "rich":
+                continue
+
+            embed_dict = embed.to_dict()
+            embed_dict.pop("type")
+            data["embeds"].append(embed_dict)
+
+        if len(data["embeds"]) <= 0:
+            data.pop("embeds")
+
+        return data
+
+    @commands.command(require_var_positional=True)
     @commands.cooldown(3, 30, type=commands.BucketType.user)
     @checks.sensitive()
-    async def link(self, ctx: cmd.Context, message: converter.MessageConverter):
+    async def link(self, ctx: cmd.Context, *messages: converter.MessageConverter):
         """Sends a link to recreate a given message in Discohook by message link"""
 
-        message_data = {}
+        data = {"messages": []}
+        for message in messages:
+            data["messages"].append({"data": self.get_message_data(message)})
 
-        if len(message.content) > 0:
-            message_data["content"] = message.content
-
-        embeds = [embed.to_dict() for embed in message.embeds if embed.type == "rich"]
-
-        for embed in embeds:
-            embed.pop("type")
-
-        if len(embeds) > 0:
-            message_data["embeds"] = embeds
-
-        message_json = json.dumps({"message": message_data}, separators=(",", ":"))
-        message_b64 = (
-            base64.urlsafe_b64encode(message_json.encode("utf-8"))
-            .decode("utf-8")
-            .replace("=", "")
-        )
-        url = f"https://discohook.app/?message={message_b64}"
+        data_json = json.dumps(data, separators=(",", ":"))
+        data_b64 = base64.urlsafe_b64encode(data_json.encode()).decode().strip("=")
+        url = urlunparse(("https", "discohook.app", "/", "", f"data={data_b64}", ""))
 
         short_url, timestamp = await self.get_short_url(url)
 
