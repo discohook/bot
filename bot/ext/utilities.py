@@ -54,7 +54,7 @@ class Utilities(cmd.Cog):
         for message in messages:
             data["messages"].append({"data": self.get_message_data(message)})
 
-        data_json = json.dumps(data, separators=(",", ":"))
+        data_json = json.dumps(data, separators=(",", ":"), ensure_ascii=False)
         data_b64 = base64.urlsafe_b64encode(data_json.encode()).decode().strip("=")
         url = urlunparse(("https", "discohook.app", "/", "", f"data={data_b64}", ""))
 
