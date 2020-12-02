@@ -11,7 +11,7 @@ from discord.ext import commands
 from discord.utils import get
 
 
-class Reactions(cmd.Cog):
+class Roles(cmd.Cog):
     """Automated actions on message reactions"""
 
     def __init__(self, bot):
@@ -235,7 +235,7 @@ class Reactions(cmd.Cog):
         await paginator.send(target=ctx.channel, owner=ctx.author)
 
     @reactionrole.command(name="new", aliases=["add", "create"])
-    @commands.cooldown(3,8, commands.BucketType.member)
+    @commands.cooldown(3, 8, commands.BucketType.member)
     @commands.has_guild_permissions(manage_roles=True)
     async def reactionrole_new(self, ctx: cmd.Context):
         """Creates a new reaction role"""
@@ -362,7 +362,7 @@ class Reactions(cmd.Cog):
         )
 
     @reactionrole.command(name="delete", aliases=["remove"])
-    @commands.cooldown(3,8, commands.BucketType.member)
+    @commands.cooldown(3, 8, commands.BucketType.member)
     @commands.has_guild_permissions(manage_roles=True)
     async def reactionrole_delete(self, ctx: cmd.Context):
         """Deletes a reaction role for a message"""
@@ -613,4 +613,4 @@ class Reactions(cmd.Cog):
 
 
 def setup(bot):
-    bot.add_cog(Reactions(bot))
+    bot.add_cog(Roles(bot))
