@@ -32,10 +32,10 @@ class Roles(cmd.Cog):
         await ctx.send(
             embed=discord.Embed(
                 title="Creating reaction role",
-                description="Give any message in your server a reaction to"
-                " create a reaction role on that message for that reaction."
-                " If you want an animated emoji but don't have nitro, reply"
-                " with a message link. You have 5 minutes to do this.",
+                description="Select your message by reacting to any message in your "
+                "server. Using the emoji that you want the reaction role for.\n\n"
+                "Alternatively, if you need a nitro emoji, you can reply with a message "
+                "link.",
             )
         )
 
@@ -114,8 +114,8 @@ class Roles(cmd.Cog):
             await ctx.send(
                 embed=discord.Embed(
                     title="Creating reaction role",
-                    description="Give the name of the emoji in this server you want"
-                    " the reaction role for. You have 5 minutes to do this.",
+                    description="Give the name of the server emoji you want the "
+                    "reaction role for.\n\nDo not attempt to use the emoji.",
                 )
             )
 
@@ -154,9 +154,8 @@ class Roles(cmd.Cog):
         await ctx.send(
             embed=discord.Embed(
                 title="Creating reaction role",
-                description="Ping or give the name of the role that should be"
-                " granted when a user reacts to this message."
-                " You have 5 minutes to do this.",
+                description="Ping or give the name of the role that should be "
+                "granted when a user reacts to this message.",
             )
         )
 
@@ -370,8 +369,8 @@ class Roles(cmd.Cog):
         prompt_message = await ctx.send(
             embed=discord.Embed(
                 title="Deleting reaction role",
-                description="Toggle any reaction that is managed by this bot"
-                " to remove the integration. You have 5 minutes to do this.",
+                description="Toggle any reaction that is managed by this bot "
+                "to remove the integration.",
             )
         )
 
