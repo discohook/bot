@@ -92,7 +92,7 @@ class Meta(cmd.Cog):
                 value=configurable.description,
             )
 
-        await paginator.send(target=ctx.channel, owner=ctx.author)
+        await paginator.send(ctx)
 
     @commands.command()
     @commands.cooldown(3, 8, commands.BucketType.channel)

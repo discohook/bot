@@ -232,7 +232,7 @@ class Roles(cmd.Cog):
                 ),
             )
 
-        await paginator.send(target=ctx.channel, owner=ctx.author)
+        await paginator.send(ctx)
 
     @reactionrole.command(name="new", aliases=["add", "create"])
     @commands.cooldown(3, 8, commands.BucketType.member)

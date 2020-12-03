@@ -74,7 +74,7 @@ class Webhooks(cmd.Cog):
                 value=f"In {webhook.channel.mention}",
             )
 
-        await paginator.send(target=ctx.channel, owner=ctx.author)
+        await paginator.send(ctx)
 
     @webhook.command(name="get", aliases=["show"])
     @commands.cooldown(3, 8, commands.BucketType.member)

@@ -4,13 +4,15 @@ import typing
 import discord
 from discord.ext import commands
 
-action_first = "\N{BLACK LEFT-POINTING DOUBLE TRIANGLE WITH VERTICAL BAR}"
-action_previous = "\N{BLACK LEFT-POINTING TRIANGLE}"
-action_next = "\N{BLACK RIGHT-POINTING TRIANGLE}"
-action_last = "\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE WITH VERTICAL BAR}"
+from bot import cmd
 
 
 class FieldPaginator:
+    action_first = "\N{BLACK LEFT-POINTING DOUBLE TRIANGLE WITH VERTICAL BAR}"
+    action_previous = "\N{BLACK LEFT-POINTING TRIANGLE}"
+    action_next = "\N{BLACK RIGHT-POINTING TRIANGLE}"
+    action_last = "\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE WITH VERTICAL BAR}"
+
     def __init__(
         self,
         bot: commands.Bot,
@@ -70,20 +72,20 @@ class FieldPaginator:
 
         return embed
 
-    async def send(
-        self,
-        *,
-        target: discord.abc.Messageable,
-        owner: discord.User,
-    ):
-        message = await target.send(embed=self.get_embed_for_page(0))
+    async def send(self, ctx: cmd.Context):
+        message = await ctx.send(embed=self.get_embed_for_page(0))
 
         if len(self.pages) <= 1:
             return message
 
-        self.bot.loop.create_task(self.loop(message=message, owner=owner))
+        self.bot.loop.create_task(self.loop(message=message, owner=ctx.author))
 
-        for reaction in [action_first, action_previous, action_next, action_last]:
+        for reaction in [
+            self.action_first,
+            self.action_previous,
+            self.action_next,
+            self.action_last,
+        ]:
             try:
                 await message.add_reaction(reaction)
             except (discord.Forbidden, discord.NotFound):
@@ -104,10 +106,10 @@ class FieldPaginator:
             await message.edit(embed=self.get_embed_for_page(page))
 
         actions = {
-            action_first: lambda: set_page(0),
-            action_previous: lambda: set_page(page - 1),
-            action_next: lambda: set_page(page + 1),
-            action_last: lambda: set_page(len(self.pages) - 1),
+            self.action_first: lambda: set_page(0),
+            self.action_previous: lambda: set_page(page - 1),
+            self.action_next: lambda: set_page(page + 1),
+            self.action_last: lambda: set_page(len(self.pages) - 1),
         }
 
         def check(event: discord.RawReactionActionEvent):

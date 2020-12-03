@@ -73,7 +73,7 @@ class HelpCommand(commands.HelpCommand):
                 name=category, value="\n".join(description), inline=False
             )
 
-        await paginator.send(target=self.get_destination(), owner=self.context.author)
+        await paginator.send(self.context)
 
     async def send_cog_help(self, cog: commands.Cog):
         self.embed.title = f"Help: {cog.qualified_name}"
@@ -89,7 +89,7 @@ class HelpCommand(commands.HelpCommand):
                 inline=False,
             )
 
-        await paginator.send(target=self.get_destination(), owner=self.context.author)
+        await paginator.send(self.context)
 
     async def send_group_help(self, group: commands.Group):
         self.embed.title = f"Help: {self.get_command_signature(group, full=True)}"
@@ -105,7 +105,7 @@ class HelpCommand(commands.HelpCommand):
                 inline=False,
             )
 
-        await paginator.send(target=self.get_destination(), owner=self.context.author)
+        await paginator.send(self.context)
 
     async def send_command_help(self, command: commands.Command):
         self.embed.title = f"Help: {self.get_command_signature(command, full=True)}"
