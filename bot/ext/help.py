@@ -1,7 +1,7 @@
 import itertools
 
 import discord
-from bot import paginators
+from bot import menus
 from bot.utils import get_clean_prefix, get_command_signature, wrap_in_code
 from discord.ext import commands
 
@@ -30,7 +30,7 @@ class HelpCommand(commands.HelpCommand):
             " showing module {first_field}..{last_field}/{total_fields}"
         )
 
-        return paginators.FieldPaginator(self.context.bot, base_embed=embed)
+        return menus.FieldPaginator(self.context.bot, base_embed=embed)
 
     def get_command_signature(self, command, *, full=False):
         return get_command_signature(self.context, command, full=full)

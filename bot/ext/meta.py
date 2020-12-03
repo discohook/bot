@@ -4,7 +4,7 @@ import json
 import typing
 
 import discord
-from bot import cmd, paginators
+from bot import cmd, menus
 from bot.ext import config
 from bot.utils import get_clean_prefix, wrap_in_code
 from discord.ext import commands
@@ -84,7 +84,7 @@ class Meta(cmd.Cog):
             text="Page {current_page}/{total_pages}, "
             "showing option {first_field}..{last_field}/{total_fields}"
         )
-        paginator = paginators.FieldPaginator(self.bot, base_embed=embed)
+        paginator = menus.FieldPaginator(self.bot, base_embed=embed)
 
         for configurable in config.configurables:
             paginator.add_field(

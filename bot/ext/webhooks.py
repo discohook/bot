@@ -1,7 +1,7 @@
 import asyncio
 
 import discord
-from bot import cmd, converter, paginators
+from bot import cmd, converter, menus
 from bot.utils import get_command_signature, wrap_in_code
 from discord.ext import commands
 
@@ -61,7 +61,7 @@ class Webhooks(cmd.Cog):
             text="Page {current_page}/{total_pages}, "
             "showing webhook {first_field}..{last_field}/{total_fields}."
         )
-        paginator = paginators.FieldPaginator(self.bot, base_embed=embed)
+        paginator = menus.FieldPaginator(self.bot, base_embed=embed)
 
         for webhook in await ctx.guild.webhooks():
             if webhook.type != discord.WebhookType.incoming:

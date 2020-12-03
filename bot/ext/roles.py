@@ -6,7 +6,7 @@ from typing import Union
 
 import cachetools
 import discord
-from bot import cmd, converter, paginators
+from bot import cmd, converter, menus
 from bot.utils import get_command_signature, wrap_in_code
 from discord.ext import commands
 from discord.utils import get
@@ -204,7 +204,7 @@ class Roles(cmd.Cog):
             text="Page {current_page}/{total_pages}, "
             "showing message {first_field}..{last_field}/{total_fields}"
         )
-        paginator = paginators.FieldPaginator(self.bot, base_embed=embed)
+        paginator = menus.FieldPaginator(self.bot, base_embed=embed)
 
         reaction_roles = itertools.groupby(
             await self.db.fetch(
