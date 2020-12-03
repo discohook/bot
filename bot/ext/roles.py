@@ -2,10 +2,11 @@ import asyncio
 import itertools
 import math
 import re
+from typing import Union
 
 import cachetools
 import discord
-from bot import cmd, paginators
+from bot import cmd, converter, paginators
 from bot.utils import get_command_signature, wrap_in_code
 from discord.ext import commands
 from discord.utils import get
@@ -425,6 +426,59 @@ class Roles(cmd.Cog):
                 f" [this message]({target_message.jump_url}) will no longer be"
                 f" assigned the <@&{role_id}> role.",
             )
+        )
+
+    @reactionrole.group(name="clear")
+    @commands.cooldown(3, 8, commands.BucketType.member)
+    @commands.has_guild_permissions(manage_roles=True)
+    async def reactionrole_clear(self, ctx: cmd.Context):
+        """Sub group of commands to clear reaction roles in the server"""
+        await ctx.send_help("reactionrole clear")
+
+    @reactionrole_clear.command(name="all")
+    @commands.cooldown(3, 8, commands.BucketType.member)
+    @commands.has_guild_permissions(manage_roles=True)
+    async def reactionrole_clear_all(self, ctx: cmd.Context):
+        """Clears all reaction roles in this server"""
+
+        await self.db.execute(
+            """
+            DELETE FROM reaction_role
+            WHERE guild_id = $1
+            """,
+            ctx.guild.id,
+        )
+
+    @reactionrole_clear.command(name="message")
+    @commands.cooldown(4, 4, commands.BucketType.member)
+    @commands.has_guild_permissions(manage_roles=True)
+    async def reactionrole_clear_message(
+        self, ctx: cmd.Context, *, message: Union[converter.MessageConverter, int]
+    ):
+        """Clears reaction roles for a given message"""
+
+        await self.db.execute(
+            """
+            DELETE FROM reaction_role
+            WHERE message_id = $1
+            """,
+            message.id if isinstance(message, discord.Message) else message,
+        )
+
+    @reactionrole_clear.command(name="role")
+    @commands.cooldown(3, 8, commands.BucketType.member)
+    @commands.has_guild_permissions(manage_roles=True)
+    async def reactionrole_clear_role(
+        self, ctx: cmd.Context, *, role: Union[discord.Role, int]
+    ):
+        """Clears reaction roles for a given role"""
+
+        await self.db.execute(
+            """
+            DELETE FROM reaction_role
+            WHERE role_id = $1
+            """,
+            role.id if isinstance(role, discord.Role) else role,
         )
 
     @reactionrole.command(name="check")
