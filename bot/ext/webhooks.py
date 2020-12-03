@@ -85,7 +85,7 @@ class Webhooks(cmd.Cog):
     ):
         """Shows data for a given webhook"""
 
-        await ctx.send(embed=self.get_webhook_embed(ctx, webhook))
+        await ctx.prompt(embed=self.get_webhook_embed(ctx, webhook))
 
     @webhook.command(name="url")
     @commands.cooldown(3, 8, commands.BucketType.member)
@@ -131,7 +131,7 @@ class Webhooks(cmd.Cog):
 
         webhook = await channel.create_webhook(name=name, avatar=avatar_file)
 
-        await ctx.send(
+        await ctx.prompt(
             embed=self.get_webhook_embed(ctx, webhook, message="New webhook created")
         )
 
@@ -165,7 +165,7 @@ class Webhooks(cmd.Cog):
         await webhook.edit(**edit_kwargs)
 
         webhook = await self.bot.fetch_webhook(webhook.id)
-        await ctx.send(
+        await ctx.prompt(
             embed=self.get_webhook_embed(ctx, webhook, message="Webhook edited")
         )
 
@@ -179,7 +179,7 @@ class Webhooks(cmd.Cog):
         """Deletes a webhook, this cannot be undone
         Messages sent by this webhook will not be deleted"""
 
-        message = await ctx.send(
+        message = await ctx.prompt(
             embed=discord.Embed(
                 title="Confirmation",
                 description=f"Are you sure you want to delete {wrap_in_code(webhook.name)}?"
@@ -200,7 +200,7 @@ class Webhooks(cmd.Cog):
                 ),
             )
         except asyncio.TimeoutError:
-            await ctx.send(
+            await ctx.prompt(
                 embed=discord.Embed(
                     title="Confirmation cancelled",
                     description="30 second timeout reached",
@@ -209,7 +209,7 @@ class Webhooks(cmd.Cog):
         else:
             await webhook.delete()
 
-            await ctx.send(
+            await ctx.prompt(
                 embed=discord.Embed(
                     title="Webhook deleted",
                     description="Messages sent by this webhook have not been deleted.",

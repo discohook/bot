@@ -61,7 +61,7 @@ class Utilities(cmd.Cog):
         short_url, timestamp = await self.get_short_url(url)
 
         if short_url is None:
-            await ctx.send(
+            await ctx.prompt(
                 embed=discord.Embed(
                     title="Error",
                     description="Failed to get short URL",
@@ -75,7 +75,7 @@ class Utilities(cmd.Cog):
         )
         embed.set_footer(text="Expires")
         embed.timestamp = timestamp
-        await ctx.send(embed=embed)
+        await ctx.prompt(embed=embed)
 
     @commands.command()
     @commands.cooldown(4, 4, commands.BucketType.member)
@@ -88,7 +88,7 @@ class Utilities(cmd.Cog):
         embed.set_image(url=str(emoji.url))
         embed.set_footer(text=f"ID: {emoji.id}")
 
-        await ctx.send(embed=embed)
+        await ctx.prompt(embed=embed)
 
     @commands.group(invoke_without_command=True)
     @commands.cooldown(4, 4, commands.BucketType.member)
@@ -104,7 +104,7 @@ class Utilities(cmd.Cog):
         embed.set_image(url=url)
         embed.set_footer(text=f"ID: {user.id}")
 
-        await ctx.send(embed=embed)
+        await ctx.prompt(embed=embed)
 
     @avatar.command(name="static")
     @commands.cooldown(4, 4, commands.BucketType.member)
@@ -120,7 +120,7 @@ class Utilities(cmd.Cog):
         embed.set_image(url=url)
         embed.set_footer(text=f"ID: {user.id}")
 
-        await ctx.send(embed=embed)
+        await ctx.prompt(embed=embed)
 
     @commands.group(invoke_without_command=True)
     @commands.cooldown(4, 4, commands.BucketType.member)
@@ -133,7 +133,7 @@ class Utilities(cmd.Cog):
         embed.set_image(url=url)
         embed.set_footer(text=f"ID: {ctx.guild.id}")
 
-        await ctx.send(embed=embed)
+        await ctx.prompt(embed=embed)
 
     @icon.command(name="static")
     @commands.cooldown(4, 4, commands.BucketType.member)
@@ -146,7 +146,7 @@ class Utilities(cmd.Cog):
         embed.set_image(url=url)
         embed.set_footer(text=f"ID: {ctx.guild.id}")
 
-        await ctx.send(embed=embed)
+        await ctx.prompt(embed=embed)
 
 
 def setup(bot):

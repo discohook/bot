@@ -65,7 +65,7 @@ class Meta(cmd.Cog):
                 f"\nUse {set_signature} to set it."
             )
 
-            await ctx.send(
+            await ctx.prompt(
                 embed=discord.Embed(title="Configuration", description=message)
             )
             return
@@ -117,14 +117,14 @@ class Meta(cmd.Cog):
             inline=False,
         )
 
-        await ctx.send(embed=embed)
+        await ctx.prompt(embed=embed)
 
     @commands.command()
     @commands.cooldown(3, 8, commands.BucketType.channel)
     async def invite(self, ctx: cmd.Context):
         """Sends the bot invite and support server links"""
 
-        await ctx.send(
+        await ctx.prompt(
             embed=discord.Embed(
                 title="Invite",
                 description="[Support server](https://discohook.app/discord)"
@@ -144,7 +144,7 @@ class Meta(cmd.Cog):
     async def data_delete(self, ctx: cmd.Context):
         """Delete the server's data stored by this bot"""
 
-        message = await ctx.send(
+        message = await ctx.prompt(
             embed=discord.Embed(
                 title="Confirmation",
                 description="Are you sure you want to delete all data for this"
@@ -168,7 +168,7 @@ class Meta(cmd.Cog):
                 ),
             )
         except asyncio.TimeoutError:
-            await ctx.send(
+            await ctx.prompt(
                 embed=discord.Embed(
                     title="Confirmation cancelled",
                     description="30 second timeout reached",
@@ -177,7 +177,7 @@ class Meta(cmd.Cog):
             await message.remove_reaction("\N{WASTEBASKET}", ctx.guild.me)
             return
 
-        await ctx.send(
+        await ctx.prompt(
             embed=discord.Embed(
                 title="Leaving server",
                 description="Data will be deleted hereafter."

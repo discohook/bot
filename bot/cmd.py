@@ -29,45 +29,32 @@ class Context(commands.Context):
     def __init__(self, **attrs):
         super().__init__(**attrs)
 
-        self.sent_message = None
+        self.prompt_message = None
 
-    async def send(
+    async def prompt(
         self,
         content=None,
         *,
-        force_send=False,
-        tts=False,
         embed=None,
         files=None,
-        delete_after=None,
-        nonce=None,
         allowed_mentions=None,
-        suppress=False,
     ):
-        if force_send:
-            self.sent_message = None
-
-        if self.sent_message:
+        if self.prompt_message:
             try:
-                await self.sent_message.edit(
+                await self.prompt_message.edit(
                     content=content,
                     embed=embed,
-                    delete_after=delete_after,
                     allowed_mentions=allowed_mentions,
-                    suppress=suppress,
                 )
             except discord.NotFound:
                 pass
             else:
-                return self.sent_message
+                return self.prompt_message
 
-        self.sent_message = await super().send(
+        self.prompt_message = await self.send(
             content=content,
-            tts=tts,
             embed=embed,
             files=files,
-            delete_after=delete_after,
-            nonce=nonce,
             allowed_mentions=allowed_mentions,
         )
-        return self.sent_message
+        return self.prompt_message

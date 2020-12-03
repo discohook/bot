@@ -20,7 +20,7 @@ class Markdown(cmd.Cog):
         embed.add_field(name="Output", value=member.mention)
         embed.set_footer(text=f"ID: {member.id}")
 
-        await ctx.send(embed=embed)
+        await ctx.prompt(embed=embed)
 
     @commands.command()
     @commands.cooldown(4, 4, commands.BucketType.member)
@@ -39,7 +39,7 @@ class Markdown(cmd.Cog):
                 " To ping everyone just write `@everyone`.",
             )
 
-        await ctx.send(embed=embed)
+        await ctx.prompt(embed=embed)
 
     @commands.command()
     @commands.cooldown(4, 4, commands.BucketType.member)
@@ -51,7 +51,7 @@ class Markdown(cmd.Cog):
         embed.add_field(name="Output", value=channel.mention)
         embed.set_footer(text=f"ID: {channel.id}")
 
-        await ctx.send(embed=embed)
+        await ctx.prompt(embed=embed)
 
     @commands.command(aliases=["emote"])
     @commands.cooldown(4, 4, commands.BucketType.member)
@@ -77,7 +77,7 @@ class Markdown(cmd.Cog):
             )
         embed.set_footer(text=f"ID: {emoji.id}")
 
-        await ctx.send(embed=embed)
+        await ctx.prompt(embed=embed)
 
     @commands.command()
     @commands.cooldown(4, 4, commands.BucketType.member)
@@ -86,7 +86,7 @@ class Markdown(cmd.Cog):
 
         fp = io.StringIO(content)
 
-        await ctx.send(files=[discord.File(fp, filename=f"{ctx.message.id}.txt")])
+        await ctx.prompt(files=[discord.File(fp, filename=f"{ctx.message.id}.txt")])
 
 
 def setup(bot):

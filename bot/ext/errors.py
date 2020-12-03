@@ -199,7 +199,7 @@ class Errors(cmd.Cog):
                 "embed_links" in error.missing_perms
                 or "attach_files" in error.missing_perms
             ):
-                await ctx.send(
+                await ctx.prompt(
                     "I don't have permission to embed links or attach files"
                     " in this channel. Please notify an administrator about"
                     " this.",
@@ -208,7 +208,7 @@ class Errors(cmd.Cog):
 
         for error_type, title, description in error_types:
             if isinstance(error, error_type):
-                await ctx.send(
+                await ctx.prompt(
                     embed=discord.Embed(
                         title=title,
                         description=description(error)
@@ -220,7 +220,7 @@ class Errors(cmd.Cog):
                 break
 
         else:
-            await ctx.send(
+            await ctx.prompt(
                 embed=discord.Embed(
                     title="Error",
                     description="An unknown error has occured, please report this.",
