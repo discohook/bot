@@ -206,6 +206,25 @@ class Errors(cmd.Cog):
                 )
                 return
 
+        if isinstance(error, commands.BadUnionArgument):
+            embed = discord.Embed(
+                title="Could not convert argument",
+                description="Multiple types of values are accepted, individual errors can be found below.",
+            )
+
+            for error in error.errors:
+                for error_type, title, description in error:
+                    if isinstance(error, error_type):
+                        embed.add_field(
+                            name=title,
+                            value=description(error)
+                            if callable(description)
+                            else description,
+                            inline=False,
+                        )
+
+                        break
+
         for error_type, title, description in error_types:
             if isinstance(error, error_type):
                 await ctx.send(
