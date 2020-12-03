@@ -1,6 +1,8 @@
 import math
+import re
 import sys
 import traceback
+import typing
 
 import discord
 from bot import cmd
@@ -17,6 +19,29 @@ ignored_errors = [
 
 def humanize_perm(permission):
     return permission.replace("_", " ").replace("guild", "server").title()
+
+
+bad_arg_converter_re = re.compile(r'Converting to "(.+)" failed for parameter "\w+".')
+
+bad_arg_converter_messages = {
+    "int": {
+        "title": "Not a number",
+        "description": "The argument could not be converted to an integer value.",
+    },
+}
+
+
+def get_bad_arg_message(error: commands.BadArgument):
+    match = bad_arg_converter_re.fullmatch(error)
+    if match:
+        converter_str = match.group(1)
+        if converter_str in bad_arg_converter_messages:
+            return bad_arg_converter_messages[converter_str]
+
+    return {
+        "title": "Bad argument",
+        "description": "An argument you provided was invalid or not found, please read help for more info.",
+    }
 
 
 error_types = [
@@ -66,9 +91,14 @@ error_types = [
         lambda e: f"Could not find role for {wrap_in_code(e.argument)}.",
     ),
     (
-        (commands.BadArgument, commands.BadUnionArgument),
-        "Bad argument",
-        "An argument you provided was invalid or not found, please read help for more info.",
+        commands.BadBoolArgument,
+        "Not a boolean value",
+        lambda e: f"Argument {wrap_in_code(e.argument)} is not a yes or no value.",
+    ),
+    (
+        commands.BadArgument,
+        lambda e: get_bad_arg_message(e)["title"],
+        lambda e: get_bad_arg_message(e)["description"],
     ),
     (
         commands.ArgumentParsingError,
@@ -116,6 +146,12 @@ error_types = [
         lambda e: f"This command is at its maximum capacity, please wait for any commands to finish.",
     ),
 ]
+
+
+def resolve_value(maybe_callable, error):
+    if callable(maybe_callable):
+        return maybe_callable(error)
+    return maybe_callable
 
 
 class Errors(cmd.Cog):
@@ -216,10 +252,8 @@ class Errors(cmd.Cog):
                 for error_type, title, description in error_types:
                     if isinstance(error, error_type):
                         embed.add_field(
-                            name=title,
-                            value=description(error)
-                            if callable(description)
-                            else description,
+                            name=resolve_value(title, error),
+                            value=resolve_value(description, error),
                             inline=False,
                         )
 
@@ -232,10 +266,8 @@ class Errors(cmd.Cog):
             if isinstance(error, error_type):
                 await ctx.send(
                     embed=discord.Embed(
-                        title=title,
-                        description=description(error)
-                        if callable(description)
-                        else description,
+                        title=resolve_value(title, error),
+                        description=resolve_value(description, error),
                     ),
                 )
 
