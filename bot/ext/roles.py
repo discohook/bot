@@ -450,6 +450,14 @@ class Roles(cmd.Cog):
             ctx.guild.id,
         )
 
+        if len(reaction_roles) <= 0:
+            await ctx.send(
+                embed=discord.Embed(
+                    title="Couldn't clear reaction roles",
+                    description=f"No reaction roles were configured for this server.",
+                )
+            )
+
         messages = {rr["message_id"] for rr in reaction_roles}
 
         await ctx.send(
@@ -477,6 +485,14 @@ class Roles(cmd.Cog):
             message.id if isinstance(message, discord.Message) else message,
         )
 
+        if len(reaction_roles) <= 0:
+            await ctx.send(
+                embed=discord.Embed(
+                    title="Couldn't clear reaction roles",
+                    description=f"No reaction roles were configured for this message.",
+                )
+            )
+
         await ctx.send(
             embed=discord.Embed(
                 title="Cleared reaction roles",
@@ -501,6 +517,14 @@ class Roles(cmd.Cog):
             """,
             role.id if isinstance(role, discord.Role) else role,
         )
+
+        if len(reaction_roles) <= 0:
+            await ctx.send(
+                embed=discord.Embed(
+                    title="Couldn't clear reaction roles",
+                    description=f"No reaction roles were configured for this role.",
+                )
+            )
 
         messages = {rr["message_id"] for rr in reaction_roles}
 
