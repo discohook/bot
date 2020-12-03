@@ -1,3 +1,4 @@
+import discord
 from discord.ext import commands
 
 
@@ -47,14 +48,18 @@ class Context(commands.Context):
             self.sent_message = None
 
         if self.sent_message:
-            await self.sent_message.edit(
-                content=content,
-                embed=embed,
-                delete_after=delete_after,
-                allowed_mentions=allowed_mentions,
-                suppress=suppress,
-            )
-            return self.sent_message
+            try:
+                await self.sent_message.edit(
+                    content=content,
+                    embed=embed,
+                    delete_after=delete_after,
+                    allowed_mentions=allowed_mentions,
+                    suppress=suppress,
+                )
+            except discord.NotFound:
+                pass
+            else:
+                return self.sent_message
 
         self.sent_message = await super().send(
             content=content,
