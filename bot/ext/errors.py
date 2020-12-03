@@ -213,7 +213,7 @@ class Errors(cmd.Cog):
             )
 
             for error in error.errors:
-                for error_type, title, description in error:
+                for error_type, title, description in error_types:
                     if isinstance(error, error_type):
                         embed.add_field(
                             name=title,
