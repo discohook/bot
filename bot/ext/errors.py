@@ -32,7 +32,7 @@ bad_arg_converter_messages = {
 
 
 def get_bad_arg_message(error: commands.BadArgument):
-    match = bad_arg_converter_re.fullmatch(error)
+    match = bad_arg_converter_re.fullmatch(str(error))
     if match:
         converter_str = match.group(1)
         if converter_str in bad_arg_converter_messages:
