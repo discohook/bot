@@ -441,12 +441,23 @@ class Roles(cmd.Cog):
     async def reactionrole_clear_all(self, ctx: cmd.Context):
         """Clears all reaction roles in this server"""
 
-        await self.db.execute(
+        reaction_roles = await self.db.fetch(
             """
             DELETE FROM reaction_role
             WHERE guild_id = $1
+            RETURNING message_id, reaction
             """,
             ctx.guild.id,
+        )
+
+        messages = {rr["message_id"] for rr in reaction_roles}
+
+        await ctx.send(
+            embed=discord.Embed(
+                title="Cleared reaction roles",
+                description=f"Successfully cleared {len(reaction_roles)} reaction "
+                f"roles from {len(messages)} messages.",
+            )
         )
 
     @reactionrole_clear.command(name="message")
@@ -457,12 +468,21 @@ class Roles(cmd.Cog):
     ):
         """Clears reaction roles for a given message"""
 
-        await self.db.execute(
+        reaction_roles = await self.db.fetch(
             """
             DELETE FROM reaction_role
             WHERE message_id = $1
+            RETURNING reaction
             """,
             message.id if isinstance(message, discord.Message) else message,
+        )
+
+        await ctx.send(
+            embed=discord.Embed(
+                title="Cleared reaction roles",
+                description=f"Successfully cleared {len(reaction_roles)} reaction "
+                "roles.",
+            )
         )
 
     @reactionrole_clear.command(name="role")
@@ -473,12 +493,23 @@ class Roles(cmd.Cog):
     ):
         """Clears reaction roles for a given role"""
 
-        await self.db.execute(
+        reaction_roles = await self.db.fetch(
             """
             DELETE FROM reaction_role
             WHERE role_id = $1
+            RETURNING message_id, reaction
             """,
             role.id if isinstance(role, discord.Role) else role,
+        )
+
+        messages = {rr["message_id"] for rr in reaction_roles}
+
+        await ctx.send(
+            embed=discord.Embed(
+                title="Cleared reaction roles",
+                description=f"Successfully cleared {len(reaction_roles)} reaction "
+                f"roles from {len(messages)} messages.",
+            )
         )
 
     @reactionrole.command(name="check")
