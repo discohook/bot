@@ -203,7 +203,7 @@ class Webhooks(cmd.Cog):
             await ctx.prompt(
                 embed=discord.Embed(
                     title="Confirmation cancelled",
-                    description="30 second timeout reached",
+                    description="Action cancelled or command expired.",
                 )
             )
 
