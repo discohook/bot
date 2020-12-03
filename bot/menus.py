@@ -93,12 +93,7 @@ class FieldPaginator:
 
         return message
 
-    async def loop(
-        self,
-        *,
-        message: discord.Message,
-        owner: discord.User,
-    ):
+    async def loop(self, *, message: discord.Message, owner: discord.User):
         page = 0
 
         async def set_page(index):
@@ -122,7 +117,7 @@ class FieldPaginator:
         try:
             while not self.bot.is_closed():
                 event = await self.bot.wait_for(
-                    "raw_reaction_add", check=check, timeout=60.0
+                    "raw_reaction_add", check=check, timeout=300.0
                 )
 
                 action = actions[str(event.emoji)]
@@ -134,6 +129,64 @@ class FieldPaginator:
                     pass
 
         except (asyncio.TimeoutError, asyncio.CancelledError):
+            for emoji in actions.keys():
+                try:
+                    await self.message.remove_reaction(emoji, self.bot.user)
+                except (discord.Forbidden, discord.NotFound):
+                    pass
+
+
+class ConfirmationPrompt:
+    action_confirm = '\N{WHITE HEAVY CHECK MARK}'
+    action_deny = '\N{WHITE HEAVY CROSS MARK}'
+
+    def __init__(
+        self,
+        bot: commands.Bot,
+        *,
+        embed: discord.Embed = discord.Embed(),
+    ):
+        self.bot = bot
+        self.embed = embed.copy()
+
+    async def send(self, ctx: cmd.Context):
+        message = await ctx.prompt(embed=self.embed)
+
+        if len(self.pages) <= 1:
+            return message
+
+        actions = {
+            self.action_confirm: True,
+            self.action_deny: False,
+        }
+
+        for reaction in actions.keys():
+            try:
+                await message.add_reaction(reaction)
+            except (discord.Forbidden, discord.NotFound):
+                pass
+
+        def check(event: discord.RawReactionActionEvent):
+            return (
+                event.user_id == ctx.author.id
+                and event.message_id == message.id
+                and str(event.emoji) in actions
+            )
+
+        try:
+            event = await self.bot.wait_for("raw_reaction_add", check=check, timeout=60.0)
+
+            try:
+                await message.remove_reaction(str(event.emoji), ctx.author)
+            except discord.Forbidden:
+                pass
+
+            return actions[str(event.emoji)]
+
+        except asyncio.TimeoutError:
+            return False
+
+        finally:
             for emoji in actions.keys():
                 try:
                     await self.message.remove_reaction(emoji, self.bot.user)

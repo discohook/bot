@@ -176,37 +176,21 @@ class Webhooks(cmd.Cog):
     async def webhook_delete(
         self, ctx: cmd.Context, *, webhook: converter.WebhookConverter
     ):
-        """Deletes a webhook, this cannot be undone
+        """Deletes a given webhook
         Messages sent by this webhook will not be deleted"""
 
-        message = await ctx.prompt(
+        prompt = menus.ConfirmationPrompt(
+            self.bot,
             embed=discord.Embed(
                 title="Confirmation",
                 description=f"Are you sure you want to delete {wrap_in_code(webhook.name)}?"
                 " This action cannot be reverted.",
-            )
+            ),
         )
 
-        await message.add_reaction("\N{WASTEBASKET}")
+        prompt.action_confirm = "\N{WASTEBASKET}"
 
-        try:
-            await self.bot.wait_for(
-                "raw_reaction_add",
-                timeout=30.0,
-                check=lambda event: (
-                    str(event.emoji) == "\N{WASTEBASKET}"
-                    and event.message_id == message.id
-                    and event.user_id == ctx.author.id
-                ),
-            )
-        except asyncio.TimeoutError:
-            await ctx.prompt(
-                embed=discord.Embed(
-                    title="Confirmation cancelled",
-                    description="30 second timeout reached",
-                )
-            )
-        else:
+        if await prompt.send(ctx):
             await webhook.delete()
 
             await ctx.prompt(
@@ -215,8 +199,13 @@ class Webhooks(cmd.Cog):
                     description="Messages sent by this webhook have not been deleted.",
                 )
             )
-        finally:
-            await message.remove_reaction("\N{WASTEBASKET}", ctx.guild.me)
+        else:
+            await ctx.prompt(
+                embed=discord.Embed(
+                    title="Confirmation cancelled",
+                    description="30 second timeout reached",
+                )
+            )
 
 
 def setup(bot):
