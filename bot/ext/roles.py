@@ -428,7 +428,7 @@ class Roles(cmd.Cog):
             )
         )
 
-    @reactionrole.group(name="clear")
+    @reactionrole.group(invoke_without_command=True, name="clear")
     @commands.cooldown(3, 8, commands.BucketType.member)
     @commands.has_guild_permissions(manage_roles=True)
     async def reactionrole_clear(self, ctx: cmd.Context):
