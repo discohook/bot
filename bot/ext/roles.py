@@ -506,9 +506,7 @@ class Roles(cmd.Cog):
     @reactionrole_clear.command(name="role")
     @commands.cooldown(3, 8, commands.BucketType.member)
     @commands.has_guild_permissions(manage_roles=True)
-    async def reactionrole_clear_role(
-        self, ctx: cmd.Context, *, role: Union[discord.Role, int]
-    ):
+    async def reactionrole_clear_role(self, ctx: cmd.Context, *, role: discord.Role):
         """Clears reaction roles for a given role"""
 
         reaction_roles = await self.db.fetch(
