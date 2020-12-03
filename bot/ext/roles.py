@@ -457,6 +457,7 @@ class Roles(cmd.Cog):
                     description=f"No reaction roles were configured for this server.",
                 )
             )
+            return
 
         messages = {rr["message_id"] for rr in reaction_roles}
 
@@ -492,6 +493,7 @@ class Roles(cmd.Cog):
                     description=f"No reaction roles were configured for this message.",
                 )
             )
+            return
 
         await ctx.send(
             embed=discord.Embed(
@@ -525,6 +527,7 @@ class Roles(cmd.Cog):
                     description=f"No reaction roles were configured for this role.",
                 )
             )
+            return
 
         messages = {rr["message_id"] for rr in reaction_roles}
 
