@@ -137,8 +137,8 @@ class FieldPaginator:
 
 
 class ConfirmationPrompt:
-    action_confirm = '\N{WHITE HEAVY CHECK MARK}'
-    action_deny = '\N{WHITE HEAVY CROSS MARK}'
+    action_confirm = "\N{WHITE HEAVY CHECK MARK}"
+    action_deny = "\N{NEGATIVE SQUARED CROSS MARK}"
 
     def __init__(
         self,
@@ -174,7 +174,9 @@ class ConfirmationPrompt:
             )
 
         try:
-            event = await self.bot.wait_for("raw_reaction_add", check=check, timeout=60.0)
+            event = await self.bot.wait_for(
+                "raw_reaction_add", check=check, timeout=60.0
+            )
 
             try:
                 await message.remove_reaction(str(event.emoji), ctx.author)
