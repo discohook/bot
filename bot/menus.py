@@ -131,7 +131,7 @@ class FieldPaginator:
         except (asyncio.TimeoutError, asyncio.CancelledError):
             for emoji in actions.keys():
                 try:
-                    await self.message.remove_reaction(emoji, self.bot.user)
+                    await message.remove_reaction(emoji, self.bot.user)
                 except (discord.Forbidden, discord.NotFound):
                     pass
 
@@ -188,6 +188,6 @@ class ConfirmationPrompt:
         finally:
             for emoji in actions.keys():
                 try:
-                    await self.message.remove_reaction(emoji, self.bot.user)
+                    await message.remove_reaction(emoji, self.bot.user)
                 except (discord.Forbidden, discord.NotFound):
                     pass
