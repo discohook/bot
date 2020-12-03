@@ -152,9 +152,6 @@ class ConfirmationPrompt:
     async def send(self, ctx: cmd.Context):
         message = await ctx.prompt(embed=self.embed)
 
-        if len(self.pages) <= 1:
-            return message
-
         actions = {
             self.action_confirm: True,
             self.action_deny: False,
