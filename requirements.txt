@@ -8,3 +8,4 @@ jishaku==1.19.2.202
 lru-dict==1.1.6
 pg8000==1.16.6
 psutil==5.7.3
+python-dotenv==0.15.0
