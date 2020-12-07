@@ -16,7 +16,7 @@ class Utilities(cmd.Cog):
         async with self.session.post(
             "https://share.discohook.app/create", json={"url": url}
         ) as resp:
-            if not resp.ok:
+            if resp.status >= 400:
                 return None, None
 
             data = await resp.json()
