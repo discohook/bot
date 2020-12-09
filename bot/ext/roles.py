@@ -284,7 +284,6 @@ class Roles(cmd.Cog):
                             " exists.",
                         )
                     )
-                    await target_message.remove_reaction(emoji, ctx.me)
                     return
 
                 await self.db.execute(
@@ -306,11 +305,17 @@ class Roles(cmd.Cog):
             )
 
             if target_message and emoji:
-                await target_message.remove_reaction(emoji, ctx.me)
+                try:
+                    await target_message.remove_reaction(emoji, ctx.me)
+                except discord.NotFound:
+                    pass
             return
         except commands.BadArgument:
             if target_message and emoji:
-                await target_message.remove_reaction(emoji, ctx.me)
+                try:
+                    await target_message.remove_reaction(emoji, ctx.me)
+                except discord.NotFound:
+                    pass
             return
 
         if role.managed:
@@ -321,7 +326,10 @@ class Roles(cmd.Cog):
                     " cannot be used.",
                 )
             )
-            await target_message.remove_reaction(emoji, ctx.me)
+            try:
+                await target_message.remove_reaction(emoji, ctx.me)
+            except discord.NotFound:
+                pass
             return
 
         if role == ctx.guild.default_role:
@@ -332,7 +340,10 @@ class Roles(cmd.Cog):
                     " @everyone role.",
                 )
             )
-            await target_message.remove_reaction(emoji, ctx.me)
+            try:
+                await target_message.remove_reaction(emoji, ctx.me)
+            except discord.NotFound:
+                pass
             return
 
         await self.db.execute(
@@ -395,7 +406,10 @@ class Roles(cmd.Cog):
         channel = ctx.guild.get_channel(event.channel_id)
         target_message = await channel.fetch_message(event.message_id)
 
-        await target_message.remove_reaction(event.emoji, ctx.me)
+        try:
+            await target_message.remove_reaction(event.emoji, ctx.me)
+        except discord.NotFound:
+            pass
 
         role_id = await self.db.fetchval(
             """
