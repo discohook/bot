@@ -547,7 +547,7 @@ class Roles(cmd.Cog):
         async with ctx.typing():
             reaction_roles = await self.db.fetch(
                 """
-                SELECT channel_id, message_id, role_id FROM reaction_role
+                SELECT channel_id, message_id, role_id, reaction FROM reaction_role
                 WHERE guild_id = $1
                 ORDER BY message_id
                 """,
