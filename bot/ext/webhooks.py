@@ -52,6 +52,11 @@ class Webhooks(cmd.Cog):
     async def webhook_list(self, ctx: cmd.Context, channel: discord.TextChannel = None):
         """Lists webhooks for the server or a given channel"""
 
+        if channel:
+            channel_perms = channel.permissions_for(ctx.me)
+            if not channel_perms.view_channel or not channel_perms.manage_webhooks:
+                raise commands.BotMissingPermissions(["manage_webhooks"])
+
         embed = discord.Embed(
             title="Webhooks",
             description=f"Use {get_command_signature(ctx, self.webhook_get)}"
@@ -85,6 +90,10 @@ class Webhooks(cmd.Cog):
     ):
         """Shows data for a given webhook"""
 
+        channel_perms = webhook.channel.permissions_for(ctx.me)
+        if not channel_perms.view_channel or not channel_perms.manage_webhooks:
+            raise commands.BotMissingPermissions(["manage_webhooks"])
+
         await ctx.prompt(embed=self.get_webhook_embed(ctx, webhook))
 
     @webhook.command(name="url")
@@ -95,6 +104,10 @@ class Webhooks(cmd.Cog):
         self, ctx: cmd.Context, *, webhook: converter.WebhookConverter
     ):
         """Obtains the URL for a given webhook"""
+
+        channel_perms = webhook.channel.permissions_for(ctx.me)
+        if not channel_perms.view_channel or not channel_perms.manage_webhooks:
+            raise commands.BotMissingPermissions(["manage_webhooks"])
 
         try:
             await ctx.author.send(
@@ -123,6 +136,10 @@ class Webhooks(cmd.Cog):
     ):
         """Creates a new webhook for a given channel"""
 
+        channel_perms = channel.permissions_for(ctx.me)
+        if not channel_perms.view_channel or not channel_perms.manage_webhooks:
+            raise commands.BotMissingPermissions(["manage_webhooks"])
+
         avatar_file = (
             await ctx.message.attachments[0].read()
             if len(ctx.message.attachments) > 0
@@ -143,13 +160,17 @@ class Webhooks(cmd.Cog):
         self,
         ctx: cmd.Context,
         webhook: converter.WebhookConverter,
-        *,
         new_name: str = None,
     ):
         """Edits an existing webhook
-        The existing webhook name must be put in quotes, but not the new name (if any)
-        To edit the avatar, attach a image file with the message
+
+        If webhook names contains spaces, it must be in quotes.
+        To edit the avatar, attach a image file with the message.
         """
+
+        channel_perms = webhook.channel.permissions_for(ctx.me)
+        if not channel_perms.view_channel or not channel_perms.manage_webhooks:
+            raise commands.BotMissingPermissions(["manage_webhooks"])
 
         edit_kwargs = {}
 
@@ -177,7 +198,13 @@ class Webhooks(cmd.Cog):
         self, ctx: cmd.Context, *, webhook: converter.WebhookConverter
     ):
         """Deletes a given webhook
-        Messages sent by this webhook will not be deleted"""
+
+        Messages sent by this webhook will not be deleted.
+        """
+
+        channel_perms = webhook.channel.permissions_for(ctx.me)
+        if not channel_perms.view_channel or not channel_perms.manage_webhooks:
+            raise commands.BotMissingPermissions(["manage_webhooks"])
 
         prompt = menus.ConfirmationPrompt(
             self.bot,
