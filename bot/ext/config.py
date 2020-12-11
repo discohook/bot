@@ -61,7 +61,7 @@ class Config(cmd.Cog):
     def __init__(self, bot):
         super().__init__(bot)
 
-        self.cache = lru.LRU(256)
+        self.cache = lru.LRU(1024)
 
     async def ensure(self, guild: discord.Guild):
         if guild.id in self.cache:
