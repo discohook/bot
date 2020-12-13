@@ -67,14 +67,6 @@ class Markdown(cmd.Cog):
             else f"*`<`*`{'a' if emoji.animated else ''}:{emoji.name}:{emoji.id}>`",
         )
         embed.add_field(name="Output", value=str(emoji))
-        if guild_emoji is None or guild_emoji.guild != ctx.guild:
-            embed.add_field(
-                name="Warning",
-                value="Emoji is from another server, please make sure the "
-                '@everyone role has the "Use External Emojis" permission in '
-                "the target channel in order to send it in a webhook message.",
-                inline=False,
-            )
         embed.set_footer(text=f"ID: {emoji.id}")
 
         await ctx.prompt(embed=embed)
