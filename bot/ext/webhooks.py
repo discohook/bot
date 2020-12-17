@@ -76,7 +76,7 @@ class Webhooks(cmd.Cog):
 
             paginator.add_field(
                 name=webhook.name,
-                value=f"In {webhook.channel.mention}\nID: {webhook.id}",
+                value=f"Channel: {webhook.channel.mention}\nID: {webhook.id}",
             )
 
         await paginator.send(ctx)
