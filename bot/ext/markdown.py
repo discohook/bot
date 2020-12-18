@@ -74,11 +74,19 @@ class Markdown(cmd.Cog):
     @commands.command()
     @commands.cooldown(4, 4, commands.BucketType.member)
     async def raw(self, ctx: cmd.Context, *, content: str):
-        """Uploads a text file with the raw message"""
+        """Returns the raw formatting of a message"""
 
-        fp = io.StringIO(content)
+        if "```" in content:
+            fp = io.StringIO(content)
+            await ctx.prompt(files=[discord.File(fp, filename=f"{ctx.message.id}.txt")])
+            return
 
-        await ctx.prompt(files=[discord.File(fp, filename=f"{ctx.message.id}.txt")])
+        await ctx.prompt(
+            embed=discord.Embed(
+                title="Raw formatting",
+                description=f"```\n{content}\n```",
+            )
+        )
 
 
 def setup(bot):
