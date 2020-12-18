@@ -78,7 +78,14 @@ class Markdown(cmd.Cog):
 
         if "```" in content:
             fp = io.StringIO(content)
-            await ctx.prompt(files=[discord.File(fp, filename=f"{ctx.message.id}.txt")])
+            await ctx.prompt(
+                files=[discord.File(fp, filename=f"{ctx.message.id}.txt")],
+                embed=discord.Embed(
+                    title="Raw formatting",
+                    description="Formatting could not be sent in chat "
+                    "because the message contained a code block.",
+                ),
+            )
             return
 
         await ctx.prompt(
