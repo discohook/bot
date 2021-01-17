@@ -264,14 +264,15 @@ class Roles(cmd.Cog):
 
         try:
             target_message, emoji = await self.prompt_message_emoji(ctx)
+            emoji_id = str(emoji.id or emoji.name)
 
             role_id = await self.db.fetchval(
                 """
                 SELECT role_id FROM reaction_role
-                WHERE message_id = $1 AND reaction = $2
+                WHERE message_id = $1 AND emoji_id = $2
                 """,
                 target_message.id,
-                str(emoji),
+                emoji_id,
             )
             if role_id:
                 role = ctx.guild.get_role(role_id)
@@ -289,10 +290,10 @@ class Roles(cmd.Cog):
                 await self.db.execute(
                     """
                     DELETE FROM reaction_role
-                    WHERE message_id = $1 AND reaction = $2
+                    WHERE message_id = $1 AND emoji_id = $2
                     """,
                     target_message.id,
-                    str(emoji),
+                    emoji_id,
                 )
 
             role = await self.prompt_role(ctx)
@@ -348,17 +349,18 @@ class Roles(cmd.Cog):
 
         await self.db.execute(
             """
-            INSERT INTO reaction_role (message_id, channel_id, guild_id, role_id, reaction)
-            VALUES ($1, $2, $3, $4, $5)
+            INSERT INTO reaction_role (message_id, channel_id, guild_id, role_id, reaction, emoji_id)
+            VALUES ($1, $2, $3, $4, $5, $6)
             """,
             target_message.id,
             target_message.channel.id,
             ctx.guild.id,
             role.id,
             str(emoji),
+            emoji_id,
         )
 
-        self.cache.pop((target_message.id, str(emoji)), None)
+        self.cache.pop((target_message.id, emoji_id), None)
         self.recent_message_cache.pop(target_message.id, None)
 
         await ctx.prompt(
@@ -411,17 +413,17 @@ class Roles(cmd.Cog):
         except discord.NotFound:
             pass
 
+        emoji_id = str(event.emoji.id or event.emoji.name)
         role_id = await self.db.fetchval(
             """
             DELETE FROM reaction_role
-            WHERE message_id = $1 AND reaction = $2
+            WHERE message_id = $1 AND emoji_id = $2
             RETURNING role_id
             """,
             target_message.id,
-            str(event.emoji),
+            emoji_id,
         )
-
-        self.cache.pop((target_message.id, str(event.emoji)), None)
+        self.cache.pop((target_message.id, emoji_id), None)
 
         if not role_id:
             await ctx.prompt(
@@ -459,7 +461,7 @@ class Roles(cmd.Cog):
             """
             DELETE FROM reaction_role
             WHERE guild_id = $1
-            RETURNING message_id, reaction
+            RETURNING message_id
             """,
             ctx.guild.id,
         )
@@ -495,7 +497,7 @@ class Roles(cmd.Cog):
             """
             DELETE FROM reaction_role
             WHERE message_id = $1
-            RETURNING reaction
+            RETURNING true
             """,
             message.id if isinstance(message, discord.Message) else message,
         )
@@ -527,7 +529,7 @@ class Roles(cmd.Cog):
             """
             DELETE FROM reaction_role
             WHERE role_id = $1
-            RETURNING message_id, reaction
+            RETURNING message_id
             """,
             role.id if isinstance(role, discord.Role) else role,
         )
@@ -561,7 +563,7 @@ class Roles(cmd.Cog):
         async with ctx.typing():
             reaction_roles = await self.db.fetch(
                 """
-                SELECT channel_id, message_id, role_id, reaction FROM reaction_role
+                SELECT channel_id, message_id, role_id, emoji_id FROM reaction_role
                 WHERE guild_id = $1
                 ORDER BY message_id
                 """,
@@ -597,10 +599,10 @@ class Roles(cmd.Cog):
             await self.db.executemany(
                 """
                 DELETE FROM reaction_role
-                WHERE message_id = $1 AND reaction = $2
+                WHERE message_id = $1 AND emoji_id = $2
                 """,
                 [
-                    (reaction_role["message_id"], reaction_role["reaction"])
+                    (reaction_role["message_id"], reaction_role["emoji_id"])
                     for role in deleted_messages
                 ],
             )
@@ -660,19 +662,21 @@ class Roles(cmd.Cog):
         if event.message_id in self.recent_message_cache:
             return
 
+        emoji_id = str(event.emoji.id or event.emoji.name)
+
         role_id = None
         try:
-            role_id = self.cache[(event.message_id, str(event.emoji))]
+            role_id = self.cache[(event.message_id, emoji_id)]
         except KeyError:
             role_id = await self.db.fetchval(
                 """
                 SELECT role_id FROM reaction_role
-                WHERE message_id = $1 AND reaction = $2
+                WHERE message_id = $1 AND emoji_id = $2
                 """,
                 event.message_id,
-                str(event.emoji),
+                emoji_id,
             )
-            self.cache[(event.message_id, str(event.emoji))] = role_id
+            self.cache[(event.message_id, emoji_id)] = role_id
 
         if not role_id:
             return
