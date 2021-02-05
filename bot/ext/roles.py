@@ -585,15 +585,17 @@ class Roles(cmd.Cog):
                     message = await channel.fetch_message(reaction_role["message_id"])
                 except discord.NotFound:
                     deleted_messages.append(reaction_role)
+                    continue
                 except discord.HTTPException:
                     cannot_read.append(reaction_role)
+                    continue
 
                 role = ctx.guild.get_role(reaction_role["role_id"])
                 if not role:
                     deleted_messages.append(reaction_role)
                     continue
 
-                if role > ctx.me.top_role:
+                if role >= ctx.me.top_role:
                     role_hierachy.append(reaction_role)
 
             await self.db.executemany(
@@ -632,7 +634,7 @@ class Roles(cmd.Cog):
                 )
 
             if len(role_hierachy) > 0:
-                managed_role = get(ctx.me.roles, managed=True) or ctx.me.top_role
+                managed_role = ctx.guild.self_role or ctx.me.top_role
                 must_win_over = max(
                     ctx.guild.get_role(r["role_id"]) for r in role_hierachy
                 )
