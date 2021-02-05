@@ -31,6 +31,12 @@ class Context(commands.Context):
 
         self.prompt_message = None
 
+    async def send(self, content=None, **kwargs):
+        if "reference" not in kwargs:
+            kwargs = dict(kwargs, reference=self.message)
+
+        return await super().send(content, **kwargs)
+
     async def prompt(
         self,
         content=None,
