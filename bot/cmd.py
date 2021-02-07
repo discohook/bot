@@ -32,7 +32,9 @@ class Context(commands.Context):
         self.prompt_message = None
 
     async def send(self, content=None, **kwargs):
-        if "reference" not in kwargs:
+        can_read_history = self.channel.permissions_for(self.me).read_message_history
+
+        if "reference" not in kwargs and can_read_history:
             kwargs = dict(kwargs, reference=self.message)
 
         return await super().send(content, **kwargs)
