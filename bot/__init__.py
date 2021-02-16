@@ -7,6 +7,7 @@ import discord
 from discord.ext import commands
 from discord.utils import get
 
+import bot.patches
 from bot import cmd
 from bot.ext import config
 from bot.utils import wrap_in_code
