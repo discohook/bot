@@ -64,7 +64,18 @@ class Roles(cmd.Cog):
 
         if isinstance(result, discord.RawReactionActionEvent):
             channel = ctx.guild.get_channel(result.channel_id)
-            target_message = await channel.fetch_message(result.message_id)
+
+            try:
+                target_message = await channel.fetch_message(result.message_id)
+            except discord.Forbidden:
+                await ctx.prompt(
+                    embed=discord.Embed(
+                        title="Cancelled",
+                        description="Couldn't find message info for the sent message.",
+                    )
+                )
+                raise commands.BadArgument()
+
             emoji = result.emoji
 
         elif isinstance(result, discord.Message):
