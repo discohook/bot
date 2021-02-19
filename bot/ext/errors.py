@@ -5,7 +5,7 @@ import traceback
 import typing
 
 import discord
-from bot import cmd
+from bot import cmd, converter
 from bot.utils import wrap_in_code
 from discord.ext import commands
 from discord.utils import escape_markdown
@@ -94,6 +94,11 @@ error_types = [
         commands.BadBoolArgument,
         "Not a boolean value",
         lambda e: f"Argument {wrap_in_code(e.argument)} is not a yes or no value.",
+    ),
+    (
+        converter.WebhookNotFound,
+        "Webhook not found",
+        lambda e: f"Could not find webhook for {wrap_in_code(e.argument)}.",
     ),
     (
         commands.BadArgument,

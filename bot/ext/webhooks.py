@@ -86,7 +86,11 @@ class Webhooks(cmd.Cog):
     @commands.has_guild_permissions(manage_webhooks=True)
     @commands.bot_has_guild_permissions(manage_webhooks=True)
     async def webhook_get(
-        self, ctx: cmd.Context, *, webhook: converter.WebhookConverter
+        self,
+        ctx: cmd.Context,
+        channel: converter.Never,
+        *,
+        webhook: converter.WebhookConverter,
     ):
         """Shows data for a given webhook"""
 
@@ -101,7 +105,11 @@ class Webhooks(cmd.Cog):
     @commands.has_guild_permissions(manage_webhooks=True)
     @commands.bot_has_guild_permissions(manage_webhooks=True)
     async def webhook_url(
-        self, ctx: cmd.Context, *, webhook: converter.WebhookConverter
+        self,
+        ctx: cmd.Context,
+        channel: converter.Never,
+        *,
+        webhook: converter.WebhookConverter,
     ):
         """Obtains the URL for a given webhook"""
 
@@ -159,6 +167,7 @@ class Webhooks(cmd.Cog):
     async def webhook_edit(
         self,
         ctx: cmd.Context,
+        channel: converter.Never,
         webhook: converter.WebhookConverter,
         new_name: str = None,
     ):
@@ -195,7 +204,11 @@ class Webhooks(cmd.Cog):
     @commands.has_guild_permissions(manage_webhooks=True)
     @commands.bot_has_guild_permissions(manage_webhooks=True)
     async def webhook_delete(
-        self, ctx: cmd.Context, *, webhook: converter.WebhookConverter
+        self,
+        ctx: cmd.Context,
+        channel: converter.Never,
+        *,
+        webhook: converter.WebhookConverter,
     ):
         """Deletes a given webhook
 
