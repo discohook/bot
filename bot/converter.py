@@ -87,6 +87,8 @@ class WebhookConverter(commands.IDConverter):
         if not ctx.guild:
             raise commands.NoPrivateMessage()
 
+        channel = None
+
         maybe_channel = argument.split(maxsplit=1)[0]
         try:
             channel = await commands.TextChannelConverter().convert(ctx, maybe_channel)
@@ -105,14 +107,22 @@ class WebhookConverter(commands.IDConverter):
         result = None
         if match:
             result = discord.utils.get(webhooks, id=int(match.group(1)))
-        if result is None:
+        if not result and channel:
             result = discord.utils.get(
-                webhooks, channel_id=ctx.channel.id, name=argument
+                webhooks,
+                channel_id=channel.id,
+                name=argument,
             )
-        if result is None:
+        if not result and not channel:
+            result = discord.utils.get(
+                webhooks,
+                channel_id=ctx.channel.id,
+                name=argument,
+            )
+        if not result and not channel:
             result = discord.utils.get(webhooks, name=argument)
 
-        if result is None:
+        if not result:
             raise commands.BadArgument(f"Webhook {argument!r} not found")
 
         return result
