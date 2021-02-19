@@ -6,14 +6,15 @@ from discord.utils import get
 
 from bot import cmd
 
-Never = typing.Optional[_Never]
-
 
 class _Never(commands.Converter):
     """Converter that never resolves to a value"""
 
     async def convert(self, ctx: cmd.Context, argument):
         raise commands.BadArgument()
+
+
+Never = typing.Optional[_Never]
 
 
 class MessageConverter(commands.MessageConverter):
