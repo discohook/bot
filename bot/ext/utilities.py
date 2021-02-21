@@ -44,7 +44,7 @@ class Utilities(cmd.Cog):
 
         return data
 
-    @commands.command(require_var_positional=True)
+    @commands.group(invoke_without_command=True, require_var_positional=True)
     @commands.cooldown(3, 30, type=commands.BucketType.user)
     @checks.sensitive()
     async def link(self, ctx: cmd.Context, *messages: converter.MessageConverter):
@@ -52,7 +52,49 @@ class Utilities(cmd.Cog):
 
         data = {"messages": []}
         for message in messages:
-            data["messages"].append({"data": self.get_message_data(message)})
+            data["messages"].append(
+                {
+                    "data": self.get_message_data(message),
+                }
+            )
+
+        data_json = json.dumps(data, separators=(",", ":"), ensure_ascii=False)
+        data_b64 = base64.urlsafe_b64encode(data_json.encode()).decode().strip("=")
+        url = urlunparse(("https", "discohook.app", "/", "", f"data={data_b64}", ""))
+
+        short_url, timestamp = await self.get_short_url(url)
+
+        if short_url is None:
+            await ctx.prompt(
+                embed=discord.Embed(
+                    title="Error",
+                    description="Failed to get short URL",
+                )
+            )
+            return
+
+        embed = discord.Embed(
+            title="Message",
+            description=short_url,
+        )
+        embed.set_footer(text="Expires")
+        embed.timestamp = timestamp
+        await ctx.prompt(embed=embed)
+
+    @link.command(name="edit", require_var_positional=True)
+    @commands.cooldown(3, 30, type=commands.BucketType.user)
+    @checks.sensitive()
+    async def link_edit(self, ctx: cmd.Context, *messages: converter.MessageConverter):
+        """Sends a link to recreate a given message in Discohook by message link"""
+
+        data = {"messages": []}
+        for message in messages:
+            data["messages"].append(
+                {
+                    "data": self.get_message_data(message),
+                    "reference": message.jump_url,
+                }
+            )
 
         data_json = json.dumps(data, separators=(",", ":"), ensure_ascii=False)
         data_b64 = base64.urlsafe_b64encode(data_json.encode()).decode().strip("=")
