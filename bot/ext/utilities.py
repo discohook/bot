@@ -47,8 +47,8 @@ class Utilities(cmd.Cog):
     @commands.group(invoke_without_command=True, require_var_positional=True)
     @commands.cooldown(3, 30, type=commands.BucketType.user)
     @checks.sensitive()
-    async def link(self, ctx: cmd.Context, *messages: converter.MessageConverter):
-        """Sends a link to recreate a given message in Discohook by message link"""
+    async def restore(self, ctx: cmd.Context, *messages: converter.MessageConverter):
+        """Sends a Discohook link for a given Discord message link"""
 
         data = {"messages": []}
         for message in messages:
@@ -81,11 +81,13 @@ class Utilities(cmd.Cog):
         embed.timestamp = timestamp
         await ctx.prompt(embed=embed)
 
-    @link.command(name="edit", require_var_positional=True)
+    @restore.command(name="edit", require_var_positional=True)
     @commands.cooldown(3, 30, type=commands.BucketType.user)
     @checks.sensitive()
-    async def link_edit(self, ctx: cmd.Context, *messages: converter.MessageConverter):
-        """Sends a link to recreate a given message in Discohook by message link"""
+    async def restore_edit(
+        self, ctx: cmd.Context, *messages: converter.MessageConverter
+    ):
+        """Sends a Discohook link for a given Discord message link with the Message Link filled"""
 
         data = {"messages": []}
         for message in messages:
