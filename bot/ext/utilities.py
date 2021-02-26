@@ -6,6 +6,7 @@ from urllib.parse import urlunparse
 
 import discord
 from bot import checks, cmd, converter
+from bot.utils import get_command_signature
 from discord.ext import commands
 
 
@@ -120,6 +121,18 @@ class Utilities(cmd.Cog):
         embed.set_footer(text="Expires")
         embed.timestamp = timestamp
         await ctx.prompt(embed=embed)
+
+    @commands.command(hidden=True)
+    @commands.cooldown(3, 30, type=commands.BucketType.user)
+    async def link(self, ctx: cmd.Context):
+        """This command has been renamed to 'restore'"""
+
+        await ctx.prompt(
+            embed=discord.Embed(
+                title="Command Renamed",
+                description=f"This command has been renamed to {get_command_signature(self.restore)}.",
+            )
+        )
 
     @commands.command()
     @commands.cooldown(4, 4, commands.BucketType.member)
