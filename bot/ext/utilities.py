@@ -130,7 +130,8 @@ class Utilities(cmd.Cog):
         await ctx.prompt(
             embed=discord.Embed(
                 title="Command Renamed",
-                description=f"This command has been renamed to {get_command_signature(self.restore)}.",
+                description="This command has been renamed to "
+                f"{get_command_signature(ctx, self.restore)}.",
             )
         )
 
