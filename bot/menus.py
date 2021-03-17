@@ -44,13 +44,31 @@ class FieldPaginator:
             current_page = []
             self.pages.append(current_page)
 
-        current_page.append(
-            {
-                "name": name,
-                "value": value,
-                "inline": inline,
-            }
-        )
+        if len(value) <= 1024:
+            current_page.append(
+                {
+                    "name": name,
+                    "value": value,
+                    "inline": inline,
+                }
+            )
+            return
+
+        parts = [""]
+        for line in value.splitlines(keepends=True):
+            if len(parts[-1] + line) > 1024:
+                parts.append("")
+
+            parts[-1] += line
+
+        for index, part in enumerate(parts):
+            current_page.append(
+                {
+                    "name": f"{name} ({index + 1}/{len(parts)})",
+                    "value": part,
+                    "inline": inline,
+                }
+            )
 
     def get_embed_for_page(self, index: int):
         embed = self.base_embed.copy()
