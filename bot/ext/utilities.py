@@ -84,13 +84,53 @@ class Utilities(cmd.Cog):
 
     @restore.command(name="edit", require_var_positional=True)
     @commands.cooldown(3, 30, type=commands.BucketType.user)
+    @commands.has_guild_permissions(manage_webhooks=True)
     @checks.sensitive()
     async def restore_edit(
         self, ctx: cmd.Context, *messages: converter.MessageConverter
     ):
-        """Sends a Discohook link for a given Discord message link with the Message Link filled"""
+        """Sends a Discohook link for a given Discord message link with extra fields filled for faster editing."""
 
-        data = {"messages": []}
+        webhook_ids = {message.webhook_id for message in messages}
+        if len(webhook_ids) > 1:
+            await ctx.prompt(
+                embed=discord.Embed(
+                    title="Error",
+                    description="The messages must not be sent by different webhooks.",
+                )
+            )
+            return
+        webhook_id = next(iter(webhook_ids))
+        if not webhook_id:
+            plural_message = "message is" if len(messages) == 1 else "messages are"
+            await ctx.prompt(
+                embed=discord.Embed(
+                    title="Error",
+                    description=f"The {plural_message} not sent by webhooks.",
+                )
+            )
+            return
+        webhook = None
+        try:
+            webhook = await ctx.bot.fetch_webhook(webhook_id)
+        except discord.NotFound:
+            await ctx.prompt(
+                embed=discord.Embed(
+                    title="Webhook Deleted",
+                    description="The webhook that was used to send the message was deleted.",
+                )
+            )
+            return
+        except discord.Forbidden:
+            await ctx.prompt(
+                embed=discord.Embed(
+                    title="Missing Permissions",
+                    description=f"I don't have have permission to manage webhooks in the webhook's channel.",
+                )
+            )
+            return
+
+        data = {"messages": [], "targets": [{"url": webhook.url}]}
         for message in messages:
             data["messages"].append(
                 {
@@ -114,13 +154,27 @@ class Utilities(cmd.Cog):
             )
             return
 
-        embed = discord.Embed(
-            title="Message",
-            description=short_url,
-        )
-        embed.set_footer(text="Expires")
-        embed.timestamp = timestamp
-        await ctx.prompt(embed=embed)
+        try:
+            embed = discord.Embed(
+                title="Message",
+                description=short_url,
+            )
+            embed.set_footer(text="Expires")
+            embed.timestamp = timestamp
+            await ctx.author.send(embed=embed)
+            await ctx.channel.send(
+                embed=discord.Embed(
+                    title="Message URL sent",
+                    description="Because the webhook URL should be kept secret, a message has been sent to your DMs.",
+                )
+            )
+        except discord.Forbidden:
+            await ctx.channel.send(
+                embed=discord.Embed(
+                    title="Forbidden",
+                    description="Could not send DM, check server privacy settings or unblock me.",
+                )
+            )
 
     @commands.command()
     @commands.cooldown(4, 4, commands.BucketType.member)
