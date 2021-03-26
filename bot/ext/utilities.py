@@ -162,14 +162,14 @@ class Utilities(cmd.Cog):
             embed.set_footer(text="Expires")
             embed.timestamp = timestamp
             await ctx.author.send(embed=embed)
-            await ctx.channel.send(
+            await ctx.prompt(
                 embed=discord.Embed(
                     title="Message URL sent",
                     description="Because the webhook URL should be kept secret, a message has been sent to your DMs.",
                 )
             )
         except discord.Forbidden:
-            await ctx.channel.send(
+            await ctx.prompt(
                 embed=discord.Embed(
                     title="Forbidden",
                     description="Could not send DM, check server privacy settings or unblock me.",

@@ -121,14 +121,14 @@ class Webhooks(cmd.Cog):
             await ctx.author.send(
                 embed=self.get_webhook_embed(ctx, webhook, show_url=True)
             )
-            await ctx.channel.send(
+            await ctx.prompt(
                 embed=discord.Embed(
                     title="Webhook URL sent",
                     description="Because the URL should be kept secret, a message has been sent to your DMs.",
                 )
             )
         except discord.Forbidden:
-            await ctx.channel.send(
+            await ctx.prompt(
                 embed=discord.Embed(
                     title="Forbidden",
                     description="Could not send DM, check server privacy settings or unblock me.",
