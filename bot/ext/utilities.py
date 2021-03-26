@@ -122,19 +122,6 @@ class Utilities(cmd.Cog):
         embed.timestamp = timestamp
         await ctx.prompt(embed=embed)
 
-    @commands.command(hidden=True)
-    @commands.cooldown(3, 30, type=commands.BucketType.user)
-    async def link(self, ctx: cmd.Context):
-        """This command has been renamed to 'restore'"""
-
-        await ctx.prompt(
-            embed=discord.Embed(
-                title="Command Renamed",
-                description="This command has been renamed to "
-                f"{get_command_signature(ctx, self.restore)}.",
-            )
-        )
-
     @commands.command()
     @commands.cooldown(4, 4, commands.BucketType.member)
     async def big(self, ctx: cmd.Context, *, emoji: converter.PartialEmojiConverter):
