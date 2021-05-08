@@ -6,6 +6,7 @@ from urllib.parse import urlunparse
 
 import discord
 from bot import checks, cmd, converter
+from bot.utils import get_command_signature
 from discord.ext import commands
 
 
@@ -16,7 +17,7 @@ class Utilities(cmd.Cog):
         async with self.session.post(
             "https://share.discohook.app/create", json={"url": url}
         ) as resp:
-            if not resp.ok:
+            if resp.status >= 400:
                 return None, None
 
             data = await resp.json()
@@ -44,15 +45,19 @@ class Utilities(cmd.Cog):
 
         return data
 
-    @commands.command(require_var_positional=True)
+    @commands.group(invoke_without_command=True, require_var_positional=True)
     @commands.cooldown(3, 30, type=commands.BucketType.user)
     @checks.sensitive()
-    async def link(self, ctx: cmd.Context, *messages: converter.MessageConverter):
-        """Sends a link to recreate a given message in Discohook by message link"""
+    async def restore(self, ctx: cmd.Context, *messages: converter.MessageConverter):
+        """Sends a Discohook link for a given Discord message link"""
 
         data = {"messages": []}
         for message in messages:
-            data["messages"].append({"data": self.get_message_data(message)})
+            data["messages"].append(
+                {
+                    "data": self.get_message_data(message),
+                }
+            )
 
         data_json = json.dumps(data, separators=(",", ":"), ensure_ascii=False)
         data_b64 = base64.urlsafe_b64encode(data_json.encode()).decode().strip("=")
@@ -61,7 +66,7 @@ class Utilities(cmd.Cog):
         short_url, timestamp = await self.get_short_url(url)
 
         if short_url is None:
-            await ctx.send(
+            await ctx.prompt(
                 embed=discord.Embed(
                     title="Error",
                     description="Failed to get short URL",
@@ -75,7 +80,101 @@ class Utilities(cmd.Cog):
         )
         embed.set_footer(text="Expires")
         embed.timestamp = timestamp
-        await ctx.send(embed=embed)
+        await ctx.prompt(embed=embed)
+
+    @restore.command(name="edit", require_var_positional=True)
+    @commands.cooldown(3, 30, type=commands.BucketType.user)
+    @commands.has_guild_permissions(manage_webhooks=True)
+    @checks.sensitive()
+    async def restore_edit(
+        self, ctx: cmd.Context, *messages: converter.MessageConverter
+    ):
+        """Sends a Discohook link for a given Discord message link with extra fields filled for faster editing."""
+
+        webhook_ids = {message.webhook_id for message in messages}
+        if len(webhook_ids) > 1:
+            await ctx.prompt(
+                embed=discord.Embed(
+                    title="Error",
+                    description="The messages must not be sent by different webhooks.",
+                )
+            )
+            return
+        webhook_id = next(iter(webhook_ids))
+        if not webhook_id:
+            plural_message = "message is" if len(messages) == 1 else "messages are"
+            await ctx.prompt(
+                embed=discord.Embed(
+                    title="Error",
+                    description=f"The {plural_message} not sent by webhooks.",
+                )
+            )
+            return
+        webhook = None
+        try:
+            webhook = await ctx.bot.fetch_webhook(webhook_id)
+        except discord.NotFound:
+            await ctx.prompt(
+                embed=discord.Embed(
+                    title="Webhook Deleted",
+                    description="The webhook that was used to send the message was deleted.",
+                )
+            )
+            return
+        except discord.Forbidden:
+            await ctx.prompt(
+                embed=discord.Embed(
+                    title="Missing Permissions",
+                    description=f"I don't have have permission to manage webhooks in the webhook's channel.",
+                )
+            )
+            return
+
+        data = {"messages": [], "targets": [{"url": webhook.url}]}
+        for message in messages:
+            data["messages"].append(
+                {
+                    "data": self.get_message_data(message),
+                    "reference": message.jump_url,
+                }
+            )
+
+        data_json = json.dumps(data, separators=(",", ":"), ensure_ascii=False)
+        data_b64 = base64.urlsafe_b64encode(data_json.encode()).decode().strip("=")
+        url = urlunparse(("https", "discohook.app", "/", "", f"data={data_b64}", ""))
+
+        short_url, timestamp = await self.get_short_url(url)
+
+        if short_url is None:
+            await ctx.prompt(
+                embed=discord.Embed(
+                    title="Error",
+                    description="Failed to get short URL",
+                )
+            )
+            return
+
+        try:
+            embed = discord.Embed(
+                title="Message",
+                description=short_url,
+            )
+            embed.set_footer(text="Expires")
+            embed.timestamp = timestamp
+            await ctx.author.send(embed=embed)
+            await ctx.prompt(
+                embed=discord.Embed(
+                    title="Message URL sent",
+                    description="Because the webhook URL should be kept secret, a message has been sent to your DMs.",
+                )
+            )
+        except discord.Forbidden:
+            await ctx.prompt(
+                embed=discord.Embed(
+                    title="Forbidden",
+                    description="Could not send DM, check server privacy settings or unblock me.",
+                )
+            )
 
     @commands.command()
     @commands.cooldown(4, 4, commands.BucketType.member)
@@ -88,7 +187,7 @@ class Utilities(cmd.Cog):
         embed.set_image(url=str(emoji.url))
         embed.set_footer(text=f"ID: {emoji.id}")
 
-        await ctx.send(embed=embed)
+        await ctx.prompt(embed=embed)
 
     @commands.group(invoke_without_command=True)
     @commands.cooldown(4, 4, commands.BucketType.member)
@@ -104,7 +203,7 @@ class Utilities(cmd.Cog):
         embed.set_image(url=url)
         embed.set_footer(text=f"ID: {user.id}")
 
-        await ctx.send(embed=embed)
+        await ctx.prompt(embed=embed)
 
     @avatar.command(name="static")
     @commands.cooldown(4, 4, commands.BucketType.member)
@@ -120,7 +219,7 @@ class Utilities(cmd.Cog):
         embed.set_image(url=url)
         embed.set_footer(text=f"ID: {user.id}")
 
-        await ctx.send(embed=embed)
+        await ctx.prompt(embed=embed)
 
     @commands.group(invoke_without_command=True)
     @commands.cooldown(4, 4, commands.BucketType.member)
@@ -133,7 +232,7 @@ class Utilities(cmd.Cog):
         embed.set_image(url=url)
         embed.set_footer(text=f"ID: {ctx.guild.id}")
 
-        await ctx.send(embed=embed)
+        await ctx.prompt(embed=embed)
 
     @icon.command(name="static")
     @commands.cooldown(4, 4, commands.BucketType.member)
@@ -146,7 +245,7 @@ class Utilities(cmd.Cog):
         embed.set_image(url=url)
         embed.set_footer(text=f"ID: {ctx.guild.id}")
 
-        await ctx.send(embed=embed)
+        await ctx.prompt(embed=embed)
 
 
 def setup(bot):

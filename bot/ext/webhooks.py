@@ -1,7 +1,7 @@
 import asyncio
 
 import discord
-from bot import cmd, converter, paginators
+from bot import cmd, converter, menus
 from bot.utils import get_command_signature, wrap_in_code
 from discord.ext import commands
 
@@ -52,6 +52,11 @@ class Webhooks(cmd.Cog):
     async def webhook_list(self, ctx: cmd.Context, channel: discord.TextChannel = None):
         """Lists webhooks for the server or a given channel"""
 
+        if channel:
+            channel_perms = channel.permissions_for(ctx.me)
+            if not channel_perms.view_channel or not channel_perms.manage_webhooks:
+                raise commands.BotMissingPermissions(["manage_webhooks"])
+
         embed = discord.Embed(
             title="Webhooks",
             description=f"Use {get_command_signature(ctx, self.webhook_get)}"
@@ -61,7 +66,7 @@ class Webhooks(cmd.Cog):
             text="Page {current_page}/{total_pages}, "
             "showing webhook {first_field}..{last_field}/{total_fields}."
         )
-        paginator = paginators.FieldPaginator(self.bot, base_embed=embed)
+        paginator = menus.FieldPaginator(self.bot, base_embed=embed)
 
         for webhook in await ctx.guild.webhooks():
             if webhook.type != discord.WebhookType.incoming:
@@ -71,43 +76,59 @@ class Webhooks(cmd.Cog):
 
             paginator.add_field(
                 name=webhook.name,
-                value=f"In {webhook.channel.mention}",
+                value=f"Channel: {webhook.channel.mention}\nID: {webhook.id}",
             )
 
-        await paginator.send(target=ctx.channel, owner=ctx.author)
+        await paginator.send(ctx)
 
     @webhook.command(name="get", aliases=["show"])
     @commands.cooldown(3, 8, commands.BucketType.member)
     @commands.has_guild_permissions(manage_webhooks=True)
     @commands.bot_has_guild_permissions(manage_webhooks=True)
     async def webhook_get(
-        self, ctx: cmd.Context, *, webhook: converter.WebhookConverter
+        self,
+        ctx: cmd.Context,
+        channel: converter.Never,
+        *,
+        webhook: converter.WebhookConverter,
     ):
         """Shows data for a given webhook"""
 
-        await ctx.send(embed=self.get_webhook_embed(ctx, webhook))
+        channel_perms = webhook.channel.permissions_for(ctx.me)
+        if not channel_perms.view_channel or not channel_perms.manage_webhooks:
+            raise commands.BotMissingPermissions(["manage_webhooks"])
+
+        await ctx.prompt(embed=self.get_webhook_embed(ctx, webhook))
 
     @webhook.command(name="url")
     @commands.cooldown(3, 8, commands.BucketType.member)
     @commands.has_guild_permissions(manage_webhooks=True)
     @commands.bot_has_guild_permissions(manage_webhooks=True)
     async def webhook_url(
-        self, ctx: cmd.Context, *, webhook: converter.WebhookConverter
+        self,
+        ctx: cmd.Context,
+        channel: converter.Never,
+        *,
+        webhook: converter.WebhookConverter,
     ):
         """Obtains the URL for a given webhook"""
+
+        channel_perms = webhook.channel.permissions_for(ctx.me)
+        if not channel_perms.view_channel or not channel_perms.manage_webhooks:
+            raise commands.BotMissingPermissions(["manage_webhooks"])
 
         try:
             await ctx.author.send(
                 embed=self.get_webhook_embed(ctx, webhook, show_url=True)
             )
-            await ctx.channel.send(
+            await ctx.prompt(
                 embed=discord.Embed(
                     title="Webhook URL sent",
                     description="Because the URL should be kept secret, a message has been sent to your DMs.",
                 )
             )
         except discord.Forbidden:
-            await ctx.channel.send(
+            await ctx.prompt(
                 embed=discord.Embed(
                     title="Forbidden",
                     description="Could not send DM, check server privacy settings or unblock me.",
@@ -123,6 +144,10 @@ class Webhooks(cmd.Cog):
     ):
         """Creates a new webhook for a given channel"""
 
+        channel_perms = channel.permissions_for(ctx.me)
+        if not channel_perms.view_channel or not channel_perms.manage_webhooks:
+            raise commands.BotMissingPermissions(["manage_webhooks"])
+
         avatar_file = (
             await ctx.message.attachments[0].read()
             if len(ctx.message.attachments) > 0
@@ -131,7 +156,7 @@ class Webhooks(cmd.Cog):
 
         webhook = await channel.create_webhook(name=name, avatar=avatar_file)
 
-        await ctx.send(
+        await ctx.prompt(
             embed=self.get_webhook_embed(ctx, webhook, message="New webhook created")
         )
 
@@ -142,14 +167,19 @@ class Webhooks(cmd.Cog):
     async def webhook_edit(
         self,
         ctx: cmd.Context,
+        channel: converter.Never,
         webhook: converter.WebhookConverter,
-        *,
         new_name: str = None,
     ):
         """Edits an existing webhook
-        The existing webhook name must be put in quotes, but not the new name (if any)
-        To edit the avatar, attach a image file with the message
+
+        If webhook names contains spaces, it must be in quotes.
+        To edit the avatar, attach a image file with the message.
         """
+
+        channel_perms = webhook.channel.permissions_for(ctx.me)
+        if not channel_perms.view_channel or not channel_perms.manage_webhooks:
+            raise commands.BotMissingPermissions(["manage_webhooks"])
 
         edit_kwargs = {}
 
@@ -165,7 +195,7 @@ class Webhooks(cmd.Cog):
         await webhook.edit(**edit_kwargs)
 
         webhook = await self.bot.fetch_webhook(webhook.id)
-        await ctx.send(
+        await ctx.prompt(
             embed=self.get_webhook_embed(ctx, webhook, message="Webhook edited")
         )
 
@@ -174,49 +204,48 @@ class Webhooks(cmd.Cog):
     @commands.has_guild_permissions(manage_webhooks=True)
     @commands.bot_has_guild_permissions(manage_webhooks=True)
     async def webhook_delete(
-        self, ctx: cmd.Context, *, webhook: converter.WebhookConverter
+        self,
+        ctx: cmd.Context,
+        channel: converter.Never,
+        *,
+        webhook: converter.WebhookConverter,
     ):
-        """Deletes a webhook, this cannot be undone
-        Messages sent by this webhook will not be deleted"""
+        """Deletes a given webhook
 
-        message = await ctx.send(
+        Messages sent by this webhook will not be deleted.
+        """
+
+        channel_perms = webhook.channel.permissions_for(ctx.me)
+        if not channel_perms.view_channel or not channel_perms.manage_webhooks:
+            raise commands.BotMissingPermissions(["manage_webhooks"])
+
+        prompt = menus.ConfirmationPrompt(
+            self.bot,
             embed=discord.Embed(
                 title="Confirmation",
                 description=f"Are you sure you want to delete {wrap_in_code(webhook.name)}?"
                 " This action cannot be reverted.",
-            )
+            ),
         )
 
-        await message.add_reaction("\N{WASTEBASKET}")
+        prompt.action_confirm = "\N{WASTEBASKET}"
 
-        try:
-            await self.bot.wait_for(
-                "raw_reaction_add",
-                timeout=30.0,
-                check=lambda event: (
-                    str(event.emoji) == "\N{WASTEBASKET}"
-                    and event.message_id == message.id
-                    and event.user_id == ctx.author.id
-                ),
-            )
-        except asyncio.TimeoutError:
-            await ctx.send(
-                embed=discord.Embed(
-                    title="Confirmation cancelled",
-                    description="30 second timeout reached",
-                )
-            )
-        else:
+        if await prompt.send(ctx):
             await webhook.delete()
 
-            await ctx.send(
+            await ctx.prompt(
                 embed=discord.Embed(
                     title="Webhook deleted",
                     description="Messages sent by this webhook have not been deleted.",
                 )
             )
-        finally:
-            await message.remove_reaction("\N{WASTEBASKET}", ctx.guild.me)
+        else:
+            await ctx.prompt(
+                embed=discord.Embed(
+                    title="Confirmation cancelled",
+                    description="Action cancelled or command expired.",
+                )
+            )
 
 
 def setup(bot):

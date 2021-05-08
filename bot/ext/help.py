@@ -1,7 +1,7 @@
 import itertools
 
 import discord
-from bot import paginators
+from bot import menus
 from bot.utils import get_clean_prefix, get_command_signature, wrap_in_code
 from discord.ext import commands
 
@@ -30,7 +30,7 @@ class HelpCommand(commands.HelpCommand):
             " showing module {first_field}..{last_field}/{total_fields}"
         )
 
-        return paginators.FieldPaginator(self.context.bot, base_embed=embed)
+        return menus.FieldPaginator(self.context.bot, base_embed=embed)
 
     def get_command_signature(self, command, *, full=False):
         return get_command_signature(self.context, command, full=full)
@@ -73,7 +73,7 @@ class HelpCommand(commands.HelpCommand):
                 name=category, value="\n".join(description), inline=False
             )
 
-        await paginator.send(target=self.get_destination(), owner=self.context.author)
+        await paginator.send(self.context)
 
     async def send_cog_help(self, cog: commands.Cog):
         self.embed.title = f"Help: {cog.qualified_name}"
@@ -89,7 +89,7 @@ class HelpCommand(commands.HelpCommand):
                 inline=False,
             )
 
-        await paginator.send(target=self.get_destination(), owner=self.context.author)
+        await paginator.send(self.context)
 
     async def send_group_help(self, group: commands.Group):
         self.embed.title = f"Help: {self.get_command_signature(group, full=True)}"
@@ -105,7 +105,7 @@ class HelpCommand(commands.HelpCommand):
                 inline=False,
             )
 
-        await paginator.send(target=self.get_destination(), owner=self.context.author)
+        await paginator.send(self.context)
 
     async def send_command_help(self, command: commands.Command):
         self.embed.title = f"Help: {self.get_command_signature(command, full=True)}"

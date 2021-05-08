@@ -7,6 +7,7 @@ import discord
 from discord.ext import commands
 from discord.utils import get
 
+import bot.patches
 from bot import cmd
 from bot.ext import config
 from bot.utils import wrap_in_code
@@ -31,7 +32,12 @@ class Bot(commands.AutoShardedBot):
             description="Discohook's official bot.",
             help_command=None,
             activity=discord.Game(name="discohook.app | d.help"),
-            allowed_mentions=discord.AllowedMentions.none(),
+            allowed_mentions=discord.AllowedMentions(
+                everyone=False,
+                roles=False,
+                users=False,
+                replied_user=True,
+            ),
             intents=discord.Intents(
                 guilds=True,
                 messages=True,

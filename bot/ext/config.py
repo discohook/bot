@@ -3,8 +3,8 @@ import collections
 from os import environ
 
 import asyncpg
+import cachetools
 import discord
-import lru
 from bot import cmd
 from discord.ext import commands
 from discord.utils import get
@@ -61,11 +61,13 @@ class Config(cmd.Cog):
     def __init__(self, bot):
         super().__init__(bot)
 
-        self.cache = lru.LRU(256)
+        self.cache = cachetools.TTLCache(maxsize=float("inf"), ttl=900)
 
     async def ensure(self, guild: discord.Guild):
-        if guild.id in self.cache:
+        try:
             return self.cache[guild.id]
+        except KeyError:
+            pass
 
         row = await self.db.fetchrow(
             """

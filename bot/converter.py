@@ -1,8 +1,20 @@
+import typing
+
 import discord
 from discord.ext import commands
 from discord.utils import get
 
 from bot import cmd
+
+
+class _Never(commands.Converter):
+    """Converter that never resolves to a value"""
+
+    async def convert(self, ctx: cmd.Context, argument):
+        raise commands.BadArgument()
+
+
+Never = typing.Optional[_Never]
 
 
 class MessageConverter(commands.MessageConverter):
@@ -47,6 +59,22 @@ class PartialEmojiConverter(commands.PartialEmojiConverter):
             return await super().convert(ctx, str(guild_emoji or argument))
 
 
+class WebhookNotFound(commands.BadArgument):
+    """Exception raised when the bot can not find the webhook.
+
+    This inherits from :exc:`discord.ext.commands.errors.BadArgument`
+
+    Attributes
+    -----------
+    webhook: :class:`str`
+        The webhook supplied by the caller that was not found
+    """
+
+    def __init__(self, argument):
+        self.argument = argument
+        super().__init__(f'Webhook "{argument}" not found.')
+
+
 class WebhookConverter(commands.IDConverter):
     """Converts to a :class:`discord.Webhook`.
     The lookup strategy is as follows (in order):
@@ -59,7 +87,14 @@ class WebhookConverter(commands.IDConverter):
         if not ctx.guild:
             raise commands.NoPrivateMessage()
 
-        argument = argument.strip()
+        channel = None
+
+        maybe_channel = argument.split(maxsplit=1)[0]
+        try:
+            channel = await commands.TextChannelConverter().convert(ctx, maybe_channel)
+            argument = argument.split(maxsplit=1)[1]
+        except:
+            pass
 
         match = self._get_id_match(argument)
 
@@ -72,14 +107,22 @@ class WebhookConverter(commands.IDConverter):
         result = None
         if match:
             result = discord.utils.get(webhooks, id=int(match.group(1)))
-        if result is None:
+        if not result and channel:
             result = discord.utils.get(
-                webhooks, channel_id=ctx.channel.id, name=argument
+                webhooks,
+                channel_id=channel.id,
+                name=argument,
             )
-        if result is None:
+        if not result and not channel:
+            result = discord.utils.get(
+                webhooks,
+                channel_id=ctx.channel.id,
+                name=argument,
+            )
+        if not result and not channel:
             result = discord.utils.get(webhooks, name=argument)
 
-        if result is None:
+        if not result:
             raise commands.BadArgument(f"Webhook {argument!r} not found")
 
         return result

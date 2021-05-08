@@ -1,3 +1,4 @@
+import discord
 from discord.ext import commands
 
 
@@ -28,41 +29,40 @@ class Context(commands.Context):
     def __init__(self, **attrs):
         super().__init__(**attrs)
 
-        self.sent_message = None
+        self.prompt_message = None
 
-    async def send(
+    async def send(self, content=None, **kwargs):
+        can_read_history = self.channel.permissions_for(self.me).read_message_history
+
+        if "reference" not in kwargs and can_read_history:
+            kwargs = dict(kwargs, reference=self.message)
+
+        return await super().send(content, **kwargs)
+
+    async def prompt(
         self,
         content=None,
         *,
-        force_send=False,
-        tts=False,
         embed=None,
         files=None,
-        delete_after=None,
-        nonce=None,
         allowed_mentions=None,
-        suppress=False,
     ):
-        if force_send:
-            self.sent_message = None
+        if self.prompt_message:
+            try:
+                await self.prompt_message.edit(
+                    content=content,
+                    embed=embed,
+                    allowed_mentions=allowed_mentions,
+                )
+            except discord.NotFound:
+                pass
+            else:
+                return self.prompt_message
 
-        if self.sent_message:
-            await self.sent_message.edit(
-                content=content,
-                embed=embed,
-                delete_after=delete_after,
-                allowed_mentions=allowed_mentions,
-                suppress=suppress,
-            )
-            return self.sent_message
-
-        self.sent_message = await super().send(
+        self.prompt_message = await self.send(
             content=content,
-            tts=tts,
             embed=embed,
             files=files,
-            delete_after=delete_after,
-            nonce=nonce,
             allowed_mentions=allowed_mentions,
         )
-        return self.sent_message
+        return self.prompt_message

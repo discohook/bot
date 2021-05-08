@@ -21,7 +21,7 @@ class Markdown(cmd.Cog):
         embed.add_field(name="Output", value=member.mention)
         embed.set_footer(text=f"ID: {member.id}")
 
-        await ctx.send(embed=embed)
+        await ctx.prompt(embed=embed)
 
     @commands.command()
     @commands.cooldown(4, 4, commands.BucketType.member)
@@ -40,7 +40,7 @@ class Markdown(cmd.Cog):
                 " To ping everyone just write `@everyone`.",
             )
 
-        await ctx.send(embed=embed)
+        await ctx.prompt(embed=embed)
 
     @commands.command()
     @commands.cooldown(4, 4, commands.BucketType.member)
@@ -52,7 +52,7 @@ class Markdown(cmd.Cog):
         embed.add_field(name="Output", value=channel.mention)
         embed.set_footer(text=f"ID: {channel.id}")
 
-        await ctx.send(embed=embed)
+        await ctx.prompt(embed=embed)
 
     @commands.command(aliases=["emote"])
     @commands.cooldown(4, 4, commands.BucketType.member)
@@ -68,26 +68,33 @@ class Markdown(cmd.Cog):
             else f"*`<`*`{'a' if emoji.animated else ''}:{emoji.name}:{emoji.id}>`",
         )
         embed.add_field(name="Output", value=str(emoji))
-        if guild_emoji is None or guild_emoji.guild != ctx.guild:
-            embed.add_field(
-                name="Warning",
-                value="Emoji is from another server, please make sure the "
-                '@everyone role has the "Use External Emojis" permission in '
-                "the target channel in order to send it in a webhook message.",
-                inline=False,
-            )
         embed.set_footer(text=f"ID: {emoji.id}")
 
-        await ctx.send(embed=embed)
+        await ctx.prompt(embed=embed)
 
     @commands.command()
     @commands.cooldown(4, 4, commands.BucketType.member)
     async def raw(self, ctx: cmd.Context, *, content: str):
-        """Uploads a text file with the raw message"""
+        """Returns the raw formatting of a message"""
 
-        fp = io.StringIO(content)
+        if "```" in content:
+            fp = io.StringIO(content)
+            await ctx.prompt(
+                files=[discord.File(fp, filename=f"{ctx.message.id}.txt")],
+                embed=discord.Embed(
+                    title="Raw formatting",
+                    description="Formatting could not be sent in chat "
+                    "because the message contained a code block.",
+                ),
+            )
+            return
 
-        await ctx.send(files=[discord.File(fp, filename=f"{ctx.message.id}.txt")])
+        await ctx.prompt(
+            embed=discord.Embed(
+                title="Raw formatting",
+                description=f"```\n{content}\n```",
+            )
+        )
 
 
 def setup(bot):
