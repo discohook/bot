@@ -2,13 +2,11 @@ import math
 import re
 import sys
 import traceback
-import typing
 
 import discord
 from bot import cmd, converter
 from bot.utils import wrap_in_code
 from discord.ext import commands
-from discord.utils import escape_markdown
 
 ignored_errors = [
     commands.CommandNotFound,
@@ -58,27 +56,27 @@ error_types = [
     (
         commands.MessageNotFound,
         "Message not found",
-        lambda e: f"Could not find message for {wrap_in_code(e.argument)}.",
+        lambda e: f"Could not find message for {wrap_in_code(str(e.argument))}.",
     ),
     (
         commands.MemberNotFound,
         "Member not found",
-        lambda e: f"Could not find member for {wrap_in_code(e.argument)}.",
+        lambda e: f"Could not find member for {wrap_in_code(str(e.argument))}.",
     ),
     (
         commands.UserNotFound,
         "User not found",
-        lambda e: f"Could not find user for {wrap_in_code(e.argument)}.",
+        lambda e: f"Could not find user for {wrap_in_code(str(e.argument))}.",
     ),
     (
         commands.ChannelNotFound,
         "Channel not found",
-        lambda e: f"Could not find channel for {wrap_in_code(e.argument)}.",
+        lambda e: f"Could not find channel for {wrap_in_code(str(e.argument))}.",
     ),
     (
         (commands.EmojiNotFound, commands.PartialEmojiConversionFailure),
         "Emoji not found",
-        lambda e: f"Could not find emoji for {wrap_in_code(e.argument)}.",
+        lambda e: f"Could not find emoji for {wrap_in_code(str(e.argument))}.",
     ),
     (
         commands.ChannelNotReadable,
@@ -88,17 +86,17 @@ error_types = [
     (
         commands.RoleNotFound,
         "Role not found",
-        lambda e: f"Could not find role for {wrap_in_code(e.argument)}.",
+        lambda e: f"Could not find role for {wrap_in_code(str(e.argument))}.",
     ),
     (
         commands.BadBoolArgument,
         "Not a boolean value",
-        lambda e: f"Argument {wrap_in_code(e.argument)} is not a yes or no value.",
+        lambda e: f"Argument {wrap_in_code(str(e.argument))} is not a yes or no value.",
     ),
     (
         converter.WebhookNotFound,
         "Webhook not found",
-        lambda e: f"Could not find webhook for {wrap_in_code(e.argument)}.",
+        lambda e: f"Could not find webhook for {wrap_in_code(str(e.argument))}.",
     ),
     (
         commands.BadArgument,
