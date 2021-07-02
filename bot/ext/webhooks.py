@@ -28,11 +28,14 @@ class Webhooks(cmd.Cog):
             value=f"{webhook.created_at.ctime()} UTC".replace("  ", " "),
         )
 
-        url_message = (
-            webhook.url
-            if show_url
-            else f"Use {get_command_signature(ctx, self.webhook_url)} to obtain the URL."
-        )
+        if webhook.token:
+            url_message = (
+                webhook.url
+                if show_url
+                else f"Use {get_command_signature(ctx, self.webhook_url)} to obtain the URL."
+            )
+        else:
+            url_message = "This webhook was created by a bot other than myself, so I cannot get its full URL."
         embed.add_field(name="Webhook URL", value=url_message, inline=False)
 
         return embed
@@ -190,6 +193,15 @@ class Webhooks(cmd.Cog):
         if not channel_perms.view_channel or not channel_perms.manage_webhooks:
             raise commands.BotMissingPermissions(["manage_webhooks"])
 
+        if not webhook.token:
+            await ctx.prompt(
+                embed=discord.Embed(
+                    title="Unable to edit",
+                    description="This webhook was created by a bot other than myself, so I cannot edit it."
+                )
+            )
+            return
+
         edit_kwargs = {}
 
         if new_name:
@@ -227,6 +239,15 @@ class Webhooks(cmd.Cog):
         channel_perms = webhook.channel.permissions_for(ctx.me)
         if not channel_perms.view_channel or not channel_perms.manage_webhooks:
             raise commands.BotMissingPermissions(["manage_webhooks"])
+
+        if not webhook.token:
+            await ctx.prompt(
+                embed=discord.Embed(
+                    title="Unable to delete",
+                    description="This webhook was created by a bot other than myself, so I cannot delete it."
+                )
+            )
+            return
 
         prompt = menus.ConfirmationPrompt(
             self.bot,
