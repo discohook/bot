@@ -47,7 +47,7 @@ class Context(commands.Context):
         files=None,
         allowed_mentions=None,
     ):
-        if embed.color is discord.Embed.Empty:
+        if embed and embed.color is discord.Embed.Empty:
             embed.color = 0x58b9ff
 
         if self.prompt_message:
