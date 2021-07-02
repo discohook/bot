@@ -37,6 +37,9 @@ class Context(commands.Context):
         if "reference" not in kwargs and can_read_history:
             kwargs = dict(kwargs, reference=self.message)
 
+        if embed := kwargs.get("embed") and embed.color is discord.Embed.Empty:
+            embed.color = 0x58b9ff
+
         return await super().send(content, **kwargs)
 
     async def prompt(
