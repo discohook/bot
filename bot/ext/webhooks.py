@@ -117,6 +117,15 @@ class Webhooks(cmd.Cog):
         if not channel_perms.view_channel or not channel_perms.manage_webhooks:
             raise commands.BotMissingPermissions(["manage_webhooks"])
 
+        if not webhook.token:
+            await ctx.prompt(
+                embed=discord.Embed(
+                    title="Unable to get URL",
+                    description="This webhook was created by a bot other than myself, so I cannot get its full URL."
+                )
+            )
+            return
+
         try:
             await ctx.author.send(
                 embed=self.get_webhook_embed(ctx, webhook, show_url=True)
