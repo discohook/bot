@@ -223,6 +223,7 @@ class Utilities(cmd.Cog):
 
     @commands.group(invoke_without_command=True)
     @commands.cooldown(4, 4, commands.BucketType.member)
+    @commands.guild_only()
     async def icon(self, ctx: cmd.Context):
         """Gives the URL to the server's icon"""
 
@@ -236,6 +237,7 @@ class Utilities(cmd.Cog):
 
     @icon.command(name="static")
     @commands.cooldown(4, 4, commands.BucketType.member)
+    @commands.guild_only()
     async def icon_static(self, ctx: cmd.Context):
         """Gives the URL to the server's non-animated icon"""
 
