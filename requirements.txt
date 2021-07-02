@@ -3,7 +3,7 @@ aiohttp==3.6.3
 asyncpg==0.21.0
 black==20.8b1
 cachetools==4.1.1
-discord.py==1.7.2
+discord.py==1.7.3
 jishaku==1.20.0.220
 pg8000==1.16.6
 psutil==5.7.3
