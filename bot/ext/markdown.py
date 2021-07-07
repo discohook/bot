@@ -45,7 +45,12 @@ class Markdown(cmd.Cog):
     @commands.command()
     @commands.cooldown(4, 4, commands.BucketType.member)
     @commands.guild_only()
-    async def channel(self, ctx: cmd.Context, *, channel: Union[discord.TextChannel, discord.VoiceChannel, discord.StageChannel]):
+    async def channel(
+        self,
+        ctx: cmd.Context,
+        *,
+        channel: Union[discord.TextChannel, discord.VoiceChannel, discord.StageChannel],
+    ):
         """Gives formatting to link to a given text, voice, or stage channel"""
 
         embed = discord.Embed(title="Syntax", description=f"`{channel.mention}`")

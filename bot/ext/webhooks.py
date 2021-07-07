@@ -124,7 +124,7 @@ class Webhooks(cmd.Cog):
             await ctx.prompt(
                 embed=discord.Embed(
                     title="Unable to get URL",
-                    description="This webhook was created by a bot other than myself, so I cannot get its full URL."
+                    description="This webhook was created by a bot other than myself, so I cannot get its full URL.",
                 )
             )
             return
@@ -197,7 +197,7 @@ class Webhooks(cmd.Cog):
             await ctx.prompt(
                 embed=discord.Embed(
                     title="Unable to edit",
-                    description="This webhook was created by a bot other than myself, so I cannot edit it."
+                    description="This webhook was created by a bot other than myself, so I cannot edit it.",
                 )
             )
             return
@@ -244,7 +244,7 @@ class Webhooks(cmd.Cog):
             await ctx.prompt(
                 embed=discord.Embed(
                     title="Unable to delete",
-                    description="This webhook was created by a bot other than myself, so I cannot delete it."
+                    description="This webhook was created by a bot other than myself, so I cannot delete it.",
                 )
             )
             return
