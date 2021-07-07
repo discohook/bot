@@ -11,7 +11,9 @@ def wrap_in_code(value: str, *, block: Optional[Union[bool, str]] = None):
     value = value.replace("\u200b\u200b", "\u200b")
 
     if block is None:
-        return "``" + value + "``"
+        if "`" in value:
+            return "``" + value + "``"
+        return "`" + value + "`"
 
     lang = "" if block is True else block
 
