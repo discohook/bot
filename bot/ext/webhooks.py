@@ -160,6 +160,15 @@ class Webhooks(cmd.Cog):
         if not channel_perms.view_channel or not channel_perms.manage_webhooks:
             raise commands.BotMissingPermissions(["manage_webhooks"])
 
+        if len(name) > 80:
+            await ctx.prompt(
+                embed=discord.Embed(
+                    title="Webhook name too long",
+                    description="Webhook names can only be up to 80 characters long",
+                )
+            )
+            return
+
         avatar_file = (
             await ctx.message.attachments[0].read()
             if len(ctx.message.attachments) > 0
@@ -206,6 +215,15 @@ class Webhooks(cmd.Cog):
 
         if new_name:
             edit_kwargs["name"] = new_name
+
+            if len(new_name) > 80:
+                await ctx.prompt(
+                    embed=discord.Embed(
+                        title="Webhook name too long",
+                        description="Webhook names can only be up to 80 characters long",
+                    )
+                )
+                return
 
         if len(ctx.message.attachments) > 0:
             edit_kwargs["avatar"] = await ctx.message.attachments[0].read()
