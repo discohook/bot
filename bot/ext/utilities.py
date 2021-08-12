@@ -39,14 +39,14 @@ class Utilities(cmd.Cog):
             embed_dict = embed.to_dict()
 
             embed_dict.pop("type")
-            embed_dict.get("image", {}).pop("proxy_url")
-            embed_dict.get("image", {}).pop("width")
-            embed_dict.get("image", {}).pop("height")
-            embed_dict.get("thumbnail", {}).pop("proxy_url")
-            embed_dict.get("thumbnail", {}).pop("width")
-            embed_dict.get("thumbnail", {}).pop("height")
-            embed_dict.get("author", {}).pop("proxy_icon_url")
-            embed_dict.get("footer", {}).pop("proxy_icon_url")
+            embed_dict.get("image", {}).pop("proxy_url", None)
+            embed_dict.get("image", {}).pop("width", None)
+            embed_dict.get("image", {}).pop("height", None)
+            embed_dict.get("thumbnail", {}).pop("proxy_url", None)
+            embed_dict.get("thumbnail", {}).pop("width", None)
+            embed_dict.get("thumbnail", {}).pop("height", None)
+            embed_dict.get("author", {}).pop("proxy_icon_url", None)
+            embed_dict.get("footer", {}).pop("proxy_icon_url", None)
 
             data["embeds"].append(embed_dict)
 
