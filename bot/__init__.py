@@ -27,6 +27,17 @@ initial_extensions = (
 
 class Bot(commands.AutoShardedBot):
     def __init__(self):
+        shard_kwargs = {}
+        if "CLUSTER_ID" in environ:
+            cluster_id = int(environ.get("CLUSTER_ID"))
+            total_clusters = int(environ.get("CLUSTER_COUNT"))
+            total_shards = int(environ.get("SHARD_COUNT"))
+
+            shard_kwargs["shard_ids"] = list(
+                range(cluster_id, total_shards - 1, total_clusters)
+            )
+            shard_kwargs["shard_count"] = total_shards
+
         super().__init__(
             command_prefix=self.get_prefix_list,
             description="Discohook's official bot.",
@@ -47,6 +58,7 @@ class Bot(commands.AutoShardedBot):
             member_cache_flags=discord.MemberCacheFlags.none(),
             max_messages=None,
             guild_subscriptions=False,
+            **shard_kwargs,
         )
 
         self.add_check(self.global_check)
