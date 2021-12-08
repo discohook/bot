@@ -34,7 +34,7 @@ class Bot(commands.AutoShardedBot):
             total_shards = int(environ.get("SHARD_COUNT"))
 
             shard_kwargs["shard_ids"] = list(
-                range(cluster_id, total_shards - 1, total_clusters)
+                range(cluster_id, total_shards, total_clusters)
             )
             shard_kwargs["shard_count"] = total_shards
 
