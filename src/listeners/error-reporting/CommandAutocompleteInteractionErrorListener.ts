@@ -1,5 +1,6 @@
+import { DiscordAPIError as RestDiscordAPIError } from "@discordjs/rest"
 import { AutocompleteInteractionPayload, Listener } from "@sapphire/framework"
-import { ClientApplication, User } from "discord.js"
+import { ClientApplication, DiscordAPIError, User } from "discord.js"
 import { inspect } from "node:util"
 
 export class CommandAutocompleteInteractionErrorListener extends Listener {
@@ -13,6 +14,14 @@ export class CommandAutocompleteInteractionErrorListener extends Listener {
   public async run(error: unknown, context: AutocompleteInteractionPayload) {
     const application = this.container.client.application as ClientApplication
     if (!application.owner) await application.fetch()
+
+    if (
+      (error instanceof DiscordAPIError ||
+        error instanceof RestDiscordAPIError) &&
+      error.code === 10062
+    ) {
+      return
+    }
 
     const user =
       application.owner instanceof User

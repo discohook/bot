@@ -1,5 +1,6 @@
+import { DiscordAPIError as RestDiscordAPIError } from "@discordjs/rest"
 import { ChatInputCommandErrorPayload, Listener } from "@sapphire/framework"
-import { ClientApplication, User } from "discord.js"
+import { ClientApplication, DiscordAPIError, User } from "discord.js"
 import { inspect } from "node:util"
 import { reply } from "../../lib/interactions/reply"
 
@@ -20,6 +21,14 @@ export class ChatInputCommandErrorListener extends Listener {
         "An unexpected error happened! This has been reported to the " +
         "developers. Try again later.",
     })
+
+    if (
+      (error instanceof DiscordAPIError ||
+        error instanceof RestDiscordAPIError) &&
+      error.code === 10062
+    ) {
+      return
+    }
 
     const user =
       application.owner instanceof User
