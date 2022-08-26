@@ -1,0 +1,47 @@
+{
+  "name": "@discohook/bot",
+  "private": true,
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "start": "node dist/index.js",
+    "dev": "tsc-watch --onSuccess \"node ./dist/index.js\"",
+    "format": "prettier --write \"src/**/*.ts\""
+  },
+  "dependencies": {
+    "@discordjs/rest": "^1.1.0",
+    "@sapphire/discord-utilities": "^2.11.6",
+    "@sapphire/discord.js-utilities": "^5.0.0",
+    "@sapphire/fetch": "^2.4.1",
+    "@sapphire/framework": "3.0.0",
+    "@sapphire/plugin-api": "^4.0.0",
+    "@sapphire/plugin-logger": "^3.0.0",
+    "@sapphire/plugin-subcommands": "^3.1.1",
+    "@sapphire/utilities": "^3.9.2",
+    "bufferutil": "^4.0.6",
+    "discord-api-types": "^0.37.5",
+    "discord.js": "^13.10.3",
+    "dotenv-cra": "^3.0.2",
+    "erlpack": "^0.1.4",
+    "ioredis": "^5.2.3",
+    "knex": "^2.2.0",
+    "pg": "^8.8.0",
+    "prom-client": "^14.1.0",
+    "reflect-metadata": "^0.1.13",
+    "utf-8-validate": "^5.0.9",
+    "zlib-sync": "^0.1.7"
+  },
+  "devDependencies": {
+    "@sapphire/ts-config": "^3.3.4",
+    "@types/node": "^16.11.56",
+    "@types/ws": "^8.5.3",
+    "node-gyp": "^9.1.0",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^2.7.1",
+    "tsc-watch": "^5.0.3",
+    "typescript": "^4.8.2"
+  },
+  "packageManager": "yarn@3.2.2"
+}
