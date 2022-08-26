@@ -40,8 +40,7 @@ export class ReactionRoleAddListener extends Listener {
     if (!role) return
 
     const member = await guild.members.fetch(payload.user_id)
-
-    if (guild.me!.roles.highest.position <= member.roles.highest.position) {
+    if (!member.manageable) {
       return
     }
 
