@@ -1,0 +1,16 @@
+diff --git a/dist/optional-listeners/message-command-listeners/CorePreMessageParser.js b/dist/optional-listeners/message-command-listeners/CorePreMessageParser.js
+index ab375a88eeddaa832badfd51f9710c18477d1256..c39b157ee0c46fc9962dff222c465120e353973f 100644
+--- a/dist/optional-listeners/message-command-listeners/CorePreMessageParser.js
++++ b/dist/optional-listeners/message-command-listeners/CorePreMessageParser.js
+@@ -47,7 +47,10 @@ class CoreListener extends Listener_1.Listener {
+         if (!me)
+             return false;
+         const channel = message.channel;
+-        return channel.permissionsFor(me).has(this.requiredPermissions, true);
++        const permissionsFor = channel.permissionsFor(me);
++        if (!permissionsFor)
++            return false;
++        return permissionsFor.has(this.requiredPermissions, true);
+     }
+     getMentionPrefix(message) {
+         if (this.container.client.disableMentionPrefix)
