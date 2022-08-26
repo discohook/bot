@@ -26,14 +26,16 @@ export const getCategorizedApplicationCommands = () => {
 
     const commands: [Snowflake, CommandHelpData][] = []
 
-    const commandIds = [
+    const commandNames = [
       ...command.applicationCommandRegistry.chatInputCommands,
       ...command.applicationCommandRegistry.contextMenuCommands,
-    ].filter((command) => /^\d+$/.test(command))
+    ]
 
-    for (const id of commandIds) {
+    for (const name of commandNames) {
       const applicationCommand =
-        container.client.application?.commands.cache.get(id)
+        container.client.application?.commands.cache.find(
+          (command) => command.name === name,
+        )
       if (!applicationCommand) continue
 
       commands.push([
