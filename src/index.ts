@@ -3,7 +3,6 @@ import "@sapphire/plugin-api/register"
 import "@sapphire/plugin-logger/register"
 import { GatewayIntentBits } from "discord-api-types/v9"
 import { ClientOptions, Options } from "discord.js"
-import { ActivityTypes } from "discord.js/typings/enums"
 import { config } from "dotenv-cra"
 import type { Redis } from "ioredis"
 import type { Knex } from "knex"
@@ -89,7 +88,7 @@ const client = new SapphireClient({
     repliedUser: false,
   },
   presence: {
-    activities: [{ type: ActivityTypes.PLAYING, name: "at discohook.app" }],
+    activities: [{ type: "PLAYING", name: "at discohook.app" }],
     status: "online",
   },
   loadMessageCommandListeners: true,
