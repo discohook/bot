@@ -2,7 +2,13 @@ import { container, LogLevel, SapphireClient } from "@sapphire/framework"
 import "@sapphire/plugin-api/register"
 import "@sapphire/plugin-logger/register"
 import { GatewayIntentBits } from "discord-api-types/v9"
-import { ClientOptions, Options } from "discord.js"
+import {
+  ClientOptions,
+  GuildMember,
+  Options,
+  ThreadMember,
+  User,
+} from "discord.js"
 import { config } from "dotenv-cra"
 import type { Redis } from "ioredis"
 import type { Knex } from "knex"
@@ -40,6 +46,14 @@ if (process.env.SHARD_COUNT) {
   }
 }
 
+const createUserManagerCache = () => {
+  return {
+    maxSize: 1,
+    keepOverLimit: (user: User | GuildMember | ThreadMember) =>
+      user.id === user.client.id,
+  }
+}
+
 const client = new SapphireClient({
   ...shardConfig,
   intents:
@@ -59,27 +73,19 @@ const client = new SapphireClient({
   ],
   makeCache: Options.cacheWithLimits({
     ...Options.defaultMakeCacheSettings,
-    UserManager: {
-      maxSize: 128,
-      keepOverLimit: (user) => user.id === user.client.id,
-    },
-    GuildMemberManager: {
-      maxSize: 128,
-      keepOverLimit: (member) => member.id === member.client.id,
-    },
+    UserManager: createUserManagerCache(),
+    GuildMemberManager: createUserManagerCache(),
+    ReactionUserManager: createUserManagerCache(),
+    ThreadMemberManager: createUserManagerCache(),
     MessageManager: 0,
-    ReactionUserManager: {
-      maxSize: 128,
-      keepOverLimit: (user) => user.id === user.client.id,
-    },
   }),
   sweepers: {
     users: {
-      filter: () => (user) => user.id !== user.client.user?.id,
+      filter: () => (user) => user.id !== user.client.id,
       interval: 900,
     },
     guildMembers: {
-      filter: () => (member) => member.id !== member.client.user?.id,
+      filter: () => (member) => member.id !== member.client.id,
       interval: 900,
     },
   },
