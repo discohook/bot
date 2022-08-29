@@ -286,6 +286,22 @@ export class ReactionRoleCommand extends Subcommand {
 
     const guild = interaction.guild!
 
+    if (!guild.me?.permissions.has("MANAGE_ROLES")) {
+      await interaction.editReply({
+        embeds: [
+          new MessageEmbed()
+            .setTitle("Reaction roles")
+            .setDescription(
+              "It looks like I don't have access to manage roles in this " +
+                "server. Please give me the permission and run this command " +
+                "again to continue.",
+            )
+            .setColor(BOT_EMBED_COLOR),
+        ],
+      })
+      return
+    }
+
     const reactionRoles = await this.container
       .database<ReactionRoleData>("reaction_roles")
       .where({ guild_id: guild.id })
@@ -358,12 +374,12 @@ export class ReactionRoleCommand extends Subcommand {
         errors.add(
           `The role for ${reactionRole.reaction} on ` +
             `${hyperlink("this message", messageLink)} appears to have been ` +
-            " deleted.",
+            "deleted.",
         )
         continue
       }
 
-      if (role.position >= guild.me!.roles.highest.position) {
+      if (!role.editable) {
         errors.add(
           `I can't assign people the ${roleMention(reactionRole.role_id)} ` +
             "role because it's placed higher in the role list. Please move " +

@@ -40,9 +40,7 @@ export class ReactionRoleAddListener extends Listener {
     if (!role) return
 
     const member = await guild.members.fetch(payload.user_id)
-    if (!member.manageable || !role.editable) {
-      return
-    }
+    if (!role.editable) return
 
     await member.roles.add(role)
   }
