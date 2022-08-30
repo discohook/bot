@@ -1,5 +1,6 @@
 import { Listener } from "@sapphire/framework"
 import type { GatewayMessageReactionAddDispatchData } from "discord-api-types/v9"
+import { DiscordAPIError } from "discord.js"
 import { getEmojiKey } from "../../lib/emojis/getEmojiKey"
 import { getCacheEntry } from "../../lib/storage/getCacheEntry"
 import type { ReactionRoleData } from "../../lib/types/ReactionRoleData"
@@ -37,11 +38,17 @@ export class ReactionRoleRemoveListener extends Listener {
     if (!roleId) return
 
     const role = guild.roles.cache.get(roleId)
-    if (!role) return
+    if (!role || !role.editable) return
 
-    const member = await guild.members.fetch(payload.user_id)
-    if (!role.editable) return
-
-    await member.roles.remove(role)
+    try {
+      const member = await guild.members.fetch(payload.user_id)
+      await member.roles.remove(role)
+    } catch (error: unknown) {
+      if (error instanceof DiscordAPIError && error.code === 10007) {
+        return
+      } else {
+        throw error
+      }
+    }
   }
 }
