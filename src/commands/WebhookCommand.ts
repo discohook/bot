@@ -164,7 +164,7 @@ export class WebhookCommand extends Subcommand {
         new MessageEmbed()
           .setTitle("Webhooks")
           .setDescription(
-            `Use ${bold("/webhook get")} to get details on any webhook.`,
+            `Use ${bold("/webhook info")} to get details on any webhook.`,
           )
           .setColor(BOT_EMBED_COLOR),
       )
