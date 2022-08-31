@@ -1,5 +1,6 @@
 import {
   bold,
+  formatEmoji,
   hyperlink,
   roleMention,
   SlashCommandBuilder,
@@ -122,7 +123,7 @@ export class ReactionRoleCommand extends Subcommand {
             ? channel.isThread()
               ? channel.name
               : `#${channel.name}`
-            : "unknown channel or thread"
+            : `unknown channel or thread (${reactionRoles[0].channel_id})`
 
           const messageLink = [
             "https://discord.com/channels",
@@ -143,7 +144,10 @@ export class ReactionRoleCommand extends Subcommand {
                   const emoji =
                     this.container.client.emojis.cache.get(
                       reactionRole.reaction,
-                    ) ?? reactionRole.reaction
+                    ) ??
+                    (/^\d+$/.test(reactionRole.reaction)
+                      ? formatEmoji(reactionRole.reaction)
+                      : reactionRole.reaction)
 
                   return `${emoji}: ${roleMention(reactionRole.role_id)}`
                 })
