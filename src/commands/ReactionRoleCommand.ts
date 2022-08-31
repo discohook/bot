@@ -337,7 +337,7 @@ export class ReactionRoleCommand extends Subcommand {
         errors.add(
           "I can't see the channel " +
             `${hyperlink("this message", messageLink)} belongs to. ` +
-            "If this message is in an archived thread please unarchive it to" +
+            "If this message is in an archived thread please unarchive it " +
             "to allow me to respond to reactions. If this message is in a " +
             "deleted channel please contact support to get it removed.",
         )
