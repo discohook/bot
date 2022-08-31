@@ -1,0 +1,24 @@
+diff --git a/dist/lib/utils/application-commands/getNeededParameters.js b/dist/lib/utils/application-commands/getNeededParameters.js
+index 7062271c1292d20a694497722281e45085a7d8de..a4a5f1ea0234f970bce7bc54d6a5ad3937be299e 100644
+--- a/dist/lib/utils/application-commands/getNeededParameters.js
++++ b/dist/lib/utils/application-commands/getNeededParameters.js
+@@ -16,7 +16,9 @@ async function getNeededRegistryParameters() {
+ exports.getNeededRegistryParameters = getNeededRegistryParameters;
+ async function fetchGuildCommands(commands) {
+     const map = new Map();
+-    for (const [guildId, guild] of commands.client.guilds.cache.entries()) {
++    const guildId = process.env.GUILD_ID;
++    const guild = commands.client.guilds.cache.get(guildId);
++    if (guild) {
+         try {
+             const guildCommands = await commands.fetch({ guildId, withLocalizations: true });
+             map.set(guildId, guildCommands);
+@@ -24,7 +26,7 @@ async function fetchGuildCommands(commands) {
+         catch (err) {
+             const { preventFailedToFetchLogForGuilds } = pieces_1.container.client.options;
+             if (preventFailedToFetchLogForGuilds === true)
+-                continue;
++                return map;
+             if (Array.isArray(preventFailedToFetchLogForGuilds) && !preventFailedToFetchLogForGuilds?.includes(guildId)) {
+                 pieces_1.container.logger.warn(`ApplicationCommandRegistries: Failed to fetch guild commands for guild "${guild.name}" (${guildId}).`, 'Make sure to authorize your application with the "applications.commands" scope in that guild.');
+             }

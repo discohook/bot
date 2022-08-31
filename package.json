@@ -45,6 +45,7 @@
   },
   "packageManager": "yarn@3.2.2",
   "resolutions": {
-    "@sapphire/framework@3.0.0": "patch:@sapphire/framework@npm:3.0.0#.yarn/patches/@sapphire-framework-npm-3.0.0-aba2065f9f.patch"
+    "@sapphire/framework@3.0.0": "patch:@sapphire/framework@npm:3.0.0#.yarn/patches/@sapphire-framework-npm-3.0.0-aba2065f9f.patch",
+    "@sapphire/framework@3.1.0": "patch:@sapphire/framework@npm:3.1.0#.yarn/patches/@sapphire-framework-npm-3.1.0-b3b1bdda00.patch"
   }
 }
