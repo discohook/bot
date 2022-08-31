@@ -38,7 +38,11 @@ export class ReactionRoleRemoveListener extends Listener {
     if (!roleId) return
 
     const role = guild.roles.cache.get(roleId)
-    if (!role || !role.editable) return
+    try {
+      if (!role || !role.editable) return
+    } catch {
+      return
+    }
 
     try {
       const member = await guild.members.fetch(payload.user_id)
