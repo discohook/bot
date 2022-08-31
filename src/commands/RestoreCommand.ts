@@ -7,7 +7,10 @@ import {
   RegisterBehavior,
 } from "@sapphire/framework"
 import { deepClone } from "@sapphire/utilities"
-import { ApplicationCommandType, PermissionFlagsBits } from "discord-api-types/v9"
+import {
+  ApplicationCommandType,
+  PermissionFlagsBits,
+} from "discord-api-types/v9"
 import { ContextMenuInteraction, MessageEmbed } from "discord.js"
 
 export class RestoreCommand extends Command {
@@ -23,6 +26,8 @@ export class RestoreCommand extends Command {
 
   override async contextMenuRun(interaction: ContextMenuInteraction) {
     if (!interaction.isMessageContextMenu()) return
+
+    await interaction.deferReply({ ephemeral: true })
 
     const embeds = interaction.targetMessage.embeds.map((embed) => {
       if (embed instanceof MessageEmbed) {
@@ -68,7 +73,7 @@ export class RestoreCommand extends Command {
       },
     )
 
-    await interaction.reply({
+    await interaction.editReply({
       embeds: [
         {
           title: "Restored message",
@@ -77,7 +82,6 @@ export class RestoreCommand extends Command {
             `will expire ${time(new Date(response.expires), "R")}.`,
         },
       ],
-      ephemeral: true,
     })
   }
 
@@ -88,7 +92,6 @@ export class RestoreCommand extends Command {
       new ContextMenuCommandBuilder()
         .setName("Restore to Discohook")
         .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
-        .setDMPermission(false)
         .setType(ApplicationCommandType.Message),
       {
         guildIds: process.env.GUILD_ID ? [process.env.GUILD_ID] : undefined,
