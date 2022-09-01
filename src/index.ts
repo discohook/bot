@@ -50,7 +50,7 @@ const createUserManagerCache = () => {
   return {
     maxSize: 1,
     keepOverLimit: (user: User | GuildMember | ThreadMember) =>
-      user.id === user.client.id,
+      user.id === user.client.user?.id,
   }
 }
 
@@ -81,11 +81,11 @@ const client = new SapphireClient({
   }),
   sweepers: {
     users: {
-      filter: () => (user) => user.id !== user.client.id,
+      filter: () => (user) => user.id !== user.client.user?.id,
       interval: 900,
     },
     guildMembers: {
-      filter: () => (member) => member.id !== member.client.id,
+      filter: () => (member) => member.id !== member.client.user?.id,
       interval: 900,
     },
   },
