@@ -1,4 +1,3 @@
-import { DiscordAPIError as RestDiscordAPIError } from "@discordjs/rest"
 import { ChatInputCommandErrorPayload, Listener } from "@sapphire/framework"
 import { ClientApplication, DiscordAPIError, User } from "discord.js"
 import { inspect } from "node:util"
@@ -13,8 +12,7 @@ export class ChatInputCommandErrorListener extends Listener {
   }
 
   public async run(error: unknown, context: ChatInputCommandErrorPayload) {
-    const application = this.container.client.application as ClientApplication
-    if (!application.owner) await application.fetch()
+    if (error instanceof DiscordAPIError && error.code === 10062) return
 
     await reply(context.interaction, {
       content:
@@ -22,20 +20,15 @@ export class ChatInputCommandErrorListener extends Listener {
         "developers. Try again later.",
     })
 
-    if (
-      (error instanceof DiscordAPIError ||
-        error instanceof RestDiscordAPIError) &&
-      error.code === 10062
-    ) {
-      return
-    }
+    const application = this.container.client.application as ClientApplication
+    if (!application.owner) await application.fetch()
 
-    const user =
+    const owner =
       application.owner instanceof User
         ? application.owner
         : application.owner?.owner?.user
 
-    await user?.send({
+    await owner?.send({
       content: `Encountered error in chat input command ${context.command.name}`,
       files: [
         {

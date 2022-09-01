@@ -1,5 +1,5 @@
 import { Listener, MessageCommandErrorPayload } from "@sapphire/framework"
-import { ClientApplication, User } from "discord.js"
+import { ClientApplication, DiscordAPIError, User } from "discord.js"
 import { inspect } from "node:util"
 
 export class MessageCommandErrorListener extends Listener {
@@ -11,15 +11,17 @@ export class MessageCommandErrorListener extends Listener {
   }
 
   public async run(error: unknown, context: MessageCommandErrorPayload) {
+    if (error instanceof DiscordAPIError && error.code === 10062) return
+
     const application = this.container.client.application as ClientApplication
     if (!application.owner) await application.fetch()
 
-    const user =
+    const owner =
       application.owner instanceof User
         ? application.owner
         : application.owner?.owner?.user
 
-    await user?.send({
+    await owner?.send({
       content: `Encountered error in message command ${context.command.name}`,
       files: [
         {

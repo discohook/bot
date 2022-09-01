@@ -1,5 +1,5 @@
 import { InteractionHandlerParseError, Listener } from "@sapphire/framework"
-import { ClientApplication, User } from "discord.js"
+import { ClientApplication, DiscordAPIError, User } from "discord.js"
 import { inspect } from "node:util"
 import { reply } from "../../lib/interactions/reply"
 
@@ -12,8 +12,7 @@ export class InteractionHandlerParseErrorListener extends Listener {
   }
 
   public async run(error: unknown, context: InteractionHandlerParseError) {
-    const application = this.container.client.application as ClientApplication
-    if (!application.owner) await application.fetch()
+    if (error instanceof DiscordAPIError && error.code === 10062) return
 
     if (
       context.interaction.isApplicationCommand() ||
@@ -26,12 +25,15 @@ export class InteractionHandlerParseErrorListener extends Listener {
       })
     }
 
-    const user =
+    const application = this.container.client.application as ClientApplication
+    if (!application.owner) await application.fetch()
+
+    const owner =
       application.owner instanceof User
         ? application.owner
         : application.owner?.owner?.user
 
-    await user?.send({
+    await owner?.send({
       content: `Encountered error in interaction handler parse ${context.handler.name}`,
       files: [
         {
