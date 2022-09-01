@@ -2,6 +2,7 @@ import { Listener } from "@sapphire/framework"
 import type { GatewayMessageReactionAddDispatchData } from "discord-api-types/v9"
 import { DiscordAPIError } from "discord.js"
 import { getEmojiKey } from "../../lib/emojis/getEmojiKey"
+import { getSelf } from "../../lib/guilds/getSelf"
 import { getCacheEntry } from "../../lib/storage/getCacheEntry"
 import type { ReactionRoleData } from "../../lib/types/ReactionRoleData"
 
@@ -19,8 +20,8 @@ export class ReactionRoleAddListener extends Listener {
     if (!payload.guild_id) return
 
     const guild = this.container.client.guilds.cache.get(payload.guild_id!)!
-
-    if (!guild.me!.permissions.has("MANAGE_ROLES")) {
+    const self = await getSelf(guild)
+    if (!self.permissions.has("MANAGE_ROLES")) {
       return
     }
 

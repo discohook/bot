@@ -22,6 +22,7 @@ import {
 import { BOT_EMBED_COLOR } from "../lib/constants"
 import { getEmojiKey } from "../lib/emojis/getEmojiKey"
 import { parseReactionOption } from "../lib/emojis/parseReactionOption"
+import { getSelf } from "../lib/guilds/getSelf"
 import { parseMessageOption } from "../lib/messages/parseMessageOption"
 import { removeCacheEntry } from "../lib/storage/removeCacheEntry"
 import type { GuildData } from "../lib/types/GuildData"
@@ -289,8 +290,9 @@ export class ReactionRoleCommand extends Subcommand {
     await interaction.deferReply({ ephemeral: true })
 
     const guild = interaction.guild!
+    const self = await getSelf(guild)
 
-    if (!guild.me?.permissions.has("MANAGE_ROLES")) {
+    if (!self.permissions.has("MANAGE_ROLES")) {
       await interaction.editReply({
         embeds: [
           new MessageEmbed()
@@ -348,7 +350,7 @@ export class ReactionRoleCommand extends Subcommand {
         continue
       }
 
-      const permissions = channel.permissionsFor(guild.me!)
+      const permissions = channel.permissionsFor(self)
       if (
         !channel.isText() ||
         !permissions.has(["VIEW_CHANNEL", "READ_MESSAGE_HISTORY"])
@@ -387,7 +389,7 @@ export class ReactionRoleCommand extends Subcommand {
         errors.add(
           `I can't assign people the ${roleMention(reactionRole.role_id)} ` +
             "role because it's placed higher in the role list. Please move " +
-            `the ${guild.roles.botRoleFor(guild.me!)} above any reaction ` +
+            `the ${guild.roles.botRoleFor(self)} above any reaction ` +
             `role to make sure all reaction roles work.`,
         )
         continue

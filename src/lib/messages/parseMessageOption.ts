@@ -3,6 +3,7 @@ import {
   CommandInteraction,
   ThreadChannel,
 } from "discord.js"
+import { getSelf } from "../guilds/getSelf"
 import { reply } from "../interactions/reply"
 
 export const parseMessageOption = async (
@@ -51,7 +52,7 @@ export const parseMessageOption = async (
   }
 
   const missingPerms = channel
-    .permissionsFor(interaction.guild.me!)
+    .permissionsFor(await getSelf(interaction.guild))
     .missing(["VIEW_CHANNEL", "READ_MESSAGE_HISTORY"])
   if (missingPerms.length > 0) {
     await reply(interaction, {
