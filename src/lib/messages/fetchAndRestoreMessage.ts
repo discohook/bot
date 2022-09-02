@@ -67,7 +67,7 @@ export const fetchAndRestoreMessage = async (
   }
 
   if (!webhook && quickEdit) {
-    await interaction.editReply({
+    await reply(interaction, {
       content:
         "I can't find the webhook this message belongs to, therefore " +
         "quick edit is unavailable on this message.",

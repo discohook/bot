@@ -42,7 +42,7 @@ export class RestoreCommand extends Command {
   }
 
   override async chatInputRun(interaction: CommandInteraction) {
-    interaction.deferReply({ ephemeral: true })
+    await interaction.deferReply({ ephemeral: true })
 
     const [channelId, messageId] = await parseMessageOption(interaction)
     if (!channelId || !messageId) return
