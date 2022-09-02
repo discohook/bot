@@ -1,6 +1,8 @@
-import { BaseGuildTextChannel, Guild, GuildChannel } from "discord.js"
+import { AnyChannel, Guild, GuildChannel, TextBasedChannel } from "discord.js"
 
-export const fetchWebhooks = async (source: Guild | BaseGuildTextChannel) => {
+export const fetchWebhooks = async (
+  source: Guild | Extract<Extract<AnyChannel, TextBasedChannel>, GuildChannel>,
+) => {
   const guild = source instanceof Guild ? source : source.guild
 
   return [...(await source.fetchWebhooks()).values()]

@@ -5,15 +5,18 @@ import {
   PieceContext,
 } from "@sapphire/framework"
 import {
+  AnyChannel,
   AutocompleteInteraction,
   BaseGuildTextChannel,
   Guild,
+  GuildChannel,
+  TextBasedChannel,
 } from "discord.js"
 import { ellipsize } from "../lib/lang/ellipsize"
 import { fetchWebhooks } from "../lib/webhooks/fetchWebhooks"
 
 type AutocompleteWebhookOptions = {
-  source: Guild | BaseGuildTextChannel
+  source: Guild | Extract<Extract<AnyChannel, TextBasedChannel>, GuildChannel>
   query: string
 }
 
@@ -78,7 +81,10 @@ export class AutocompleteWebhookHandler extends InteractionHandler {
     const { name, value } = interaction.options.getFocused(true)
     if (name !== "webhook") return this.none()
 
-    let source: Guild | BaseGuildTextChannel = interaction.guild!
+    let source:
+      | Guild
+      | Extract<Extract<AnyChannel, TextBasedChannel>, GuildChannel> =
+      interaction.guild!
 
     // Using options.get("channel") as Discord doesn't give channel data in
     // autocomplete interactions

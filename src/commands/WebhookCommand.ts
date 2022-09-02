@@ -15,10 +15,13 @@ import {
 import { Subcommand } from "@sapphire/plugin-subcommands"
 import { ChannelType, PermissionFlagsBits } from "discord-api-types/v9"
 import {
+  AnyChannel,
   BaseGuildTextChannel,
   CommandInteraction,
+  GuildChannel,
   GuildMember,
   MessageEmbed,
+  TextBasedChannel,
   Webhook,
 } from "discord.js"
 import {
@@ -137,9 +140,10 @@ export class WebhookCommand extends Subcommand {
     await interaction.deferReply({ ephemeral: true })
     if (!(await this.#runAssertions(interaction))) return
 
-    const channel = interaction.options.getChannel(
-      "channel",
-    ) as BaseGuildTextChannel | null
+    const channel = interaction.options.getChannel("channel") as Extract<
+      Extract<AnyChannel, TextBasedChannel>,
+      GuildChannel
+    > | null
     const showIds = interaction.options.getBoolean("show-ids")
 
     const webhooks = await fetchWebhooks(channel ?? interaction.guild!)

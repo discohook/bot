@@ -1,6 +1,13 @@
 import { channelMention } from "@discordjs/builders"
 import { AutoCompleteLimits } from "@sapphire/discord.js-utilities"
-import { BaseGuildTextChannel, CommandInteraction, Guild } from "discord.js"
+import {
+  AnyChannel,
+  Channel,
+  CommandInteraction,
+  Guild,
+  GuildChannel,
+  TextBasedChannel,
+} from "discord.js"
 import { reply } from "../interactions/reply"
 import { ellipsize } from "../lang/ellipsize"
 import { fetchWebhooks } from "./fetchWebhooks"
@@ -10,10 +17,15 @@ export const parseWebhookOption = async (
   webhookOptionName = "webhook",
   channelOptionName = "channel",
 ) => {
-  let source: Guild | BaseGuildTextChannel = interaction.guild!
+  let source:
+    | Guild
+    | Extract<Extract<AnyChannel, TextBasedChannel>, GuildChannel> =
+    interaction.guild!
 
   const channel = interaction.options.getChannel(channelOptionName)
-  if (channel instanceof BaseGuildTextChannel) source = channel
+  if (channel instanceof Channel && channel.isText()) {
+    source = channel.isThread() ? channel.parent ?? interaction.guild! : channel
+  }
 
   const webhooks = await fetchWebhooks(source)
 

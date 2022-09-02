@@ -23,6 +23,7 @@ import { BOT_EMBED_COLOR } from "../lib/constants"
 import { getEmojiKey } from "../lib/emojis/getEmojiKey"
 import { parseReactionOption } from "../lib/emojis/parseReactionOption"
 import { getSelf } from "../lib/guilds/getSelf"
+import { fetchMessage } from "../lib/messages/fetchMessage"
 import { parseMessageOption } from "../lib/messages/parseMessageOption"
 import { removeCacheEntry } from "../lib/storage/removeCacheEntry"
 import type { GuildData } from "../lib/types/GuildData"
@@ -164,7 +165,10 @@ export class ReactionRoleCommand extends Subcommand {
   async createRun(interaction: CommandInteraction) {
     await interaction.deferReply({ ephemeral: true })
 
-    const message = await parseMessageOption(interaction)
+    const [channelId, messageId] = await parseMessageOption(interaction)
+    if (!channelId || !messageId) return
+
+    const message = await fetchMessage(interaction, channelId, messageId)
     if (!message) return
 
     const canReact = (message.channel as GuildBasedChannel)
@@ -241,8 +245,12 @@ export class ReactionRoleCommand extends Subcommand {
   async deleteRun(interaction: CommandInteraction) {
     await interaction.deferReply({ ephemeral: true })
 
-    const message = await parseMessageOption(interaction)
+    const [channelId, messageId] = await parseMessageOption(interaction)
+    if (!channelId || !messageId) return
+
+    const message = await fetchMessage(interaction, channelId, messageId)
     if (!message) return
+
     const emoji = await parseReactionOption(interaction)
     if (!emoji) return
 

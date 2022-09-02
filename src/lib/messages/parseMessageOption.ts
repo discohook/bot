@@ -1,9 +1,4 @@
-import {
-  BaseGuildTextChannel,
-  CommandInteraction,
-  ThreadChannel,
-} from "discord.js"
-import { getSelf } from "../guilds/getSelf"
+import type { CommandInteraction } from "discord.js"
 import { reply } from "../interactions/reply"
 
 export const parseMessageOption = async (
@@ -21,7 +16,7 @@ export const parseMessageOption = async (
     await reply(interaction, {
       content: "The message provided is not a valid message link.",
     })
-    return
+    return [] as const
   }
 
   const [, guildId, channelId, messageId] = result
@@ -29,45 +24,8 @@ export const parseMessageOption = async (
     await reply(interaction, {
       content: "The message provided isn't from this server.",
     })
-    return
+    return [] as const
   }
 
-  const channel = interaction.guild.channels.cache.get(channelId)
-  if (!channel) {
-    await reply(interaction, {
-      content: "The message provided is from a non-existing channel.",
-    })
-    return
-  }
-
-  if (
-    !(channel instanceof BaseGuildTextChannel) &&
-    !(channel instanceof ThreadChannel)
-  ) {
-    await reply(interaction, {
-      content:
-        "The channel this message link belongs to does not support reaction roles.",
-    })
-    return
-  }
-
-  const missingPerms = channel
-    .permissionsFor(await getSelf(interaction.guild))
-    .missing(["VIEW_CHANNEL", "READ_MESSAGE_HISTORY"])
-  if (missingPerms.length > 0) {
-    await reply(interaction, {
-      content:
-        "I'm missing permission to read messages in this channel. Make sure I can view the channel and read the message history.",
-    })
-    return
-  }
-
-  try {
-    return await channel.messages.fetch(messageId)
-  } catch {
-    await reply(interaction, {
-      content: "This message does not exist.",
-    })
-    return
-  }
+  return [channelId, messageId] as const
 }
