@@ -16,9 +16,9 @@ __metadata:
     "@sapphire/framework": ^3.1.1
     "@sapphire/plugin-api": ^4.0.0
     "@sapphire/plugin-logger": ^3.0.0
-    "@sapphire/plugin-subcommands": ^3.2.0
+    "@sapphire/plugin-subcommands": ^3.2.1
     "@sapphire/ts-config": ^3.3.4
-    "@sapphire/utilities": ^3.9.2
+    "@sapphire/utilities": ^3.9.3
     "@types/node": ^16.11.56
     "@types/ws": ^8.5.3
     bufferutil: ^4.0.6
@@ -27,7 +27,7 @@ __metadata:
     dotenv-cra: ^3.0.2
     erlpack: ^0.1.4
     ioredis: ^5.2.3
-    knex: ^2.2.0
+    knex: ^2.3.0
     node-gyp: ^9.1.0
     npm-run-all: ^4.1.5
     pg: ^8.8.0
@@ -217,13 +217,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sapphire/plugin-subcommands@npm:^3.2.0":
-  version: 3.2.0
-  resolution: "@sapphire/plugin-subcommands@npm:3.2.0"
+"@sapphire/plugin-subcommands@npm:^3.2.1":
+  version: 3.2.1
+  resolution: "@sapphire/plugin-subcommands@npm:3.2.1"
   dependencies:
     "@sapphire/utilities": ^3.9.2
     tslib: ^2.4.0
-  checksum: 6a70c88989cfa739960727e04ffdf8cf4e97d94d3e4562a3a0e2ba5cd83a92c7382f5f574a396d7f372b81efc3d1f1b4c99b1dbcb821a36fc7aa201bb5ca96ba
+  checksum: 2d9a38fb351890bae6de92b2995d5e8db76d8b4d85175f0a1f404ab28b20f67733db6485027ecf3452ee6599c638564117db00d0df8f68a09a9d211c9905d56d
   languageName: node
   linkType: hard
 
@@ -1449,9 +1449,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"knex@npm:^2.2.0":
-  version: 2.2.0
-  resolution: "knex@npm:2.2.0"
+"knex@npm:^2.3.0":
+  version: 2.3.0
+  resolution: "knex@npm:2.3.0"
   dependencies:
     colorette: 2.0.19
     commander: ^9.1.0
@@ -1484,7 +1484,7 @@ __metadata:
       optional: true
   bin:
     knex: bin/cli.js
-  checksum: 596289b0e64f42646b6d298b2a33a9ae686ed3c1f894f6019b8a87f5d159b33ac566b9504ed5362c65a5e90ed60f092dcdef0fc4303473a23f2aba05673179aa
+  checksum: ec00da6dd622a386507881e9d8ad44b9c5a4d9f272889b181cafb856fd26d7fdb19ef009cecdbbdedaf7c76f985a8fd14348ae47a0bb77b3dbec15f2c03c0dfe
   languageName: node
   linkType: hard
 
