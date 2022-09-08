@@ -1,11 +1,6 @@
 import { Listener } from "@sapphire/framework"
-import {
-  DiscordAPIError,
-  MessageReaction,
-  PartialMessageReaction,
-  PartialUser,
-  User,
-} from "discord.js"
+import type { GatewayMessageReactionAddDispatchData } from "discord-api-types/v9"
+import { DiscordAPIError } from "discord.js"
 import { getEmojiKey } from "../../lib/emojis/getEmojiKey"
 import { getSelf } from "../../lib/guilds/getSelf"
 import { getCacheEntry } from "../../lib/storage/getCacheEntry"
@@ -16,43 +11,49 @@ export class ReactionRoleAddListener extends Listener {
     super(context, {
       ...options,
       name: "reaction-role-add",
-      event: "messageReactionAdd",
+      emitter: "ws",
+      event: "MESSAGE_REACTION_ADD",
     })
   }
 
-  override async run(
-    reaction: MessageReaction | PartialMessageReaction,
-    user: User | PartialUser,
-  ) {
-    if (!reaction.message.guild) return
+  override async run(payload: GatewayMessageReactionAddDispatchData) {
+    if (!payload.guild_id) return
 
-    const self = await getSelf(reaction.message.guild)
-    if (!self.permissions.has("MANAGE_ROLES")) return
+    const guild = this.container.client.guilds.cache.get(payload.guild_id!)!
+    const self = await getSelf(guild)
+    if (!self.permissions.has("MANAGE_ROLES")) {
+      return
+    }
 
-    const cacheKey = `reaction-role:${reaction.message.id}:${getEmojiKey(
-      reaction.emoji,
+    const cacheKey = `reaction-role:${payload.message_id}:${getEmojiKey(
+      payload.emoji,
     )}`
     const roleId = await getCacheEntry(cacheKey, async () => {
       return await this.container
         .database<ReactionRoleData>("reaction_roles")
-        .where({
-          message_id: reaction.message.id,
-          reaction: getEmojiKey(reaction.emoji),
-        })
+        .where({ message_id: payload.message_id })
+        .where({ reaction: getEmojiKey(payload.emoji) })
         .first()
         .then((reactionRole) => reactionRole?.role_id ?? "")
     })
     if (!roleId) return
 
-    const role = reaction.message.guild.roles.cache.get(roleId)
-    if (!role || !role.editable) return
+    const role = guild.roles.cache.get(roleId)
+    try {
+      if (!role || !role.editable) return
+    } catch {
+      return
+    }
 
     try {
-      const member = await reaction.message.guild.members.fetch(user.id)
+      const member = await guild.members.fetch(payload.user_id)
       await member.roles.add(role)
     } catch (error: unknown) {
-      if (error instanceof DiscordAPIError && error.code === 10007) return
-      throw error
+      if (error instanceof DiscordAPIError && error.code === 10007) {
+        return
+      } else {
+        throw error
+      }
     }
   }
 }
