@@ -8,7 +8,7 @@ export const parseMessageOption = async (
   const query = interaction.options.getString(messageOptionName, true)
 
   const result =
-    /^https?:\/\/(?:www\.|ptb\.|canary\.)?discord\.com\/channels\/(\d+)\/(\d+)\/(\d+)$/.exec(
+    /^https?:\/\/(?:www\.|ptb\.|canary\.)?discord(?:app)?\.com\/channels\/(\d+)\/(\d+)\/(\d+)$/.exec(
       query,
     )
 
