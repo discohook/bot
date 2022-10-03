@@ -22,7 +22,7 @@ __metadata:
     "@types/node": ^16.11.63
     "@types/ws": ^8.5.3
     bufferutil: ^4.0.6
-    discord-api-types: ^0.37.11
+    discord-api-types: ^0.33.5
     discord.js: ^13.11.0
     dotenv-cra: ^3.0.2
     erlpack: ^0.1.4
@@ -729,7 +729,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"discord-api-types@npm:^0.37.10, discord-api-types@npm:^0.37.11":
+"discord-api-types@npm:^0.37.10":
   version: 0.37.11
   resolution: "discord-api-types@npm:0.37.11"
   checksum: 61af711c29dc089f150c0dd41f257e59583d6ef72789bdb63183d328efe73d2df86ef4b6867390ad31441fe3588985a99a2a1ed8fc920b7ba1deda1dceaf5f84

@@ -21,7 +21,7 @@
     "@sapphire/plugin-subcommands": "^3.2.2",
     "@sapphire/utilities": "^3.10.1",
     "bufferutil": "^4.0.6",
-    "discord-api-types": "^0.37.11",
+    "discord-api-types": "^0.33.5",
     "discord.js": "^13.11.0",
     "dotenv-cra": "^3.0.2",
     "erlpack": "^0.1.4",
