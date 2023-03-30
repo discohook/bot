@@ -9,7 +9,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@discohook/bot@workspace:."
   dependencies:
-    "@discordjs/rest": ^1.6.0
     "@sapphire/discord-utilities": ^3.0.1
     "@sapphire/discord.js-utilities": ^6.0.4
     "@sapphire/fetch": ^2.4.1
