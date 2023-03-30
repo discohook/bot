@@ -1,14 +1,13 @@
 import { fetch } from "@sapphire/fetch"
 import { deepClone } from "@sapphire/utilities"
-import type { APIMessage } from "discord-api-types/v9"
-import { Message, MessageEmbed, Webhook } from "discord.js"
+import { APIMessage, Embed, Message, Webhook } from "discord.js"
 
 export const restoreMessage = async (
   message: APIMessage | Message,
   target?: Webhook,
 ) => {
   const embeds = message.embeds.map((embed) => {
-    if (embed instanceof MessageEmbed) {
+    if (embed instanceof Embed) {
       embed = embed.toJSON()
     } else {
       embed = deepClone(embed)

@@ -5,7 +5,8 @@
     "outDir": "dist",
     "target": "ESNext",
     "tsBuildInfoFile": "dist/.tsbuildinfo",
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "ignoreDeprecations": "5.0"
   },
   "include": ["src"]
 }

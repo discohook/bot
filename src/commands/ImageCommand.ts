@@ -1,12 +1,15 @@
-import { SlashCommandBuilder } from "@discordjs/builders"
-import { CDN } from "@discordjs/rest"
 import {
   ApplicationCommandRegistry,
   PieceContext,
   RegisterBehavior,
 } from "@sapphire/framework"
 import { Subcommand } from "@sapphire/plugin-subcommands"
-import { CommandInteraction, MessageEmbed } from "discord.js"
+import {
+  CDN,
+  ChatInputCommandInteraction,
+  EmbedBuilder,
+  SlashCommandBuilder,
+} from "discord.js"
 import { BOT_EMBED_COLOR } from "../lib/constants"
 import { parseEmojiOption } from "../lib/emojis/parseEmojiOption"
 
@@ -32,14 +35,14 @@ export class ImageCommand extends Subcommand {
     })
   }
 
-  async avatarRun(interaction: CommandInteraction) {
+  async avatarRun(interaction: ChatInputCommandInteraction) {
     const user = interaction.options.getUser("user", true)
     const member = interaction.options.getMember("user")
 
-    const dynamic = !(interaction.options.getBoolean("static") ?? false)
-    const avatar = user.displayAvatarURL({ format: "png", dynamic })
+    const forceStatic = interaction.options.getBoolean("static") ?? false
+    const avatar = user.displayAvatarURL({ extension: "png", forceStatic })
 
-    const embed = new MessageEmbed()
+    const embed = new EmbedBuilder()
       .setTitle(`Avatar for ${user.tag}`)
       .setDescription(avatar)
       .setImage(avatar)
@@ -50,7 +53,7 @@ export class ImageCommand extends Subcommand {
         interaction.guild!.id,
         user.id,
         member.avatar,
-        { extension: "png", forceStatic: !dynamic },
+        { extension: "png", forceStatic: !forceStatic },
       )
 
       embed
@@ -65,7 +68,7 @@ export class ImageCommand extends Subcommand {
     })
   }
 
-  async iconRun(interaction: CommandInteraction) {
+  async iconRun(interaction: ChatInputCommandInteraction) {
     if (!interaction.guild) {
       await interaction.reply({
         content: "This command can only be run in a server.",
@@ -74,8 +77,8 @@ export class ImageCommand extends Subcommand {
       return
     }
 
-    const dynamic = !(interaction.options.getBoolean("static") ?? false)
-    const url = interaction.guild.iconURL({ format: "png", dynamic })
+    const forceStatic = interaction.options.getBoolean("static") ?? false
+    const url = interaction.guild.iconURL({ extension: "png", forceStatic })
 
     if (!url) {
       await interaction.reply({
@@ -87,7 +90,7 @@ export class ImageCommand extends Subcommand {
 
     await interaction.reply({
       embeds: [
-        new MessageEmbed()
+        new EmbedBuilder()
           .setTitle(`Server icon for ${interaction.guild.name}`)
           .setDescription(url)
           .setImage(url)
@@ -97,7 +100,7 @@ export class ImageCommand extends Subcommand {
     })
   }
 
-  async emojiRun(interaction: CommandInteraction) {
+  async emojiRun(interaction: ChatInputCommandInteraction) {
     const emoji = await parseEmojiOption(interaction, "target")
     if (!emoji) return
 
@@ -114,7 +117,7 @@ export class ImageCommand extends Subcommand {
             .join("-") +
           ".png"
 
-    const embed = new MessageEmbed()
+    const embed = new EmbedBuilder()
       .setTitle(`Emoji image for ${name}`)
       .setDescription(url)
       .setImage(url)

@@ -15,7 +15,7 @@ export class InteractionHandlerParseErrorListener extends Listener {
     if (error instanceof DiscordAPIError && error.code === 10062) return
 
     if (
-      context.interaction.isApplicationCommand() ||
+      context.interaction.isCommand() ||
       context.interaction.isMessageComponent()
     ) {
       await reply(context.interaction, {

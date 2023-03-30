@@ -1,5 +1,5 @@
 import type {
-  CommandInteraction,
+  ChatInputCommandInteraction,
   GuildEmoji,
   Message,
   ReactionEmoji,
@@ -9,7 +9,7 @@ import { emojiNameToUnicodeMap } from "./emojiNameToUnicodeMap"
 import { emojiUnicodeToNameMap } from "./emojiUnicodeToNameMap"
 
 export const parseReactionOption = async (
-  interaction: CommandInteraction,
+  interaction: ChatInputCommandInteraction,
   emojiOptionName = "emoji",
   message?: Message,
 ): Promise<string | GuildEmoji | ReactionEmoji | undefined> => {

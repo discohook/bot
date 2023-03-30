@@ -1,12 +1,15 @@
-import { FormattingPatterns } from "discord-api-types/globals"
-import type { APIPartialEmoji } from "discord-api-types/v9"
-import type { CommandInteraction, GuildEmoji } from "discord.js"
+import {
+  APIPartialEmoji,
+  ChatInputCommandInteraction,
+  FormattingPatterns,
+  GuildEmoji,
+} from "discord.js"
 import { reply } from "../interactions/reply"
 import { emojiNameToUnicodeMap } from "./emojiNameToUnicodeMap"
 import { emojiUnicodeToNameMap } from "./emojiUnicodeToNameMap"
 
 export const parseEmojiOption = async (
-  interaction: CommandInteraction,
+  interaction: ChatInputCommandInteraction,
   emojiOptionName = "emoji",
 ): Promise<string | GuildEmoji | APIPartialEmoji | undefined> => {
   const query = interaction.options.getString(emojiOptionName, true)

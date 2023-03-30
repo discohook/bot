@@ -1,5 +1,6 @@
-import type {
+import {
   ApplicationCommandOption,
+  ApplicationCommandOptionType,
   ApplicationCommandSubCommand,
   ApplicationCommandSubGroup,
 } from "discord.js"
@@ -16,10 +17,14 @@ export const getSubcommandsFromOptionsList = (
       ): option is Extract<
         typeof option,
         ApplicationCommandSubGroup | ApplicationCommandSubCommand
-      > => ["SUB_COMMAND", "SUB_COMMAND_GROUP"].includes(option.type as string),
+      > =>
+        [
+          ApplicationCommandOptionType.Subcommand,
+          ApplicationCommandOptionType.SubcommandGroup,
+        ].includes(option.type),
     )
     .flatMap((command) =>
-      command.type === "SUB_COMMAND_GROUP"
+      command.type === ApplicationCommandOptionType.SubcommandGroup
         ? [
             {
               name: command.name,

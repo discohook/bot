@@ -1,5 +1,5 @@
 import { Args, Command, PieceContext } from "@sapphire/framework"
-import type { Message } from "discord.js"
+import { Message, PermissionFlagsBits } from "discord.js"
 import { inspect } from "node:util"
 
 export class SqlCommand extends Command {
@@ -8,7 +8,7 @@ export class SqlCommand extends Command {
       name: "sql",
       quotes: [],
       preconditions: ["owner-only"],
-      requiredClientPermissions: ["ATTACH_FILES"],
+      requiredClientPermissions: [PermissionFlagsBits.AttachFiles],
       detailedDescription: {},
     })
   }

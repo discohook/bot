@@ -1,15 +1,13 @@
-import { Collection } from "@discordjs/collection"
 import { container } from "@sapphire/framework"
-import type { Snowflake } from "discord-api-types/v9"
-import type { ApplicationCommandType } from "discord.js"
+import { ApplicationCommandType, Collection, Snowflake } from "discord.js"
 import type { CommandHelpData } from "./CommandHelpData"
 import { getArgumentsFromOptionsList } from "./getArgumentsFromOptionsList"
 import { getSubcommandsFromOptionsList } from "./getSubcommandsFromOptionsList"
 
 const prefixes: Record<ApplicationCommandType, string> = {
-  CHAT_INPUT: "/",
-  USER: "(User) ",
-  MESSAGE: "(Message) ",
+  [ApplicationCommandType.ChatInput]: "/",
+  [ApplicationCommandType.User]: "(User) ",
+  [ApplicationCommandType.Message]: "(Message) ",
 }
 
 export const getCategorizedApplicationCommands = () => {
@@ -45,7 +43,7 @@ export const getCategorizedApplicationCommands = () => {
           displayName:
             prefixes[applicationCommand.type] + applicationCommand.name,
           description:
-            applicationCommand.type === "CHAT_INPUT"
+            applicationCommand.type === ApplicationCommandType.ChatInput
               ? applicationCommand.description
               : command.detailedDescription.contextMenuCommandDescription ?? "",
           arguments: getArgumentsFromOptionsList(applicationCommand.options),

@@ -1,9 +1,19 @@
-import { AnyChannel, Guild, GuildChannel, TextBasedChannel } from "discord.js"
+import { isThreadChannel } from "@sapphire/discord.js-utilities"
+import {
+  CategoryChannel,
+  Guild,
+  GuildBasedChannel,
+  GuildChannel,
+} from "discord.js"
 
 export const fetchWebhooks = async (
-  source: Guild | Extract<Extract<AnyChannel, TextBasedChannel>, GuildChannel>,
+  source: Guild | Exclude<GuildBasedChannel, CategoryChannel>,
 ) => {
   const guild = source instanceof Guild ? source : source.guild
+
+  if (!(source instanceof Guild) && isThreadChannel(source)) {
+    source = source.parent ?? source.guild
+  }
 
   return [...(await source.fetchWebhooks()).values()]
     .filter((webhook) => webhook.isIncoming() && webhook.token)

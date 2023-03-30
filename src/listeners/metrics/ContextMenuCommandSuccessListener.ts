@@ -1,9 +1,9 @@
 import { ContextMenuCommandSuccessPayload, Listener } from "@sapphire/framework"
-import type { ContextMenuInteraction } from "discord.js"
+import { APIContextMenuInteraction, ApplicationCommandType } from "discord.js"
 
-const prefixes: Record<ContextMenuInteraction["targetType"], string> = {
-  MESSAGE: "(Message) ",
-  USER: "(User) ",
+const prefixes: Record<APIContextMenuInteraction["data"]["type"], string> = {
+  [ApplicationCommandType.Message]: "(Message) ",
+  [ApplicationCommandType.User]: "(User) ",
 }
 
 export class ContextMenuCommandSuccessListener extends Listener {
@@ -18,7 +18,7 @@ export class ContextMenuCommandSuccessListener extends Listener {
     this.container.metrics.applicationCommandRequestDuration.observe(
       {
         command:
-          prefixes[payload.interaction.targetType] +
+          prefixes[payload.interaction.commandType] +
           payload.interaction.commandName,
       },
       payload.duration / 1000,

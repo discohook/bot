@@ -1,12 +1,12 @@
 import type {
-  BaseCommandInteraction,
+  CommandInteraction,
+  InteractionReplyOptions,
   MessageComponentInteraction,
-  WebhookMessageOptions,
 } from "discord.js"
 
 export const reply = async (
-  interaction: BaseCommandInteraction | MessageComponentInteraction,
-  options: Omit<WebhookMessageOptions, "username" | "avatarURL" | "flags">,
+  interaction: CommandInteraction | MessageComponentInteraction,
+  options: InteractionReplyOptions,
   ephemeral = true,
 ) => {
   if (interaction.replied) {

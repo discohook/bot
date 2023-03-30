@@ -1,11 +1,16 @@
-import { SlashCommandBuilder } from "@discordjs/builders"
 import {
   ApplicationCommandRegistry,
   Command,
   PieceContext,
   RegisterBehavior,
 } from "@sapphire/framework"
-import { CommandInteraction, EmbedFieldData, MessageEmbed } from "discord.js"
+import {
+  APIEmbedField,
+  ChatInputCommandInteraction,
+  CommandInteraction,
+  EmbedBuilder,
+  SlashCommandBuilder,
+} from "discord.js"
 import { BOT_EMBED_COLOR } from "../lib/constants"
 import { getCategorizedApplicationCommands } from "../lib/help/getCategorizedApplicationCommands"
 import { parseApplicationCommandOption } from "../lib/help/parseApplicationCommandOption"
@@ -19,7 +24,7 @@ export class HelpCommand extends Command {
     })
   }
 
-  override async chatInputRun(interaction: CommandInteraction) {
+  override async chatInputRun(interaction: ChatInputCommandInteraction) {
     if (!interaction.options.get("command")) {
       await this.#default(interaction)
       return
@@ -31,7 +36,7 @@ export class HelpCommand extends Command {
   async #default(interaction: CommandInteraction) {
     await interaction.reply({
       embeds: [
-        new MessageEmbed()
+        new EmbedBuilder()
           .setTitle("Help")
           .setDescription(
             [
@@ -47,7 +52,7 @@ export class HelpCommand extends Command {
           )
           .addFields(
             getCategorizedApplicationCommands().map(
-              (commands, name): EmbedFieldData => ({
+              (commands, name): APIEmbedField => ({
                 name,
                 value: commands
                   .map((command) =>
@@ -63,7 +68,7 @@ export class HelpCommand extends Command {
     })
   }
 
-  async #commandInfo(interaction: CommandInteraction) {
+  async #commandInfo(interaction: ChatInputCommandInteraction) {
     const result = await parseApplicationCommandOption(interaction)
     if (!result) return
 
@@ -77,7 +82,7 @@ export class HelpCommand extends Command {
         )!
       : command
 
-    const embed = new MessageEmbed()
+    const embed = new EmbedBuilder()
       .setTitle(`Command help: ${displayName}`)
       .setDescription(description)
       .setColor(BOT_EMBED_COLOR)

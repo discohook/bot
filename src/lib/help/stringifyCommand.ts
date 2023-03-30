@@ -1,4 +1,4 @@
-import { bold } from "@discordjs/builders"
+import { bold } from "discord.js"
 import type { CommandHelpData } from "./CommandHelpData"
 
 type FormatCommandOptions = {

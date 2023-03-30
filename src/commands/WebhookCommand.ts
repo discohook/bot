@@ -1,11 +1,3 @@
-import {
-  bold,
-  channelMention,
-  inlineCode,
-  SlashCommandBuilder,
-  time,
-  userMention,
-} from "@discordjs/builders"
 import { PaginatedMessageEmbedFields } from "@sapphire/discord.js-utilities"
 import {
   ApplicationCommandRegistry,
@@ -13,15 +5,22 @@ import {
   RegisterBehavior,
 } from "@sapphire/framework"
 import { Subcommand } from "@sapphire/plugin-subcommands"
-import { ChannelType, PermissionFlagsBits } from "discord-api-types/v9"
 import {
-  AnyChannel,
   BaseGuildTextChannel,
+  bold,
+  CategoryChannel,
+  channelMention,
+  ChannelType,
+  ChatInputCommandInteraction,
   CommandInteraction,
-  GuildChannel,
+  EmbedBuilder,
+  GuildBasedChannel,
   GuildMember,
-  MessageEmbed,
-  TextBasedChannel,
+  inlineCode,
+  PermissionFlagsBits,
+  SlashCommandBuilder,
+  time,
+  userMention,
   Webhook,
 } from "discord.js"
 import {
@@ -65,7 +64,7 @@ export class WebhookCommand extends Subcommand {
   }
 
   async #runAssertions(
-    interaction: CommandInteraction,
+    interaction: ChatInputCommandInteraction,
     channelOption = "channel",
   ) {
     const channel = interaction.options.getChannel(
@@ -75,10 +74,10 @@ export class WebhookCommand extends Subcommand {
     const location = channel ? channelMention(channel.id) : "this server"
 
     const selfPermissions = channel
-      ? interaction.guild!.me!.permissionsIn(channel.id)
-      : interaction.guild!.me!.permissions
+      ? interaction.guild!.members.me!.permissionsIn(channel.id)
+      : interaction.guild!.members.me!.permissions
 
-    if (!selfPermissions.has("MANAGE_WEBHOOKS")) {
+    if (!selfPermissions.has(PermissionFlagsBits.ManageWebhooks)) {
       await interaction.editReply({
         content: `I don't have permissions to manage webhooks in ${location}.`,
       })
@@ -94,7 +93,7 @@ export class WebhookCommand extends Subcommand {
       ? member.permissionsIn(channel.id)
       : member.permissions
 
-    if (!memberPermissions.has("MANAGE_WEBHOOKS")) {
+    if (!memberPermissions.has(PermissionFlagsBits.ManageWebhooks)) {
       await interaction.editReply({
         content: `You don't have permissions to manage webhooks in ${location}.`,
       })
@@ -110,7 +109,7 @@ export class WebhookCommand extends Subcommand {
   ) {
     await interaction.editReply({
       embeds: [
-        new MessageEmbed()
+        new EmbedBuilder()
           .setTitle(webhook.name)
           .setColor(BOT_EMBED_COLOR)
           .setThumbnail(webhook.avatarURL() ?? DEFAULT_AVATAR_URL)
@@ -136,13 +135,13 @@ export class WebhookCommand extends Subcommand {
     })
   }
 
-  async listRun(interaction: CommandInteraction) {
+  async listRun(interaction: ChatInputCommandInteraction) {
     await interaction.deferReply({ ephemeral: true })
     if (!(await this.#runAssertions(interaction))) return
 
-    const channel = interaction.options.getChannel("channel") as Extract<
-      Extract<AnyChannel, TextBasedChannel>,
-      GuildChannel
+    const channel = interaction.options.getChannel("channel") as Exclude<
+      GuildBasedChannel,
+      CategoryChannel
     > | null
     const showIds = interaction.options.getBoolean("show-ids")
 
@@ -151,7 +150,7 @@ export class WebhookCommand extends Subcommand {
     if (webhooks.length === 0) {
       await interaction.editReply({
         embeds: [
-          new MessageEmbed()
+          new EmbedBuilder()
             .setTitle("Webhooks")
             .setDescription(
               `It seems like you don't have any webhooks yet. Use ` +
@@ -165,7 +164,7 @@ export class WebhookCommand extends Subcommand {
 
     await new PaginatedMessageEmbedFields()
       .setTemplate(
-        new MessageEmbed()
+        new EmbedBuilder()
           .setTitle("Webhooks")
           .setDescription(
             `Use ${bold("/webhook info")} to get details on any webhook.`,
@@ -187,7 +186,7 @@ export class WebhookCommand extends Subcommand {
             value += `\nID: ${inlineCode(webhook.id)}`
           }
 
-          return { name: webhook.name, value }
+          return { name: webhook.name, value, inline: false }
         }),
       )
       .setItemsPerPage(8)
@@ -195,7 +194,7 @@ export class WebhookCommand extends Subcommand {
       .run(interaction)
   }
 
-  async infoRun(interaction: CommandInteraction) {
+  async infoRun(interaction: ChatInputCommandInteraction) {
     await interaction.deferReply({ ephemeral: true })
     if (!(await this.#runAssertions(interaction))) return
 
@@ -205,7 +204,7 @@ export class WebhookCommand extends Subcommand {
     await this.#replyWithWebhookInfo(interaction, webhook)
   }
 
-  async createRun(interaction: CommandInteraction) {
+  async createRun(interaction: ChatInputCommandInteraction) {
     await interaction.deferReply({ ephemeral: true })
     if (!(await this.#runAssertions(interaction))) return
 
@@ -232,7 +231,8 @@ export class WebhookCommand extends Subcommand {
       }
     }
 
-    const webhook = await channel.createWebhook(name, {
+    const webhook = await channel.createWebhook({
+      name,
       avatar: avatar?.url,
       reason: `Action on behalf of ${interaction.user.tag} (ID: ${interaction.user.id})`,
     })
@@ -240,7 +240,7 @@ export class WebhookCommand extends Subcommand {
     await this.#replyWithWebhookInfo(interaction, webhook)
   }
 
-  async editRun(interaction: CommandInteraction) {
+  async editRun(interaction: ChatInputCommandInteraction) {
     await interaction.deferReply({ ephemeral: true })
     if (!(await this.#runAssertions(interaction))) return
 
@@ -269,19 +269,17 @@ export class WebhookCommand extends Subcommand {
       }
     }
 
-    webhook = await webhook.edit(
-      {
-        name: renameTo ?? webhook.name,
-        channel: moveTo?.id ?? webhook.channelId,
-        avatar: changeAvatarTo?.url,
-      },
-      `Action on behalf of ${interaction.user.tag} (ID: ${interaction.user.id})`,
-    )
+    webhook = await webhook.edit({
+      name: renameTo ?? webhook.name,
+      channel: moveTo?.id ?? webhook.channelId,
+      avatar: changeAvatarTo?.url,
+      reason: `Action on behalf of ${interaction.user.tag} (ID: ${interaction.user.id})`,
+    })
 
     await this.#replyWithWebhookInfo(interaction, webhook)
   }
 
-  async deleteRun(interaction: CommandInteraction) {
+  async deleteRun(interaction: ChatInputCommandInteraction) {
     await interaction.deferReply({ ephemeral: true })
     if (!(await this.#runAssertions(interaction))) return
 

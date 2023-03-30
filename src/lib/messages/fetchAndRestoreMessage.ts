@@ -1,13 +1,16 @@
-import { time } from "@discordjs/builders"
-import type { APIMessage } from "discord-api-types/v10"
 import {
-  BaseCommandInteraction,
+  APIMessage,
+  BaseMessageOptions,
+  ButtonStyle,
+  CommandInteraction,
+  ComponentType,
   GuildMember,
   Message,
   MessageComponentInteraction,
-  MessageOptions,
-  Permissions,
+  PermissionFlagsBits,
+  PermissionsBitField,
   ThreadChannel,
+  time,
   Webhook,
 } from "discord.js"
 import { getSelf } from "../guilds/getSelf"
@@ -17,7 +20,7 @@ import { fetchMessage } from "./fetchMessage"
 import { restoreMessage } from "./restoreMessage"
 
 export const fetchAndRestoreMessage = async (
-  interaction: BaseCommandInteraction | MessageComponentInteraction,
+  interaction: CommandInteraction | MessageComponentInteraction,
   channelId: string,
   messageId: string,
   quickEdit = false,
@@ -28,11 +31,14 @@ export const fetchAndRestoreMessage = async (
   const selfPermissions =
     "guild" in message.channel && message.channel.guild
       ? message.channel.permissionsFor(await getSelf(message.channel.guild))
-      : new Permissions(Permissions.DEFAULT)
+      : new PermissionsBitField(PermissionsBitField.Default)
 
   let webhook: Webhook | undefined = undefined
-  const components: MessageOptions["components"] = []
-  if (message.webhookId && selfPermissions.has("MANAGE_WEBHOOKS")) {
+  const components: BaseMessageOptions["components"] = []
+  if (
+    message.webhookId &&
+    selfPermissions.has(PermissionFlagsBits.ManageWebhooks)
+  ) {
     const member =
       interaction.member instanceof GuildMember
         ? interaction.member
@@ -41,7 +47,9 @@ export const fetchAndRestoreMessage = async (
     if (
       member &&
       "guild" in message.channel &&
-      message.channel.permissionsFor(member).has("MANAGE_WEBHOOKS")
+      message.channel
+        .permissionsFor(member)
+        .has(PermissionFlagsBits.ManageWebhooks)
     ) {
       const root =
         message.channel instanceof ThreadChannel
@@ -52,11 +60,11 @@ export const fetchAndRestoreMessage = async (
       webhook = webhooks.find((webhook) => webhook.id === message.webhookId)
       if (webhook && !quickEdit) {
         components.push({
-          type: "ACTION_ROW",
+          type: ComponentType.ActionRow,
           components: [
             {
-              type: "BUTTON",
-              style: "SECONDARY",
+              type: ComponentType.Button,
+              style: ButtonStyle.Secondary,
               label: "Quick Edit",
               customId: `@discohook/restore-quick-edit/${channelId}-${messageId}`,
             },

@@ -1,6 +1,9 @@
 import { Listener } from "@sapphire/framework"
-import type { GatewayMessageReactionAddDispatchData } from "discord-api-types/v9"
-import { DiscordAPIError } from "discord.js"
+import {
+  DiscordAPIError,
+  GatewayMessageReactionAddDispatchData,
+  PermissionFlagsBits,
+} from "discord.js"
 import { getEmojiKey } from "../../lib/emojis/getEmojiKey"
 import { getSelf } from "../../lib/guilds/getSelf"
 import { getCacheEntry } from "../../lib/storage/getCacheEntry"
@@ -21,7 +24,7 @@ export class ReactionRoleRemoveListener extends Listener {
 
     const guild = this.container.client.guilds.cache.get(payload.guild_id!)!
     const self = await getSelf(guild)
-    if (!self.permissions.has("MANAGE_ROLES")) {
+    if (!self.permissions.has(PermissionFlagsBits.ManageRoles)) {
       return
     }
 

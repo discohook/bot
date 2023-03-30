@@ -1,5 +1,5 @@
 import { Listener } from "@sapphire/framework"
-import type { GatewayMessageDeleteDispatchData } from "discord-api-types/v9"
+import type { GatewayMessageDeleteDispatchData } from "discord.js"
 import type { ReactionRoleData } from "../../lib/types/ReactionRoleData"
 
 export class DeleteReactionRoleOnMessageDelete extends Listener {

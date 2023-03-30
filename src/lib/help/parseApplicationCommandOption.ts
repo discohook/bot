@@ -1,9 +1,9 @@
-import type { CommandInteraction } from "discord.js"
+import type { ChatInputCommandInteraction } from "discord.js"
 import { reply } from "../interactions/reply"
 import { getApplicationCommands } from "./getApplicationCommands"
 
 export const parseApplicationCommandOption = async (
-  interaction: CommandInteraction,
+  interaction: ChatInputCommandInteraction,
   commandOptionName = "command",
 ) => {
   const query = interaction.options.getString(commandOptionName, true)

@@ -1,16 +1,17 @@
 import {
-  formatEmoji,
-  inlineCode,
-  SlashCommandBuilder,
-} from "@discordjs/builders"
-import {
   ApplicationCommandRegistry,
   PieceContext,
   RegisterBehavior,
 } from "@sapphire/framework"
 import { Subcommand } from "@sapphire/plugin-subcommands"
-import { ChannelType } from "discord-api-types/v9"
-import { CommandInteraction, MessageEmbed } from "discord.js"
+import {
+  ChannelType,
+  ChatInputCommandInteraction,
+  EmbedBuilder,
+  formatEmoji,
+  inlineCode,
+  SlashCommandBuilder,
+} from "discord.js"
 import { BOT_EMBED_COLOR } from "../lib/constants"
 import { parseEmojiOption } from "../lib/emojis/parseEmojiOption"
 
@@ -36,12 +37,12 @@ export class FormatCommand extends Subcommand {
     })
   }
 
-  async mentionRun(interaction: CommandInteraction) {
+  async mentionRun(interaction: ChatInputCommandInteraction) {
     const mentionable = interaction.options.getMentionable("target", true)
 
     await interaction.reply({
       embeds: [
-        new MessageEmbed()
+        new EmbedBuilder()
           .setTitle("Mention")
           .setDescription(inlineCode(String(mentionable)))
           .addFields({ name: "Output", value: String(mentionable) })
@@ -51,12 +52,12 @@ export class FormatCommand extends Subcommand {
     })
   }
 
-  async channelRun(interaction: CommandInteraction) {
+  async channelRun(interaction: ChatInputCommandInteraction) {
     const channel = interaction.options.getChannel("target", true)
 
     await interaction.reply({
       embeds: [
-        new MessageEmbed()
+        new EmbedBuilder()
           .setTitle("Channel")
           .setDescription(inlineCode(String(channel)))
           .addFields({ name: "Output", value: String(channel) })
@@ -66,19 +67,18 @@ export class FormatCommand extends Subcommand {
     })
   }
 
-  async emojiRun(interaction: CommandInteraction) {
+  async emojiRun(interaction: ChatInputCommandInteraction) {
     const emoji = await parseEmojiOption(interaction, "target")
     if (!emoji) return
 
     const formatting =
       typeof emoji === "object"
-        ? // @ts-expect-error: weird overload
-          formatEmoji(emoji.id!, emoji.animated ?? false)
+        ? formatEmoji(emoji.id!, emoji.animated ?? false)
         : emoji
 
     await interaction.reply({
       embeds: [
-        new MessageEmbed()
+        new EmbedBuilder()
           .setTitle("Emoji")
           .setDescription(inlineCode(formatting))
           .addFields({ name: "Output", value: formatting })

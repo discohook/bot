@@ -1,5 +1,6 @@
-import type {
+import {
   ApplicationCommandOption,
+  ApplicationCommandOptionType,
   ApplicationCommandSubCommand,
   ApplicationCommandSubGroup,
 } from "discord.js"
@@ -16,7 +17,10 @@ export const getArgumentsFromOptionsList = (
         typeof option,
         ApplicationCommandSubGroup | ApplicationCommandSubCommand
       > =>
-        !["SUB_COMMAND", "SUB_COMMAND_GROUP"].includes(option.type as string),
+        ![
+          ApplicationCommandOptionType.Subcommand,
+          ApplicationCommandOptionType.SubcommandGroup,
+        ].includes(option.type),
     )
     .map((option) => ({
       name: option.name,

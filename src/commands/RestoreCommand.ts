@@ -1,28 +1,25 @@
 import {
-  ContextMenuCommandBuilder,
-  SlashCommandBuilder,
-  time,
-} from "@discordjs/builders"
-import {
   ApplicationCommandRegistry,
   Command,
   PieceContext,
   RegisterBehavior,
 } from "@sapphire/framework"
-import type { APIMessage } from "discord-api-types/v10"
 import {
+  APIMessage,
   ApplicationCommandType,
-  PermissionFlagsBits,
-} from "discord-api-types/v9"
-import {
-  AnyChannel,
-  CommandInteraction,
-  ContextMenuInteraction,
-  GuildChannel,
+  BaseMessageOptions,
+  ButtonStyle,
+  CategoryChannel,
+  ChatInputCommandInteraction,
+  ComponentType,
+  ContextMenuCommandBuilder,
+  ContextMenuCommandInteraction,
+  GuildBasedChannel,
   GuildMember,
   Message,
-  MessageOptions,
-  TextBasedChannel,
+  PermissionFlagsBits,
+  SlashCommandBuilder,
+  time,
 } from "discord.js"
 import { getSelf } from "../lib/guilds/getSelf"
 import { fetchAndRestoreMessage } from "../lib/messages/fetchAndRestoreMessage"
@@ -41,7 +38,7 @@ export class RestoreCommand extends Command {
     })
   }
 
-  override async chatInputRun(interaction: CommandInteraction) {
+  override async chatInputRun(interaction: ChatInputCommandInteraction) {
     await interaction.deferReply({ ephemeral: true })
 
     const [channelId, messageId] = await parseMessageOption(interaction)
@@ -50,8 +47,8 @@ export class RestoreCommand extends Command {
     fetchAndRestoreMessage(interaction, channelId, messageId, false)
   }
 
-  override async contextMenuRun(interaction: ContextMenuInteraction) {
-    if (!interaction.isMessageContextMenu()) return
+  override async contextMenuRun(interaction: ContextMenuCommandInteraction) {
+    if (!interaction.isMessageContextMenuCommand()) return
 
     await interaction.deferReply({ ephemeral: true })
 
@@ -59,42 +56,38 @@ export class RestoreCommand extends Command {
       interaction.targetMessage as APIMessage | Message,
     )
 
-    const channel = (
-      interaction.targetMessage instanceof Message
-        ? interaction.targetMessage.channel
-        : interaction.guild?.channels.cache.get(
-            interaction.targetMessage.channel_id,
-          )
-    ) as Extract<Extract<AnyChannel, TextBasedChannel>, GuildChannel>
+    const channel = interaction.targetMessage.channel as Exclude<
+      GuildBasedChannel,
+      CategoryChannel
+    >
 
-    const components: MessageOptions["components"] = []
-    const webhookId =
-      interaction.targetMessage instanceof Message
-        ? interaction.targetMessage.webhookId
-        : interaction.targetMessage.webhook_id
+    const components: BaseMessageOptions["components"] = []
+    const webhookId = interaction.targetMessage.webhookId
 
     if (
       webhookId &&
       interaction.guild &&
       channel
         .permissionsFor(await getSelf(interaction.guild))
-        .has("MANAGE_WEBHOOKS")
+        .has(PermissionFlagsBits.ManageWebhooks)
     ) {
       const member =
         interaction.member instanceof GuildMember
           ? interaction.member
           : await interaction.guild.members.fetch(interaction.user.id)
 
-      if (channel.permissionsFor(member).has("MANAGE_WEBHOOKS")) {
+      if (
+        channel.permissionsFor(member).has(PermissionFlagsBits.ManageWebhooks)
+      ) {
         const webhooks = await fetchWebhooks(channel)
 
         if (webhooks.some((webhook) => webhook.id === webhookId)) {
           components.push({
-            type: "ACTION_ROW",
+            type: ComponentType.ActionRow,
             components: [
               {
-                type: "BUTTON",
-                style: "SECONDARY",
+                type: ComponentType.Button,
+                style: ButtonStyle.Secondary,
                 label: "Quick Edit",
                 customId: `@discohook/restore-quick-edit/${channel.id}-${interaction.targetId}`,
               },

@@ -1,13 +1,15 @@
+import { isTextBasedChannel } from "@sapphire/discord.js-utilities"
 import {
-  BaseCommandInteraction,
+  CommandInteraction,
   MessageComponentInteraction,
-  Permissions,
+  PermissionFlagsBits,
+  PermissionsBitField,
 } from "discord.js"
 import { getSelf } from "../guilds/getSelf"
 import { reply } from "../interactions/reply"
 
 export const fetchMessage = async (
-  interaction: BaseCommandInteraction | MessageComponentInteraction,
+  interaction: CommandInteraction | MessageComponentInteraction,
   channelId: string,
   messageId: string,
 ) => {
@@ -21,7 +23,7 @@ export const fetchMessage = async (
     return
   }
 
-  if (!channel.isText()) {
+  if (!isTextBasedChannel(channel)) {
     await reply(interaction, {
       content: "The channel the message belongs to does not support messages.",
     })
@@ -31,11 +33,11 @@ export const fetchMessage = async (
   const selfPermissions =
     "guild" in channel && channel.guild
       ? channel.permissionsFor(await getSelf(channel.guild))
-      : new Permissions(Permissions.DEFAULT)
+      : new PermissionsBitField(PermissionsBitField.Default)
 
   const missingPerms = selfPermissions.missing([
-    "VIEW_CHANNEL",
-    "READ_MESSAGE_HISTORY",
+    PermissionFlagsBits.ViewChannel,
+    PermissionFlagsBits.ReadMessageHistory,
   ])
   if (missingPerms.length > 0) {
     await reply(interaction, {

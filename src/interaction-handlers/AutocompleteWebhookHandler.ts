@@ -5,18 +5,18 @@ import {
   PieceContext,
 } from "@sapphire/framework"
 import {
-  AnyChannel,
+  ApplicationCommandOptionType,
   AutocompleteInteraction,
   BaseGuildTextChannel,
+  CategoryChannel,
   Guild,
-  GuildChannel,
-  TextBasedChannel,
+  GuildBasedChannel,
 } from "discord.js"
 import { ellipsize } from "../lib/lang/ellipsize"
 import { fetchWebhooks } from "../lib/webhooks/fetchWebhooks"
 
 type AutocompleteWebhookOptions = {
-  source: Guild | Extract<Extract<AnyChannel, TextBasedChannel>, GuildChannel>
+  source: Guild | Exclude<GuildBasedChannel, CategoryChannel>
   query: string
 }
 
@@ -81,15 +81,13 @@ export class AutocompleteWebhookHandler extends InteractionHandler {
     const { name, value } = interaction.options.getFocused(true)
     if (name !== "webhook") return this.none()
 
-    let source:
-      | Guild
-      | Extract<Extract<AnyChannel, TextBasedChannel>, GuildChannel> =
+    let source: Guild | Guild | Exclude<GuildBasedChannel, CategoryChannel> =
       interaction.guild!
 
     // Using options.get("channel") as Discord doesn't give channel data in
-    // autocomplete interactions
+    // autocomplete interactions which trips up the resolver
     const channelOption = interaction.options.get("channel")
-    if (channelOption?.type === "CHANNEL") {
+    if (channelOption?.type === ApplicationCommandOptionType.Channel) {
       const channel = interaction.guild!.channels.cache.get(
         String(channelOption.value),
       )

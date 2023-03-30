@@ -1,11 +1,13 @@
 import { container, LogLevel, SapphireClient } from "@sapphire/framework"
 import "@sapphire/plugin-api/register"
 import "@sapphire/plugin-logger/register"
-import { GatewayIntentBits } from "discord-api-types/v9"
 import {
+  ActivityType,
   ClientOptions,
+  GatewayIntentBits,
   GuildMember,
   Options,
+  Partials,
   ThreadMember,
   User,
 } from "discord.js"
@@ -64,15 +66,16 @@ const client = new SapphireClient({
     GatewayIntentBits.GuildMessageReactions |
     GatewayIntentBits.DirectMessages,
   partials: [
-    "CHANNEL",
-    "USER",
-    "GUILD_MEMBER",
-    "MESSAGE",
-    "REACTION",
-    "GUILD_SCHEDULED_EVENT",
+    Partials.User,
+    Partials.Channel,
+    Partials.GuildMember,
+    Partials.Message,
+    Partials.Reaction,
+    Partials.GuildScheduledEvent,
+    Partials.ThreadMember,
   ],
   makeCache: Options.cacheWithLimits({
-    ...Options.defaultMakeCacheSettings,
+    ...Options.DefaultMakeCacheSettings,
     UserManager: createUserManagerCache(),
     GuildMemberManager: createUserManagerCache(),
     ReactionUserManager: createUserManagerCache(),
@@ -94,7 +97,7 @@ const client = new SapphireClient({
     repliedUser: false,
   },
   presence: {
-    activities: [{ type: "PLAYING", name: "at discohook.app" }],
+    activities: [{ type: ActivityType.Playing, name: "at discohook.app" }],
     status: "online",
   },
   loadMessageCommandListeners: true,

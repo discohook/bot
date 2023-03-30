@@ -1,5 +1,5 @@
 import { Args, Command, PieceContext } from "@sapphire/framework"
-import type { Message } from "discord.js"
+import { Message, PermissionFlagsBits } from "discord.js"
 import { createRequire } from "node:module"
 import { resolve } from "node:path"
 import { inspect } from "node:util"
@@ -11,7 +11,7 @@ export class EvalCommand extends Command {
       name: "eval",
       quotes: [],
       preconditions: ["owner-only"],
-      requiredClientPermissions: ["ATTACH_FILES"],
+      requiredClientPermissions: [PermissionFlagsBits.AttachFiles],
       detailedDescription: {},
     })
   }

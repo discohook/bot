@@ -1,5 +1,5 @@
 import { Args, Command, PieceContext } from "@sapphire/framework"
-import type { Message } from "discord.js"
+import { Message, PermissionFlagsBits } from "discord.js"
 import { spawn } from "node:child_process"
 
 export class ShellCommand extends Command {
@@ -8,7 +8,7 @@ export class ShellCommand extends Command {
       name: "shell",
       quotes: [],
       preconditions: ["owner-only"],
-      requiredClientPermissions: ["ATTACH_FILES"],
+      requiredClientPermissions: [PermissionFlagsBits.AttachFiles],
       detailedDescription: {},
     })
   }

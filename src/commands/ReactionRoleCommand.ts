@@ -1,22 +1,24 @@
 import {
-  bold,
-  formatEmoji,
-  hyperlink,
-  roleMention,
-  SlashCommandBuilder,
-} from "@discordjs/builders"
-import { PaginatedMessageEmbedFields } from "@sapphire/discord.js-utilities"
+  isTextBasedChannel,
+  PaginatedMessageEmbedFields,
+} from "@sapphire/discord.js-utilities"
 import {
   ApplicationCommandRegistry,
   PieceContext,
   RegisterBehavior,
 } from "@sapphire/framework"
 import { Subcommand } from "@sapphire/plugin-subcommands"
-import { ChannelType, PermissionFlagsBits } from "discord-api-types/v9"
 import {
-  CommandInteraction,
+  bold,
+  ChannelType,
+  ChatInputCommandInteraction,
+  EmbedBuilder,
+  formatEmoji,
   GuildBasedChannel,
-  MessageEmbed,
+  hyperlink,
+  PermissionFlagsBits,
+  roleMention,
+  SlashCommandBuilder,
   ThreadChannel,
 } from "discord.js"
 import { BOT_EMBED_COLOR } from "../lib/constants"
@@ -57,7 +59,7 @@ export class ReactionRoleCommand extends Subcommand {
     })
   }
 
-  async listRun(interaction: CommandInteraction) {
+  async listRun(interaction: ChatInputCommandInteraction) {
     await interaction.deferReply({ ephemeral: true })
 
     const channel = interaction.options.getChannel("channel")
@@ -87,7 +89,7 @@ export class ReactionRoleCommand extends Subcommand {
     if (reactionRoles.length === 0) {
       await interaction.editReply({
         embeds: [
-          new MessageEmbed()
+          new EmbedBuilder()
             .setTitle("Reaction roles")
             .setDescription(
               `It seems like you don't have any reaction roles yet. Use ` +
@@ -101,7 +103,7 @@ export class ReactionRoleCommand extends Subcommand {
 
     await new PaginatedMessageEmbedFields()
       .setTemplate(
-        new MessageEmbed()
+        new EmbedBuilder()
           .setTitle("Reaction roles")
           .setDescription(
             `Use ${bold("/reaction-role create")} to create a new reaction ` +
@@ -154,6 +156,7 @@ export class ReactionRoleCommand extends Subcommand {
                   return `${emoji}: ${roleMention(reactionRole.role_id)}`
                 })
                 .join("\n"),
+            inline: false,
           }
         }),
       )
@@ -162,7 +165,7 @@ export class ReactionRoleCommand extends Subcommand {
       .run(interaction)
   }
 
-  async createRun(interaction: CommandInteraction) {
+  async createRun(interaction: ChatInputCommandInteraction) {
     await interaction.deferReply({ ephemeral: true })
 
     const [channelId, messageId] = await parseMessageOption(interaction)
@@ -172,8 +175,8 @@ export class ReactionRoleCommand extends Subcommand {
     if (!message) return
 
     const canReact = (message.channel as GuildBasedChannel)
-      .permissionsFor(interaction.guild!.me!)
-      .has("ADD_REACTIONS")
+      .permissionsFor(interaction.guild!.members.me!)
+      .has(PermissionFlagsBits.AddReactions)
     if (!canReact) {
       await interaction.editReply({
         content: "I'm missing permission to react in this channel.",
@@ -242,7 +245,7 @@ export class ReactionRoleCommand extends Subcommand {
     }
   }
 
-  async deleteRun(interaction: CommandInteraction) {
+  async deleteRun(interaction: ChatInputCommandInteraction) {
     await interaction.deferReply({ ephemeral: true })
 
     const [channelId, messageId] = await parseMessageOption(interaction)
@@ -294,16 +297,16 @@ export class ReactionRoleCommand extends Subcommand {
     })
   }
 
-  async verifyRun(interaction: CommandInteraction) {
+  async verifyRun(interaction: ChatInputCommandInteraction) {
     await interaction.deferReply({ ephemeral: true })
 
     const guild = interaction.guild!
     const self = await getSelf(guild)
 
-    if (!self.permissions.has("MANAGE_ROLES")) {
+    if (!self.permissions.has(PermissionFlagsBits.ManageRoles)) {
       await interaction.editReply({
         embeds: [
-          new MessageEmbed()
+          new EmbedBuilder()
             .setTitle("Reaction roles")
             .setDescription(
               "It looks like I don't have access to manage roles in this " +
@@ -324,7 +327,7 @@ export class ReactionRoleCommand extends Subcommand {
     if (reactionRoles.length === 0) {
       await interaction.editReply({
         embeds: [
-          new MessageEmbed()
+          new EmbedBuilder()
             .setTitle("Reaction roles")
             .setDescription(
               `It seems like you don't have any reaction roles yet. Use ` +
@@ -360,8 +363,11 @@ export class ReactionRoleCommand extends Subcommand {
 
       const permissions = channel.permissionsFor(self)
       if (
-        !channel.isText() ||
-        !permissions.has(["VIEW_CHANNEL", "READ_MESSAGE_HISTORY"])
+        !isTextBasedChannel(channel) ||
+        !permissions.has([
+          PermissionFlagsBits.ViewChannel,
+          PermissionFlagsBits.ReadMessageHistory,
+        ])
       ) {
         errors.add(
           `I don't have permission to see messages in ${channel}. Make sure ` +
@@ -404,7 +410,7 @@ export class ReactionRoleCommand extends Subcommand {
       }
     }
 
-    const embed = new MessageEmbed()
+    const embed = new EmbedBuilder()
       .setTitle("Reaction role verification")
       .addFields(
         ...Array.from(errors).map((error, index) => ({
