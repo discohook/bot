@@ -122,6 +122,7 @@ export class FormatCommand extends Subcommand {
                   ChannelType.GuildPrivateThread,
                   ChannelType.GuildVoice,
                   ChannelType.GuildStageVoice,
+                  ChannelType.GuildForum,
                 )
                 .setRequired(true),
             ),
