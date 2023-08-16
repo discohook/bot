@@ -1,5 +1,11 @@
-import { ContextMenuCommandSuccessPayload, Listener } from "@sapphire/framework"
-import { APIContextMenuInteraction, ApplicationCommandType } from "discord.js"
+import {
+  type ContextMenuCommandSuccessPayload,
+  Listener,
+} from "@sapphire/framework"
+import {
+  type APIContextMenuInteraction,
+  ApplicationCommandType,
+} from "discord.js"
 
 const prefixes: Record<APIContextMenuInteraction["data"]["type"], string> = {
   [ApplicationCommandType.Message]: "(Message) ",

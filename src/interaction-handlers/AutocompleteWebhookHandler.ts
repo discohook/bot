@@ -2,7 +2,7 @@ import { AutoCompleteLimits } from "@sapphire/discord-utilities"
 import {
   InteractionHandler,
   InteractionHandlerTypes,
-  PieceContext,
+  type PieceContext,
 } from "@sapphire/framework"
 import {
   ApplicationCommandOptionType,
@@ -10,7 +10,7 @@ import {
   BaseGuildTextChannel,
   CategoryChannel,
   Guild,
-  GuildBasedChannel,
+  type GuildBasedChannel,
 } from "discord.js"
 import { ellipsize } from "../lib/lang/ellipsize"
 import { fetchWebhooks } from "../lib/webhooks/fetchWebhooks"

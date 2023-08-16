@@ -1,5 +1,5 @@
 import {
-  ChatInputCommandDeniedPayload,
+  type ChatInputCommandDeniedPayload,
   Listener,
   UserError,
 } from "@sapphire/framework"

@@ -1,4 +1,4 @@
-import { Listener, MessageCommandErrorPayload } from "@sapphire/framework"
+import { Listener, type MessageCommandErrorPayload } from "@sapphire/framework"
 import { ClientApplication, DiscordAPIError, User } from "discord.js"
 import { inspect } from "node:util"
 

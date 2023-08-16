@@ -1,5 +1,5 @@
 import {
-  APIPartialEmoji,
+  type APIPartialEmoji,
   ChatInputCommandInteraction,
   FormattingPatterns,
   GuildEmoji,

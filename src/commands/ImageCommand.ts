@@ -1,6 +1,6 @@
 import {
   ApplicationCommandRegistry,
-  PieceContext,
+  type PieceContext,
   RegisterBehavior,
 } from "@sapphire/framework"
 import { Subcommand } from "@sapphire/plugin-subcommands"

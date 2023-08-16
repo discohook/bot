@@ -1,4 +1,4 @@
-import { Args, Command, PieceContext } from "@sapphire/framework"
+import { Args, Command, type PieceContext } from "@sapphire/framework"
 import { Message, PermissionFlagsBits } from "discord.js"
 import { spawn } from "node:child_process"
 
@@ -32,12 +32,14 @@ export class ShellCommand extends Command {
       child.on("close", (code, signal) => resolve(code ?? signal!))
     })
 
-    output = output.replace(/\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])/g, (match) =>
-      /\x1B\[(?:\d+(?:[:;]\d+)*)m/.test(match)
-        ? "\x1B[0m" + match
-        : match === "\x1B[m"
-        ? "\x1B[0m"
-        : "",
+    output = output.replace(
+      /\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])/g,
+      (match) =>
+        /\x1B\[(?:\d+(?:[:;]\d+)*)m/.test(match)
+          ? "\x1B[0m" + match
+          : match === "\x1B[m"
+          ? "\x1B[0m"
+          : "",
     )
 
     await message.reply({

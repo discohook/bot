@@ -1,4 +1,4 @@
-import { Command, PieceContext } from "@sapphire/framework"
+import { Command, type PieceContext } from "@sapphire/framework"
 import type { Message } from "discord.js"
 
 export class DebugCommand extends Command {

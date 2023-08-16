@@ -2,7 +2,7 @@ import { isThreadChannel } from "@sapphire/discord.js-utilities"
 import {
   CategoryChannel,
   Guild,
-  GuildBasedChannel,
+  type GuildBasedChannel,
   GuildChannel,
 } from "discord.js"
 

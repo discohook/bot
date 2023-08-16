@@ -2,7 +2,7 @@ import { AutoCompleteLimits } from "@sapphire/discord-utilities"
 import {
   InteractionHandler,
   InteractionHandlerTypes,
-  PieceContext,
+  type PieceContext,
 } from "@sapphire/framework"
 import type { AutocompleteInteraction } from "discord.js"
 import { getApplicationCommands } from "../lib/help/getApplicationCommands"

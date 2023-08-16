@@ -1,4 +1,4 @@
-import { Args, Command, PieceContext } from "@sapphire/framework"
+import { Args, Command, type PieceContext } from "@sapphire/framework"
 import { Message, PermissionFlagsBits } from "discord.js"
 import { createRequire } from "node:module"
 import { resolve } from "node:path"

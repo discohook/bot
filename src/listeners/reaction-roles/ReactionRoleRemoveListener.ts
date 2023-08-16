@@ -1,7 +1,7 @@
 import { Listener } from "@sapphire/framework"
 import {
   DiscordAPIError,
-  GatewayMessageReactionAddDispatchData,
+  type GatewayMessageReactionAddDispatchData,
   PermissionFlagsBits,
 } from "discord.js"
 import { getEmojiKey } from "../../lib/emojis/getEmojiKey"

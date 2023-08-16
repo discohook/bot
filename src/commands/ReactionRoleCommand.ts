@@ -4,7 +4,7 @@ import {
 } from "@sapphire/discord.js-utilities"
 import {
   ApplicationCommandRegistry,
-  PieceContext,
+  type PieceContext,
   RegisterBehavior,
 } from "@sapphire/framework"
 import { Subcommand } from "@sapphire/plugin-subcommands"
@@ -14,7 +14,7 @@ import {
   ChatInputCommandInteraction,
   EmbedBuilder,
   formatEmoji,
-  GuildBasedChannel,
+  type GuildBasedChannel,
   hyperlink,
   PermissionFlagsBits,
   roleMention,

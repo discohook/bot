@@ -1,7 +1,7 @@
 import {
   InteractionHandler,
   InteractionHandlerTypes,
-  PieceContext,
+  type PieceContext,
 } from "@sapphire/framework"
 import type { ButtonInteraction, Snowflake } from "discord.js"
 import { fetchAndRestoreMessage } from "../lib/messages/fetchAndRestoreMessage"

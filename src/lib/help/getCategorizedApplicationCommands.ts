@@ -1,5 +1,5 @@
 import { container } from "@sapphire/framework"
-import { ApplicationCommandType, Collection, Snowflake } from "discord.js"
+import { ApplicationCommandType, Collection, type Snowflake } from "discord.js"
 import type { CommandHelpData } from "./CommandHelpData"
 import { getArgumentsFromOptionsList } from "./getArgumentsFromOptionsList"
 import { getSubcommandsFromOptionsList } from "./getSubcommandsFromOptionsList"

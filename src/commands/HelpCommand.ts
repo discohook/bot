@@ -1,11 +1,11 @@
 import {
   ApplicationCommandRegistry,
   Command,
-  PieceContext,
+  type PieceContext,
   RegisterBehavior,
 } from "@sapphire/framework"
 import {
-  APIEmbedField,
+  type APIEmbedField,
   ChatInputCommandInteraction,
   CommandInteraction,
   EmbedBuilder,

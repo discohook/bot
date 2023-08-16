@@ -1,4 +1,7 @@
-import { AutocompleteInteractionPayload, Listener } from "@sapphire/framework"
+import {
+  type AutocompleteInteractionPayload,
+  Listener,
+} from "@sapphire/framework"
 import { ClientApplication, DiscordAPIError, User } from "discord.js"
 import { inspect } from "node:util"
 

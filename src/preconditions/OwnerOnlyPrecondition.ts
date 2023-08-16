@@ -1,4 +1,4 @@
-import { PieceContext, Precondition } from "@sapphire/framework"
+import { Precondition, type PieceContext } from "@sapphire/framework"
 import { ClientApplication, Message, User } from "discord.js"
 
 export class OwnerOnlyPrecondition extends Precondition {

@@ -1,6 +1,6 @@
 import {
-  APIMessage,
-  BaseMessageOptions,
+  type APIMessage,
+  type BaseMessageOptions,
   ButtonStyle,
   CommandInteraction,
   ComponentType,

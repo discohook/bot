@@ -1,5 +1,5 @@
 import { Listener } from "@sapphire/framework"
-import { GatewayOpcodes, GatewayReceivePayload } from "discord.js"
+import { GatewayOpcodes, type GatewayReceivePayload } from "discord.js"
 
 export class RawGatewayPayloadListener extends Listener {
   public constructor(context: Listener.Context, options: Listener.Options) {

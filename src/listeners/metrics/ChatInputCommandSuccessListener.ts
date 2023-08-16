@@ -1,4 +1,7 @@
-import { ChatInputCommandSuccessPayload, Listener } from "@sapphire/framework"
+import {
+  type ChatInputCommandSuccessPayload,
+  Listener,
+} from "@sapphire/framework"
 
 export class ChatInputCommandSuccessListener extends Listener {
   public constructor(context: Listener.Context) {

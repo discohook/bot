@@ -1,4 +1,7 @@
-import { ChatInputCommandErrorPayload, Listener } from "@sapphire/framework"
+import {
+  type ChatInputCommandErrorPayload,
+  Listener,
+} from "@sapphire/framework"
 import { ClientApplication, DiscordAPIError, User } from "discord.js"
 import { inspect } from "node:util"
 import { reply } from "../../lib/interactions/reply"

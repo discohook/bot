@@ -1,13 +1,13 @@
 import {
-  ApplicationCommandOption,
   ApplicationCommandOptionType,
-  ApplicationCommandSubCommand,
-  ApplicationCommandSubGroup,
+  type ApplicationCommandOption,
+  type ApplicationCommandSubCommand,
+  type ApplicationCommandSubGroup,
 } from "discord.js"
 import type { ArgumentHelpData } from "./CommandHelpData"
 
 export const getArgumentsFromOptionsList = (
-  options: ApplicationCommandOption[] = [],
+  options: readonly ApplicationCommandOption[] = [],
 ): ArgumentHelpData[] => {
   return options
     .filter(

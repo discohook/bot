@@ -1,8 +1,8 @@
 import {
-  ApplicationCommandOption,
   ApplicationCommandOptionType,
-  ApplicationCommandSubCommand,
-  ApplicationCommandSubGroup,
+  type ApplicationCommandOption,
+  type ApplicationCommandSubCommand,
+  type ApplicationCommandSubGroup,
 } from "discord.js"
 import type { SubcommandHelpData } from "./CommandHelpData"
 import { getArgumentsFromOptionsList } from "./getArgumentsFromOptionsList"

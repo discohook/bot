@@ -1,6 +1,6 @@
 import { fetch } from "@sapphire/fetch"
 import { deepClone } from "@sapphire/utilities"
-import { APIMessage, Embed, Message, Webhook } from "discord.js"
+import { type APIMessage, Embed, Message, Webhook } from "discord.js"
 
 export const restoreMessage = async (
   message: APIMessage | Message,

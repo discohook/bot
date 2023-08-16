@@ -3,7 +3,7 @@ import "@sapphire/plugin-api/register"
 import "@sapphire/plugin-logger/register"
 import {
   ActivityType,
-  ClientOptions,
+  type ClientOptions,
   GatewayIntentBits,
   GuildMember,
   Options,

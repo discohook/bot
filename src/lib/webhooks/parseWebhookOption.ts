@@ -9,7 +9,7 @@ import {
   channelMention,
   ChatInputCommandInteraction,
   Guild,
-  GuildBasedChannel,
+  type GuildBasedChannel,
 } from "discord.js"
 import { reply } from "../interactions/reply"
 import { ellipsize } from "../lang/ellipsize"

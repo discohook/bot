@@ -1,7 +1,7 @@
 import { PaginatedMessageEmbedFields } from "@sapphire/discord.js-utilities"
 import {
   ApplicationCommandRegistry,
-  PieceContext,
+  type PieceContext,
   RegisterBehavior,
 } from "@sapphire/framework"
 import { Subcommand } from "@sapphire/plugin-subcommands"
@@ -14,7 +14,7 @@ import {
   ChatInputCommandInteraction,
   CommandInteraction,
   EmbedBuilder,
-  GuildBasedChannel,
+  type GuildBasedChannel,
   GuildMember,
   inlineCode,
   PermissionFlagsBits,
