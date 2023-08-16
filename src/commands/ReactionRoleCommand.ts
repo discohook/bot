@@ -184,7 +184,7 @@ export class ReactionRoleCommand extends Subcommand {
       return
     }
 
-    const emoji = await parseReactionOption(interaction)
+    const emoji = await parseReactionOption(interaction, message)
     if (!emoji) return
 
     if (
@@ -254,7 +254,7 @@ export class ReactionRoleCommand extends Subcommand {
     const message = await fetchMessage(interaction, channelId, messageId)
     if (!message) return
 
-    const emoji = await parseReactionOption(interaction)
+    const emoji = await parseReactionOption(interaction, message)
     if (!emoji) return
 
     const reaction = message.reactions.cache.get(getEmojiKey(emoji))

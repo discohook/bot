@@ -10,8 +10,8 @@ import { emojiUnicodeToNameMap } from "./emojiUnicodeToNameMap"
 
 export const parseReactionOption = async (
   interaction: ChatInputCommandInteraction,
+  message: Message | undefined,
   emojiOptionName = "emoji",
-  message?: Message,
 ): Promise<string | GuildEmoji | ReactionEmoji | undefined> => {
   const query = interaction.options.getString(emojiOptionName, true)
 
