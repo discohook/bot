@@ -4,8 +4,8 @@ import {
 } from "@sapphire/discord.js-utilities"
 import {
   ApplicationCommandRegistry,
-  type PieceContext,
   RegisterBehavior,
+  type PieceContext,
 } from "@sapphire/framework"
 import { Subcommand } from "@sapphire/plugin-subcommands"
 import {
@@ -14,12 +14,13 @@ import {
   ChatInputCommandInteraction,
   EmbedBuilder,
   formatEmoji,
-  type GuildBasedChannel,
   hyperlink,
   PermissionFlagsBits,
   roleMention,
   SlashCommandBuilder,
   ThreadChannel,
+  type GuildBasedChannel,
+  type Snowflake,
 } from "discord.js"
 import { BOT_EMBED_COLOR } from "../lib/constants"
 import { getEmojiKey } from "../lib/emojis/getEmojiKey"
@@ -340,6 +341,7 @@ export class ReactionRoleCommand extends Subcommand {
     }
 
     const errors = new Set<string>()
+    const fetched = new Set<Snowflake>()
 
     for (const reactionRole of reactionRoles) {
       const messageLink = [
@@ -378,6 +380,7 @@ export class ReactionRoleCommand extends Subcommand {
       }
 
       try {
+        fetched.add(reactionRole.message_id)
         await channel.messages.fetch(reactionRole.message_id)
       } catch {
         errors.add(
