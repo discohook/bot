@@ -381,7 +381,9 @@ export class ReactionRoleCommand extends Subcommand {
 
       try {
         fetched.add(reactionRole.message_id)
-        await channel.messages.fetch(reactionRole.message_id)
+        if (!fetched.has(reactionRole.message_id)) {
+          await channel.messages.fetch(reactionRole.message_id)
+        }
       } catch {
         errors.add(
           `${hyperlink("This message", messageLink)} appears to have been ` +
