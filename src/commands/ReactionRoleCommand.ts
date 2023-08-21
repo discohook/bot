@@ -416,10 +416,12 @@ export class ReactionRoleCommand extends Subcommand {
     const embed = new EmbedBuilder()
       .setTitle("Reaction role verification")
       .addFields(
-        ...Array.from(errors).map((error, index) => ({
-          name: `Error ${index + 1}`,
-          value: error,
-        })),
+        ...Array.from(errors)
+          .map((error, index) => ({
+            name: `Error ${index + 1}`,
+            value: error,
+          }))
+          .slice(0, 25),
       )
       .setColor(BOT_EMBED_COLOR)
 
