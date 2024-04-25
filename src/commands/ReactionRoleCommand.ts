@@ -198,7 +198,9 @@ export class ReactionRoleCommand extends Subcommand {
       return
     }
 
-    const role = interaction.options.getRole("role", true)
+    const role = interaction.guild!.roles.cache.get(
+      interaction.options.getRole("role", true).id,
+    )!
 
     if (role.managed || interaction.guild!.roles.everyone.id === role.id) {
       await interaction.editReply({
@@ -207,13 +209,12 @@ export class ReactionRoleCommand extends Subcommand {
       return
     }
 
-    for (const memberRole of interaction.member.roles) {
-      if (role.comparePositionTo(memberRole) >= 0) {
-        await interaction.editReply({
-          content: "This role is higher than your current highest role.",
-        })
-        return
-      }
+    const member = await interaction.guild!.members.fetch(interaction.user.id)
+    if (role.comparePositionTo(member.roles.highest) >= 0) {
+      await interaction.editReply({
+        content: "This role is higher than your current highest role.",
+      })
+      return
     }
 
     await message.react(emoji)
