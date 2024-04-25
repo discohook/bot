@@ -207,6 +207,15 @@ export class ReactionRoleCommand extends Subcommand {
       return
     }
 
+    for (const memberRole of interaction.member.roles) {
+      if (role.comparePositionTo(memberRole) >= 0) {
+        await interaction.editReply({
+          content: "This role is higher than your current highest role.",
+        })
+        return
+      }
+    }
+
     await message.react(emoji)
     if (message.channel instanceof ThreadChannel && message.channel.joinable) {
       await message.channel.join()
