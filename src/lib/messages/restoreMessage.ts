@@ -1,4 +1,4 @@
-import { URL } from 'node:url'
+import { URL } from "node:url"
 import { fetch } from "@sapphire/fetch"
 import { ThreadChannel, Message, Webhook } from "discord.js"
 

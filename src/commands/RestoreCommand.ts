@@ -15,6 +15,7 @@ import {
 import {
   fetchAndRestoreMessage,
   restoreMessageAndReply,
+  RestoreMode,
 } from "../lib/messages/fetchAndRestoreMessage"
 import { parseMessageOption } from "../lib/messages/parseMessageOption"
 
@@ -35,7 +36,7 @@ export class RestoreCommand extends Command {
     const [channelId, messageId] = await parseMessageOption(interaction)
     if (!channelId || !messageId) return
 
-    fetchAndRestoreMessage(interaction, channelId, messageId, false)
+    fetchAndRestoreMessage(interaction, channelId, messageId, RestoreMode.Restore)
   }
 
   override async contextMenuRun(interaction: ContextMenuCommandInteraction) {
@@ -43,7 +44,7 @@ export class RestoreCommand extends Command {
 
     await interaction.deferReply({ ephemeral: true })
 
-    await restoreMessageAndReply(interaction, interaction.targetMessage)
+    await restoreMessageAndReply(interaction, interaction.targetMessage, RestoreMode.Open)
   }
 
   override async registerApplicationCommands(

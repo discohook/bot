@@ -17,18 +17,27 @@ import { fetchWebhooks } from "../webhooks/fetchWebhooks"
 import { fetchMessage } from "./fetchMessage"
 import { restoreMessage } from "./restoreMessage"
 
+export enum RestoreMode {
+  // Just restore the message
+  Restore,
+  // Require that the message is from a webhook, and include the webhook
+  QuickEdit,
+  // Act like quick edit if the message is from a webhook, and like restore otherwise
+  Open,
+}
+
 export const restoreMessageAndReply = async (
   interaction: CommandInteraction | MessageComponentInteraction,
   message: Message,
-  quickEdit = false,
+  mode: RestoreMode = RestoreMode.Restore,
 ) => {
   let webhook: Webhook | undefined = undefined
   const components: BaseMessageOptions["components"] = []
 
-  // Check permissions for the bot
   if (
     message.webhookId &&
     message.inGuild() &&
+    // Check permissions for the bot
     message.channel
       .permissionsFor(await getSelf(message.channel.guild))
       .has(PermissionFlagsBits.ManageWebhooks)
@@ -52,7 +61,7 @@ export const restoreMessageAndReply = async (
       const webhooks = await fetchWebhooks(root!)
 
       webhook = webhooks.find((webhook) => webhook.id === message.webhookId)
-      if (webhook && !quickEdit) {
+      if (webhook && mode == RestoreMode.Restore) {
         components.push({
           type: ComponentType.ActionRow,
           components: [
@@ -68,7 +77,7 @@ export const restoreMessageAndReply = async (
     }
   }
 
-  if (quickEdit && !webhook) {
+  if (mode == RestoreMode.QuickEdit && !webhook) {
     await reply(interaction, {
       content:
         "I can't find the webhook this message belongs to, therefore " +
@@ -91,17 +100,15 @@ export const restoreMessageAndReply = async (
     return
   }
 
-  const response = await restoreMessage(
-    message,
-    quickEdit ? webhook : undefined,
-  )
+  const editTarget = mode == RestoreMode.Restore ? undefined : webhook
+  const response = await restoreMessage(message, editTarget)
 
   await reply(interaction, {
     embeds: [
       {
-        title: "Restored message",
+        title: editTarget ? "Opened for editing" : "Restored message",
         description:
-          `The restored message can be found at ${response.url}. This link ` +
+          `The message editor can be found at ${response.url}. This link ` +
           `will expire ${time(new Date(response.expires), "R")}.`,
       },
     ],
@@ -113,10 +120,10 @@ export const fetchAndRestoreMessage = async (
   interaction: CommandInteraction | MessageComponentInteraction,
   channelId: string,
   messageId: string,
-  quickEdit = false,
+  mode: RestoreMode = RestoreMode.Restore,
 ) => {
   const message = await fetchMessage(interaction, channelId, messageId)
   if (!message) return
 
-  restoreMessageAndReply(interaction, message, quickEdit)
+  restoreMessageAndReply(interaction, message, mode)
 }

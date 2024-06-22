@@ -4,7 +4,7 @@ import {
   type PieceContext,
 } from "@sapphire/framework"
 import type { ButtonInteraction, Snowflake } from "discord.js"
-import { fetchAndRestoreMessage } from "../lib/messages/fetchAndRestoreMessage"
+import { fetchAndRestoreMessage, RestoreMode } from "../lib/messages/fetchAndRestoreMessage"
 
 type RestoreQuickEditOptions = {
   channelId: Snowflake
@@ -29,7 +29,7 @@ export class RestoreQuickEditHandler extends InteractionHandler {
       interaction,
       options.channelId,
       options.messageId,
-      true,
+      RestoreMode.QuickEdit
     )
   }
 
