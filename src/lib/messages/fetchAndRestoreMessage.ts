@@ -1,5 +1,4 @@
 import {
-  type APIMessage,
   type BaseMessageOptions,
   ButtonStyle,
   CommandInteraction,
@@ -8,9 +7,8 @@ import {
   Message,
   MessageComponentInteraction,
   PermissionFlagsBits,
-  PermissionsBitField,
-  ThreadChannel,
   time,
+  ThreadChannel,
   Webhook,
 } from "discord.js"
 import { getSelf } from "../guilds/getSelf"
@@ -19,26 +17,23 @@ import { fetchWebhooks } from "../webhooks/fetchWebhooks"
 import { fetchMessage } from "./fetchMessage"
 import { restoreMessage } from "./restoreMessage"
 
-export const fetchAndRestoreMessage = async (
+export const restoreMessageAndReply = async (
   interaction: CommandInteraction | MessageComponentInteraction,
-  channelId: string,
-  messageId: string,
+  message: Message,
   quickEdit = false,
 ) => {
-  const message = await fetchMessage(interaction, channelId, messageId)
-  if (!message) return
-
-  const selfPermissions =
-    "guild" in message.channel && message.channel.guild
-      ? message.channel.permissionsFor(await getSelf(message.channel.guild))
-      : new PermissionsBitField(PermissionsBitField.Default)
-
   let webhook: Webhook | undefined = undefined
   const components: BaseMessageOptions["components"] = []
+
+  // Check permissions for the bot
   if (
     message.webhookId &&
-    selfPermissions.has(PermissionFlagsBits.ManageWebhooks)
+    message.inGuild() &&
+    message.channel
+      .permissionsFor(await getSelf(message.channel.guild))
+      .has(PermissionFlagsBits.ManageWebhooks)
   ) {
+    // Now check permissions for the member triggering this
     const member =
       interaction.member instanceof GuildMember
         ? interaction.member
@@ -46,7 +41,6 @@ export const fetchAndRestoreMessage = async (
 
     if (
       member &&
-      "guild" in message.channel &&
       message.channel
         .permissionsFor(member)
         .has(PermissionFlagsBits.ManageWebhooks)
@@ -66,7 +60,7 @@ export const fetchAndRestoreMessage = async (
               type: ComponentType.Button,
               style: ButtonStyle.Secondary,
               label: "Quick Edit",
-              customId: `@discohook/restore-quick-edit/${channelId}-${messageId}`,
+              customId: `@discohook/restore-quick-edit/${message.channelId}-${message.id}`,
             },
           ],
         })
@@ -74,7 +68,7 @@ export const fetchAndRestoreMessage = async (
     }
   }
 
-  if (!webhook && quickEdit) {
+  if (quickEdit && !webhook) {
     await reply(interaction, {
       content:
         "I can't find the webhook this message belongs to, therefore " +
@@ -84,25 +78,10 @@ export const fetchAndRestoreMessage = async (
   }
 
   if (message.content || message.embeds.length > 0) {
-    const response = await restoreMessage(
-      message,
-      quickEdit ? webhook : undefined,
-    )
-    await reply(interaction, {
-      embeds: [
-        {
-          title: "Restored message",
-          description:
-            `The restored message can be found at ${response.url}. This link ` +
-            `will expire ${time(new Date(response.expires), "R")}.`,
-        },
-      ],
-      components,
-    })
-    return
-  }
-
-  if (!webhook) {
+    message = message
+  } else if (webhook) {
+    message = await webhook.fetchMessage(message.id)
+  } else {
     await reply(interaction, {
       content:
         "I can't read the message because of Discord's privacy restrictions. " +
@@ -112,11 +91,11 @@ export const fetchAndRestoreMessage = async (
     return
   }
 
-  const webhookMessage = await webhook.fetchMessage(messageId)
   const response = await restoreMessage(
-    webhookMessage as Message | APIMessage,
+    message,
     quickEdit ? webhook : undefined,
   )
+
   await reply(interaction, {
     embeds: [
       {
@@ -128,4 +107,16 @@ export const fetchAndRestoreMessage = async (
     ],
     components,
   })
+}
+
+export const fetchAndRestoreMessage = async (
+  interaction: CommandInteraction | MessageComponentInteraction,
+  channelId: string,
+  messageId: string,
+  quickEdit = false,
+) => {
+  const message = await fetchMessage(interaction, channelId, messageId)
+  if (!message) return
+
+  restoreMessageAndReply(interaction, message, quickEdit)
 }
