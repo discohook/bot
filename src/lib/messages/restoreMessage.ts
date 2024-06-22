@@ -1,5 +1,6 @@
+import { URL } from 'node:url'
 import { fetch } from "@sapphire/fetch"
-import { Message, Webhook } from "discord.js"
+import { ThreadChannel, Message, Webhook } from "discord.js"
 
 export const restoreMessage = async (message: Message, target?: Webhook) => {
   const embeds = message.embeds.map((embedObject) => {
@@ -20,6 +21,13 @@ export const restoreMessage = async (message: Message, target?: Webhook) => {
     return embed
   })
 
+  let webhookUrl = target?.url
+  if (webhookUrl && message.channel instanceof ThreadChannel) {
+    let newUrl = new URL(webhookUrl)
+    newUrl.searchParams.set("thread_id", message.channel.id)
+    webhookUrl = newUrl.toString()
+  }
+
   const data = JSON.stringify({
     messages: [
       {
@@ -30,7 +38,7 @@ export const restoreMessage = async (message: Message, target?: Webhook) => {
         reference: target ? message.url : undefined,
       },
     ],
-    targets: target ? [{ url: target.url }] : undefined,
+    targets: [{ url: webhookUrl }],
   })
   const encodedData = Buffer.from(data, "utf-8").toString("base64url")
   const url = `https://discohook.app/?data=${encodedData}`
