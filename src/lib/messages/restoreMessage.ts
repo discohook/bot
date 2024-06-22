@@ -1,17 +1,9 @@
 import { fetch } from "@sapphire/fetch"
-import { deepClone } from "@sapphire/utilities"
-import { type APIMessage, Embed, Message, Webhook } from "discord.js"
+import { Message, Webhook } from "discord.js"
 
-export const restoreMessage = async (
-  message: APIMessage | Message,
-  target?: Webhook,
-) => {
-  const embeds = message.embeds.map((embed) => {
-    if (embed instanceof Embed) {
-      embed = embed.toJSON()
-    } else {
-      embed = deepClone(embed)
-    }
+export const restoreMessage = async (message: Message, target?: Webhook) => {
+  const embeds = message.embeds.map((embedObject) => {
+    const embed = embedObject.toJSON()
 
     delete embed.type
     delete embed.video
@@ -35,11 +27,7 @@ export const restoreMessage = async (
           content: message.content || undefined,
           embeds: embeds.length === 0 ? undefined : embeds,
         },
-        reference: target
-          ? message instanceof Message
-            ? message.url
-            : message.id
-          : undefined,
+        reference: target ? message.url : undefined,
       },
     ],
     targets: target ? [{ url: target.url }] : undefined,
