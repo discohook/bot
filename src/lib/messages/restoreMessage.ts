@@ -1,17 +1,10 @@
+import { URL } from "node:url"
 import { fetch } from "@sapphire/fetch"
-import { deepClone } from "@sapphire/utilities"
-import { type APIMessage, Embed, Message, Webhook } from "discord.js"
+import { ThreadChannel, Message, Webhook } from "discord.js"
 
-export const restoreMessage = async (
-  message: APIMessage | Message,
-  target?: Webhook,
-) => {
-  const embeds = message.embeds.map((embed) => {
-    if (embed instanceof Embed) {
-      embed = embed.toJSON()
-    } else {
-      embed = deepClone(embed)
-    }
+export const restoreMessage = async (message: Message, target?: Webhook) => {
+  const embeds = message.embeds.map((embedObject) => {
+    const embed = embedObject.toJSON()
 
     delete embed.type
     delete embed.video
@@ -28,6 +21,13 @@ export const restoreMessage = async (
     return embed
   })
 
+  let webhookUrl = target?.url
+  if (webhookUrl && message.channel instanceof ThreadChannel) {
+    let newUrl = new URL(webhookUrl)
+    newUrl.searchParams.set("thread_id", message.channel.id)
+    webhookUrl = newUrl.toString()
+  }
+
   const data = JSON.stringify({
     messages: [
       {
@@ -35,14 +35,10 @@ export const restoreMessage = async (
           content: message.content || undefined,
           embeds: embeds.length === 0 ? undefined : embeds,
         },
-        reference: target
-          ? message instanceof Message
-            ? message.url
-            : message.id
-          : undefined,
+        reference: target ? message.url : undefined,
       },
     ],
-    targets: target ? [{ url: target.url }] : undefined,
+    targets: [{ url: webhookUrl }],
   })
   const encodedData = Buffer.from(data, "utf-8").toString("base64url")
   const url = `https://discohook.app/?data=${encodedData}`

@@ -5,27 +5,19 @@ import {
   RegisterBehavior,
 } from "@sapphire/framework"
 import {
-  type APIMessage,
   ApplicationCommandType,
-  type BaseMessageOptions,
-  ButtonStyle,
-  CategoryChannel,
   ChatInputCommandInteraction,
-  ComponentType,
   ContextMenuCommandBuilder,
   ContextMenuCommandInteraction,
-  type GuildBasedChannel,
-  GuildMember,
-  Message,
   PermissionFlagsBits,
   SlashCommandBuilder,
-  time,
 } from "discord.js"
-import { getSelf } from "../lib/guilds/getSelf"
-import { fetchAndRestoreMessage } from "../lib/messages/fetchAndRestoreMessage"
+import {
+  fetchAndRestoreMessage,
+  restoreMessageAndReply,
+  RestoreMode,
+} from "../lib/messages/fetchAndRestoreMessage"
 import { parseMessageOption } from "../lib/messages/parseMessageOption"
-import { restoreMessage } from "../lib/messages/restoreMessage"
-import { fetchWebhooks } from "../lib/webhooks/fetchWebhooks"
 
 export class RestoreCommand extends Command {
   constructor(context: PieceContext) {
@@ -44,7 +36,7 @@ export class RestoreCommand extends Command {
     const [channelId, messageId] = await parseMessageOption(interaction)
     if (!channelId || !messageId) return
 
-    fetchAndRestoreMessage(interaction, channelId, messageId, false)
+    fetchAndRestoreMessage(interaction, channelId, messageId, RestoreMode.Restore)
   }
 
   override async contextMenuRun(interaction: ContextMenuCommandInteraction) {
@@ -52,62 +44,7 @@ export class RestoreCommand extends Command {
 
     await interaction.deferReply({ ephemeral: true })
 
-    const response = await restoreMessage(
-      interaction.targetMessage as APIMessage | Message,
-    )
-
-    const channel = interaction.targetMessage.channel as Exclude<
-      GuildBasedChannel,
-      CategoryChannel
-    >
-
-    const components: BaseMessageOptions["components"] = []
-    const webhookId = interaction.targetMessage.webhookId
-
-    if (
-      webhookId &&
-      interaction.guild &&
-      channel
-        .permissionsFor(await getSelf(interaction.guild))
-        .has(PermissionFlagsBits.ManageWebhooks)
-    ) {
-      const member =
-        interaction.member instanceof GuildMember
-          ? interaction.member
-          : await interaction.guild.members.fetch(interaction.user.id)
-
-      if (
-        channel.permissionsFor(member).has(PermissionFlagsBits.ManageWebhooks)
-      ) {
-        const webhooks = await fetchWebhooks(channel)
-
-        if (webhooks.some((webhook) => webhook.id === webhookId)) {
-          components.push({
-            type: ComponentType.ActionRow,
-            components: [
-              {
-                type: ComponentType.Button,
-                style: ButtonStyle.Secondary,
-                label: "Quick Edit",
-                customId: `@discohook/restore-quick-edit/${channel.id}-${interaction.targetId}`,
-              },
-            ],
-          })
-        }
-      }
-    }
-
-    await interaction.editReply({
-      embeds: [
-        {
-          title: "Restored message",
-          description:
-            `The restored message can be found at ${response.url}. This link ` +
-            `will expire ${time(new Date(response.expires), "R")}.`,
-        },
-      ],
-      components,
-    })
+    await restoreMessageAndReply(interaction, interaction.targetMessage, RestoreMode.Open)
   }
 
   override async registerApplicationCommands(
